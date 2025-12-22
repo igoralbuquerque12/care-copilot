@@ -1,0 +1,36 @@
+model Profile {
+  id        String   @id @db.Uuid
+  email     String?  @unique
+
+  name      String
+  phone     String?                           @map("phone")
+  photoUrl  String?                           @map("photo_url")
+  addressId String?  @unique @db.Uuid         @map("address_id")
+
+  createdAt DateTime @default(now())          @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  address              Address?        @relation(fields: [addressId], references: [id])
+
+  @@map("profile")
+}
+
+model Address {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  street       String?                                           @map("street")
+  number       String?                                           @map("number")
+  complement   String?                                           @map("complement")
+  neighborhood String?                                           @map("neighborhood")
+  city         String?                                           @map("city")
+  state        String?                                           @map("state")
+  zipCode      String?                                           @map("zip_code")
+  country      String?                                           @map("country")
+
+  createdAt    DateTime @default(now())                          @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt               @map("updated_at")
+
+  profile    Profile?
+
+  @@map("address")
+}
