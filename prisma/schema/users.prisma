@@ -12,6 +12,9 @@ model Profile {
 
   address              Address?        @relation(fields: [addressId], references: [id])
 
+  patients             Patient[]
+  anamneses            Anamnesis[]
+
   @@map("profile")
 }
 
