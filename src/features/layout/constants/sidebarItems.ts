@@ -1,12 +1,12 @@
-import { 
-  LayoutDashboard, 
-  Users, 
-  CalendarDays, 
-  Mic, 
-  FileText, 
-  Stethoscope, 
-  Pill, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Users,
+  CalendarDays,
+  Mic,
+  FileText,
+  Stethoscope,
+  Pill,
+  Settings,
   History,
   Activity,
   FolderCode
@@ -35,6 +35,15 @@ export const SIDEBAR_ITEMS = [
     subItems: [
       { title: "Lista de Pacientes", href: "/pacientes", icon: Users },
       { title: "Novo Prontuário", href: "/pacientes/novo", icon: FileText },
+    ]
+  },
+  {
+    title: "Consultas",
+    icon: Stethoscope,
+    type: "group",
+    subItems: [
+      { title: "Todas as Consultas", href: "/consultas", icon: FileText },
+      { title: "Nova Consulta", href: "/anamnesis", icon: Stethoscope },
     ]
   },
   {

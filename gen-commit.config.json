@@ -1,0 +1,25 @@
+{
+  "PRs": {
+    "createPRs": true,
+    "useModel": true,
+    "model": "# Description\nWrite a detailed description of the changes made to the code...\n\n# Justification\nExplain the reason for these changes and how they improve the project...\n\n# Impact\nDescribe any potential impact these changes may have.",
+    "idioma": "en"
+  },
+  "commits": {
+    "useConventionalCommits": true,
+    "conventionalCommitTypes": [
+      "feat",
+      "fix",
+      "docs",
+      "style",
+      "refactor",
+      "perf",
+      "test",
+      "chore"
+    ],
+    "idioma": "en"
+  },
+  "llm-gemini-model": {
+    "modelName": "gemini-2.5-flash"
+  }
+}
