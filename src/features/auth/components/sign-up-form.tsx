@@ -4,14 +4,18 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
-import { signUpSchema, type SignUpInput } from "~/schemas/auth"
-import { signUpAction } from "~/features/auth/actions/auth.actions"
+import { toast } from "sonner"
+
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
-import { PasswordStrengthIndicator } from "./password-strength-indicator"
+
+
+import { signUpSchema, type SignUpInput } from "~/schemas/auth"
+import { signUpAction } from "~/features/auth/actions/auth.actions"
+import { PasswordStrengthIndicator } from "~/features/auth/components/password-strength-indicator"
 import { validatePassword } from "~/features/auth/helpers/password-validator"
-import { toast } from "sonner"
+
 
 export function SignUpForm() {
     const [isLoading, setIsLoading] = useState(false)
@@ -48,7 +52,7 @@ export function SignUpForm() {
             }
         } catch (error) {
             console.log("SignUp Error:", error)
-            toast.error("Ocorreu um erro ao criar a conta. Tente novamente.")
+            toast.error(error instanceof Error ? error.message : "Erro ao criar conta. Tente novamente.")
         } finally {
             setIsLoading(false)
         }
