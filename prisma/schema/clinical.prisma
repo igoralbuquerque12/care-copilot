@@ -1,0 +1,115 @@
+enum ConsultationType {
+  FIRST_VISIT
+  FOLLOW_UP
+  ROUTINE
+}
+
+enum NyhaClass {
+  I
+  II
+  III
+  IV
+}
+
+enum ExerciseLevel {
+  SEDENTARIO
+  IRREGULAR
+  ATIVO
+}
+
+
+model Patient {
+  id              String           @id @default(cuid())
+  name            String
+  birthDate       DateTime
+  gender          String
+  createdAt       DateTime         @default(now())
+  
+  clinicalProfile ClinicalProfile?
+  profileId           String           @db.Uuid
+  profile             Profile          @relation(fields: [profileId], references: [id])
+  
+  anamneses       Anamnesis[]
+}
+
+model ClinicalProfile {
+  id                 String   @id @default(cuid())
+  patientId          String   @unique
+  patient            Patient  @relation(fields: [patientId], references: [id])
+  updatedAt          DateTime @updatedAt
+
+  hasHypertension    Boolean  @default(false)
+  hasDiabetes        Boolean  @default(false)
+  diabetesDuration   Int?
+  hasDyslipidemia    Boolean  @default(false)
+  hasPriorInfarction Boolean  @default(false)
+  priorSurgeries     String?  @db.Text
+  allergies          String?  @db.Text
+
+  familyHistoryCoronaryEarly Boolean @default(false)
+  familyHistorySuddenDeath   Boolean @default(false)
+  familyHistoryOthers        String? @db.Text
+
+  smokingStatus      Boolean  @default(false)
+  smokingPacksYear   Int?
+  alcoholConsumption String?
+  exerciseLevel      ExerciseLevel @default(SEDENTARIO)
+}
+
+model Anamnesis {
+  id                  String           @id @default(cuid())
+  date                DateTime         @default(now())
+  type                ConsultationType @default(FIRST_VISIT)
+  
+  patientId           String
+  patient             Patient          @relation(fields: [patientId], references: [id])
+  profileId           String           @db.Uuid
+  profile             Profile          @relation(fields: [profileId], references: [id])
+
+  chiefComplaint      String           @db.Text
+  currentIllnessHistory String         @db.Text 
+
+  treatmentResponse   String?          @db.Text 
+  symptomEvolution    String?          @db.Text 
+  newEvents           String?          @db.Text 
+
+  nyhaClass           NyhaClass        @default(I)
+  hasPalpitations     Boolean          @default(false)
+  hasSyncope          Boolean          @default(false)
+  hasEdema            Boolean          @default(false)
+  hasChestPain        Boolean          @default(false)
+
+  physicalExam        PhysicalExam?
+  medications         PrescribedMedication[]
+
+  diagnosticHypothesis String?         @db.Text
+  conduct              String?         @db.Text 
+  nextRecallDate       DateTime?       
+}
+
+model PhysicalExam {
+  id                String    @id @default(cuid())
+  anamnesisId       String    @unique
+  anamnesis         Anamnesis @relation(fields: [anamnesisId], references: [id])
+
+  weight            Float?
+  height            Float?
+  bpSystolic        Int?      
+  bpDiastolic       Int?      
+  heartRate         Int?      
+  oxygenSaturation  Int?
+  
+  heartAuscultation String?   @db.Text 
+  lungAuscultation  String?   @db.Text 
+  peripheralPulses  String?   
+  edemaGrade        String?   
+}
+
+model PrescribedMedication {
+  id              String    @id @default(cuid())
+  name            String
+  dosage          String    
+  frequency       String    
+  anamnesisId     String
+  anamnesis       Anamnesis @relation(fields: [anamnesisId], references: [id])
+}
