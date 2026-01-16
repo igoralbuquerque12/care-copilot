@@ -4,6 +4,9 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+
 import { signInSchema, type SignInInput } from "~/schemas/auth"
 import { signInAction } from "~/features/auth/actions/auth.actions"
 
@@ -11,10 +14,12 @@ import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Checkbox } from "~/components/ui/checkbox"
-import { toast } from "sonner"
+
+
 
 export function SignInForm() {
     const [isLoading, setIsLoading] = useState(false)
+    const router = useRouter();
 
     const {
         register,
@@ -40,9 +45,10 @@ export function SignInForm() {
             if (result.success) {
                 toast.success(result.message)
             }
+            void router.push("/")
         } catch (error) {
             console.log("SignIn Error:", error)
-            toast.error("Ocorreu um erro ao fazer login. Tente novamente.")
+            toast.error(error instanceof Error ? error.message : "Erro ao fazer login. Tente novamente.")
         } finally {
             setIsLoading(false)
         }
