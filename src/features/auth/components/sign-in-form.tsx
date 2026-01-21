@@ -44,6 +44,9 @@ export function SignInForm() {
             const result = await signInAction(data)
             if (result.success) {
                 toast.success(result.message)
+            } else {
+                toast.error(result.message)
+                return
             }
             void router.push("/")
         } catch (error) {
