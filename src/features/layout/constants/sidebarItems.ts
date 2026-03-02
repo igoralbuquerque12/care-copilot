@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   Users,
   CalendarDays,
+  CalendarPlus,
   Mic,
   FileText,
   Stethoscope,
@@ -25,6 +26,7 @@ export const SIDEBAR_ITEMS = [
     type: "group",
     subItems: [
       { title: "Agenda do Dia", href: "/agenda", icon: CalendarDays },
+      { title: "Agendar Consulta", href: "/consultas/agendar", icon: CalendarPlus },
       { title: "Histórico", href: "/agenda/historico", icon: History },
     ]
   },
