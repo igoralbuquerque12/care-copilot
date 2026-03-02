@@ -1,12 +1,12 @@
 // src/schemas/anamnesis.ts
 import { z } from "zod";
 
-export const consultationTypeSchema = z.enum(["FIRST_VISIT", "FOLLOW_UP", "ROUTINE"]);
 export const nyhaClassSchema = z.enum(["I", "II", "III", "IV"]);
 
 export const createAnamnesisSchema = z.object({
   patientId: z.string().cuid(),
-  type: consultationTypeSchema,
+  // optional: link to an existing ScheduleConsultation
+  consultationId: z.string().cuid().optional(),
   chiefComplaint: z.string().min(1, "Campo obrigatório"),
   currentIllnessHistory: z.string().min(1, "Campo obrigatório"),
   treatmentResponse: z.string().optional(),
@@ -45,7 +45,6 @@ export const createAnamnesisSchema = z.object({
 export const getAnamnesesFilterSchema = z.object({
   startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().optional(),
-  type: consultationTypeSchema.optional(),
   page: z.number().int().min(1).default(1),
   limit: z.number().int().min(1).max(100).default(10),
 });
