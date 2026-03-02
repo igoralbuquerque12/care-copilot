@@ -17,8 +17,7 @@ export type FormData = {
     diabetesDuration?: number
     allergies?: string
   }
-
-  type: "PRIMEIRA_CONSULTA" | "RETORNO" | "EMERGENCIA"
+  cpf?: string
   chiefComplaint: string
   currentIllnessHistory: string
   treatmentResponse?: string
@@ -53,12 +52,18 @@ export type FormData = {
   nextRecallDate?: Date
 }
 
-export function useAnamnesisForm() {
+type UseAnamnesisFormOptions = {
+  /** cuid from URL param ?consultationId=... */
+  consultationId?: string
+}
+
+export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
   const router = useRouter();
 
   const [currentStep, setCurrentStep] = useState(1)
   const [patientId, setPatientId] = useState<string | null>(null)
-  
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
+
   const [formData, setFormData] = useState<Partial<FormData>>({
     hasPalpitations: false,
     hasSyncope: false,
@@ -66,7 +71,7 @@ export function useAnamnesisForm() {
     hasChestPain: false,
     nyhaClass: "I",
   })
-  
+
   const [medications, setMedications] = useState<Array<{ name: string; dosage: string; frequency: string }>>([])
 
   const createPatientMutation = api.patient.create.useMutation({
@@ -94,10 +99,26 @@ export function useAnamnesisForm() {
 
   const isLoading = createPatientMutation.isPending || createAnamnesisMutation.isPending
 
+  const handleSelectExistingPatient = (id: string) => {
+    setSelectedPatientId(id)
+  }
+
+  const handleClearExistingPatient = () => {
+    setSelectedPatientId(null)
+    setPatientId(null)
+  }
+
   const handleNext = async () => {
     if (currentStep === 1) {
       if (!formData.name || !formData.birthDate || !formData.gender) {
         toast.error("Preencha os campos obrigatórios do paciente.")
+        return
+      }
+
+      // If an existing patient was picked, skip creation and go directly to step 2
+      if (selectedPatientId) {
+        setPatientId(selectedPatientId)
+        setCurrentStep(2)
         return
       }
 
@@ -111,6 +132,7 @@ export function useAnamnesisForm() {
         name: formData.name,
         birthDate: formData.birthDate,
         gender: genderMap[formData.gender] ?? "Outro",
+        cpf: formData.cpf || undefined,
         clinicalProfile: formData.clinicalProfile,
       }
 
@@ -131,35 +153,30 @@ export function useAnamnesisForm() {
       return
     }
 
-    if (!formData.type || !formData.chiefComplaint || !formData.currentIllnessHistory) {
+    if (!formData.chiefComplaint || !formData.currentIllnessHistory) {
       toast.error("Preencha os dados obrigatórios da anamnese.")
       return
     }
 
-    const typeMap: Record<string, "FIRST_VISIT" | "FOLLOW_UP" | "ROUTINE"> = {
-      "PRIMEIRA_CONSULTA": "FIRST_VISIT",
-      "RETORNO": "FOLLOW_UP",
-      "EMERGENCIA": "ROUTINE" 
-    }
-
     const anamnesisData: CreateAnamnesisInput = {
       patientId,
-      type: typeMap[formData.type] ?? "ROUTINE",
+      // Only pass consultationId if provided via URL param
+      consultationId: opts.consultationId,
       chiefComplaint: formData.chiefComplaint,
       currentIllnessHistory: formData.currentIllnessHistory,
       treatmentResponse: formData.treatmentResponse,
       symptomEvolution: formData.symptomEvolution,
       newEvents: formData.newEvents,
       nyhaClass: formData.nyhaClass ?? "I",
-      
+
       hasPalpitations: formData.hasPalpitations ?? false,
       hasSyncope: formData.hasSyncope ?? false,
       hasEdema: formData.hasEdema ?? false,
       hasChestPain: formData.hasChestPain ?? false,
-      
+
       physicalExam: formData.physicalExam,
       medications: medications.length > 0 ? medications : undefined,
-      
+
       diagnosticHypothesis: formData.diagnosticHypothesis,
       conduct: formData.conduct,
       nextRecallDate: formData.nextRecallDate,
@@ -188,6 +205,7 @@ export function useAnamnesisForm() {
   return {
     currentStep,
     patientId,
+    selectedPatientId,
     isLoading,
     formData,
     setFormData,
@@ -195,6 +213,8 @@ export function useAnamnesisForm() {
     handleNext,
     handlePrevious,
     handleFinalSubmit,
+    handleSelectExistingPatient,
+    handleClearExistingPatient,
     addMedication,
     updateMedication,
     removeMedication,
