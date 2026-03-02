@@ -16,20 +16,23 @@ import { ReviewStep } from "~/features/anamnesis/components/review-step"
 import { steps } from "~/features/anamnesis/constants/steps"
 
 
-export function AnamnesisWizard() {
+export function AnamnesisWizard({ consultationId }: { consultationId?: string }) {
   const {
     currentStep,
     isLoading,
     formData,
     setFormData,
+    selectedPatientId,
     medications,
     handleNext,
     handlePrevious,
     handleFinalSubmit,
+    handleSelectExistingPatient,
+    handleClearExistingPatient,
     addMedication,
     updateMedication,
     removeMedication,
-  } = useAnamnesisForm()
+  } = useAnamnesisForm({ consultationId })
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -46,7 +49,15 @@ export function AnamnesisWizard() {
             <CardTitle>{steps[currentStep - 1]?.title}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {currentStep === 1 && <PatientDataStep formData={formData} setFormData={setFormData} />}
+            {currentStep === 1 && (
+              <PatientDataStep
+                formData={formData}
+                setFormData={setFormData}
+                selectedPatientId={selectedPatientId}
+                onSelectExistingPatient={handleSelectExistingPatient}
+                onClearExistingPatient={handleClearExistingPatient}
+              />
+            )}
             {currentStep === 2 && <AnamnesisDataStep formData={formData} setFormData={setFormData} />}
             {currentStep === 3 && <PhysicalExamStep formData={formData} setFormData={setFormData} />}
             {currentStep === 4 && (
@@ -80,7 +91,7 @@ export function AnamnesisWizard() {
                     isLoading ||
                     (currentStep === 1 && (!formData.name || !formData.birthDate || !formData.gender)) ||
                     (currentStep === 2 &&
-                      (!formData.type || !formData.chiefComplaint || !formData.currentIllnessHistory))
+                      (!formData.chiefComplaint || !formData.currentIllnessHistory))
                   }
                 >
                   {isLoading ? (
