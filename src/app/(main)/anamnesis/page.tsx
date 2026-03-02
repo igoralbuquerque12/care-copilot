@@ -1,5 +1,10 @@
 import { AnamnesisWizard } from "~/features/anamnesis/components/anamnesis-wizard"
 
-export default function Home() {
-  return <AnamnesisWizard />
+type Props = {
+  searchParams: Promise<{ consultationId?: string }>
+}
+
+export default async function AnamnesisPage({ searchParams }: Props) {
+  const params = await searchParams
+  return <AnamnesisWizard consultationId={params.consultationId} />
 }
