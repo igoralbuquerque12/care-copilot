@@ -149,14 +149,17 @@ export function DiagnosisStep({
           id="nextRecallDate"
           type="date"
           value={
-            formData.nextRecallDate
+            formData.nextRecallDate &&
+              !isNaN(new Date(formData.nextRecallDate).getTime())
               ? new Date(formData.nextRecallDate).toISOString().split("T")[0]
               : ""
           }
           onChange={(e) =>
             setFormData({
               ...formData,
-              nextRecallDate: new Date(e.target.value),
+              nextRecallDate: e.target.value
+                ? new Date(e.target.value)
+                : undefined,
             })
           }
         />
