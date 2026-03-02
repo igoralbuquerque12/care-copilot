@@ -13,7 +13,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 
 import type { FormData } from "~/features/anamnesis/hooks/use-anamnesis-form";
 
-import type { AnamnesisType, NYHAClass } from "~/features/anamnesis/types/anamnesis.types";
+import type { NYHAClass } from "~/features/anamnesis/types/anamnesis.types";
 
 type AnamnesisDataStepProps = {
   formData: Partial<FormData>;
@@ -26,27 +26,6 @@ export function AnamnesisDataStep({
 }: AnamnesisDataStepProps) {
   return (
     <div className="space-y-6">
-      <div>
-        <Label htmlFor="type" className="mb-2 block">
-          Tipo de Consulta *
-        </Label>
-        <Select
-          value={formData.type}
-          onValueChange={(value: AnamnesisType) =>
-            setFormData({ ...formData, type: value })
-          }
-        >
-          <SelectTrigger id="type">
-            <SelectValue placeholder="Selecione" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="PRIMEIRA_CONSULTA">Primeira Consulta</SelectItem>
-            <SelectItem value="RETORNO">Retorno</SelectItem>
-            <SelectItem value="EMERGENCIA">Emergência</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <div>
         <Label htmlFor="chiefComplaint" className="mb-2 block">
           Queixa Principal *
