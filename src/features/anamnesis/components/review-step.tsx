@@ -12,16 +12,6 @@ export function ReviewStep({ formData, medications }: ReviewStepProps) {
         <h3 className="font-medium mb-3">Anamnese</h3>
         <div className="space-y-2 text-sm">
           <div className="grid grid-cols-3 gap-2">
-            <span className="text-muted-foreground">Tipo:</span>
-            <span className="col-span-2">
-              {formData.type === "PRIMEIRA_CONSULTA"
-                ? "Primeira Consulta"
-                : formData.type === "RETORNO"
-                  ? "Retorno"
-                  : "Emergência"}
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-2">
             <span className="text-muted-foreground">Queixa:</span>
             <span className="col-span-2">{formData.chiefComplaint}</span>
           </div>

@@ -8,7 +8,6 @@ export const patientRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createPatientSchema)
     .mutation(({ ctx, input }) => {
-      console.log('contexto de user: ', ctx.user)
       return patientService.createPatient(ctx.db, ctx.user.id, input);
     }),
 

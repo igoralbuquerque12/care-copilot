@@ -10,6 +10,7 @@ export const createPatient = async (
   data: CreatePatientInput,
 ) => {
   try {
+    console.log("profileid:", profileId)
     const { clinicalProfile, ...patientData } = data;
 
     return await db.patient.create({
@@ -66,6 +67,32 @@ export const listPatients = async (db: PrismaClient, profileId: string) => {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Erro ao listar pacientes",
+    });
+  }
+};
+
+export const searchPatients = async (
+  db: PrismaClient,
+  profileId: string,
+  query: string,
+) => {
+  try {
+    return await db.patient.findMany({
+      where: {
+        profileId,
+        OR: [
+          { name: { contains: query, mode: "insensitive" } },
+          { cpf: { contains: query } },
+        ],
+      },
+      orderBy: { name: "asc" },
+      take: 10,
+    });
+  } catch (error) {
+    console.error("[Patient - search]: ", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro ao buscar pacientes",
     });
   }
 };

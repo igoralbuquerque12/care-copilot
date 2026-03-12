@@ -1,8 +1,10 @@
 {
+  "_aiProvider_info": "Options: 'gemini' | 'openai'",
+  "aiProvider": "gemini",
   "PRs": {
     "createPRs": true,
     "useModel": true,
-    "model": "# Description\nWrite a detailed description of the changes made to the code...\n\n# Justification\nExplain the reason for these changes and how they improve the project...\n\n# Impact\nDescribe any potential impact these changes may have.",
+    "model": "# Description\nWrite a detailed description...\n\n# Justification\nExplain the reason...",
     "idioma": "en"
   },
   "commits": {
@@ -21,5 +23,8 @@
   },
   "llm-gemini-model": {
     "modelName": "gemini-2.5-flash"
+  },
+  "llm-openai-model": {
+    "modelName": "gpt-4o"
   }
 }
