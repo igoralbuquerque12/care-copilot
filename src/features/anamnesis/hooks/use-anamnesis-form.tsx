@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { api } from "~/trpc/react"
 import { type CreatePatientInput } from "~/schemas/patient"
@@ -74,6 +74,32 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
 
   const [medications, setMedications] = useState<Array<{ name: string; dosage: string; frequency: string }>>([])
 
+  const { data: consultation, isLoading: isLoadingConsultation } = api.scheduleConsultation.getById.useQuery(
+    { id: opts.consultationId! },
+    { enabled: !!opts.consultationId }
+  )
+
+  useEffect(() => {
+    if (consultation?.patient) {
+      const patient = consultation.patient
+      const genderMap: Record<string, "MASCULINO" | "FEMININO" | "OUTRO"> = {
+        Masculino: "MASCULINO",
+        Feminino: "FEMININO",
+        Outro: "OUTRO",
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        name: patient.name,
+        birthDate: new Date(patient.birthDate),
+        gender: genderMap[patient.gender] ?? "OUTRO",
+        cpf: patient.cpf ?? undefined,
+      }))
+      setPatientId(patient.id)
+      setSelectedPatientId(patient.id)
+    }
+  }, [consultation])
+
   const createPatientMutation = api.patient.create.useMutation({
     onSuccess: (data) => {
       setPatientId(data.id)
@@ -97,7 +123,7 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
     }
   })
 
-  const isLoading = createPatientMutation.isPending || createAnamnesisMutation.isPending
+  const isLoading = createPatientMutation.isPending || createAnamnesisMutation.isPending || isLoadingConsultation
 
   const handleSelectExistingPatient = (id: string) => {
     setSelectedPatientId(id)

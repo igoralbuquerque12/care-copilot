@@ -1,5 +1,6 @@
 // src/server/api/routers/scheduleConsultation.router.ts
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { genderSchema } from "~/schemas/patient";
 import * as scheduleConsultationService from "~/server/services/scheduleConsultation.service";
@@ -99,5 +100,23 @@ export const scheduleConsultationRouter = createTRPCRouter({
         .input(searchPatientSchema)
         .query(({ ctx, input }) => {
             return patientService.searchPatients(ctx.db, ctx.user.id, input.query);
+        }),
+
+    getById: protectedProcedure
+        .input(z.object({ id: z.string().cuid() }))
+        .query(async ({ ctx, input }) => {
+            const consultation = await ctx.db.scheduleConsultation.findFirst({
+                where: { id: input.id, profileId: ctx.user.id },
+                include: { patient: true },
+            });
+
+            if (!consultation) {
+                throw new TRPCError({
+                    code: "NOT_FOUND",
+                    message: "Consulta não encontrada",
+                });
+            }
+
+            return consultation;
         }),
 });
