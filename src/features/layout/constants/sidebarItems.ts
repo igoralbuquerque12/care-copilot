@@ -25,7 +25,7 @@ export const SIDEBAR_ITEMS = [
     icon: CalendarDays,
     type: "group",
     subItems: [
-      { title: "Agenda do Dia", href: "/agenda", icon: CalendarDays },
+      { title: "Dashboard", href: "/consultas", icon: CalendarDays },
       { title: "Agendar Consulta", href: "/consultas/agendar", icon: CalendarPlus },
       { title: "Histórico", href: "/agenda/historico", icon: History },
     ]
@@ -40,12 +40,11 @@ export const SIDEBAR_ITEMS = [
     ]
   },
   {
-    title: "Consultas",
+    title: "Anamneses",
     icon: Stethoscope,
     type: "group",
     subItems: [
-      { title: "Todas as Consultas", href: "/consultas", icon: FileText },
-      { title: "Nova Consulta", href: "/anamnesis", icon: Stethoscope },
+      { title: "Nova Anamnese", href: "/anamnesis", icon: Stethoscope },
     ]
   },
   {
