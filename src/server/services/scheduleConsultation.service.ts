@@ -76,39 +76,6 @@ export const createScheduleConsultation = async (
     }
 };
 
-export const listConsultationsByDate = async (
-    db: PrismaClient,
-    profileId: string,
-    dateStr: string,
-) => {
-    try {
-        const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
-        const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
-
-        return await db.scheduleConsultation.findMany({
-            where: {
-                profileId,
-                date: {
-                    gte: startOfDay,
-                    lte: endOfDay,
-                },
-            },
-            orderBy: { date: "asc" },
-            include: {
-                patient: {
-                    select: { id: true, name: true },
-                },
-            },
-        });
-    } catch (error) {
-        console.error("[ScheduleConsultation - listByDate]: ", error);
-        throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Erro ao listar agendamentos do dia",
-        });
-    }
-};
-
 export const listConsultationsPaginated = async (
     db: PrismaClient,
     profileId: string,
@@ -119,13 +86,12 @@ export const listConsultationsPaginated = async (
     try {
         const startOfDay = new Date(`${dateStr}T00:00:00.000Z`);
         const endOfDay = new Date(`${dateStr}T23:59:59.999Z`);
+        const where = { profileId, date: { gte: startOfDay, lte: endOfDay } };
 
         const [total, items] = await Promise.all([
-            db.scheduleConsultation.count({
-                where: { profileId, date: { gte: startOfDay, lte: endOfDay } },
-            }),
+            db.scheduleConsultation.count({ where }),
             db.scheduleConsultation.findMany({
-                where: { profileId, date: { gte: startOfDay, lte: endOfDay } },
+                where,
                 orderBy: { date: "asc" },
                 skip: (page - 1) * pageSize,
                 take: pageSize,
@@ -155,20 +121,27 @@ export const getChartData = async (
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0);
 
-        const results: { date: string; count: number }[] = [];
+        const rangeEnd = new Date(today);
+        rangeEnd.setUTCDate(rangeEnd.getUTCDate() + days - 1);
+        rangeEnd.setUTCHours(23, 59, 59, 999);
 
+        const consultations = await db.scheduleConsultation.findMany({
+            where: { profileId, date: { gte: today, lte: rangeEnd } },
+            select: { date: true },
+        });
+
+        const countMap = new Map<string, number>();
+        for (const c of consultations) {
+            const dateStr = c.date.toISOString().split("T")[0]!;
+            countMap.set(dateStr, (countMap.get(dateStr) ?? 0) + 1);
+        }
+
+        const results: { date: string; count: number }[] = [];
         for (let i = 0; i < days; i++) {
             const d = new Date(today);
             d.setUTCDate(d.getUTCDate() + i);
             const dateStr = d.toISOString().split("T")[0]!;
-            const start = new Date(`${dateStr}T00:00:00.000Z`);
-            const end = new Date(`${dateStr}T23:59:59.999Z`);
-
-            const count = await db.scheduleConsultation.count({
-                where: { profileId, date: { gte: start, lte: end } },
-            });
-
-            results.push({ date: dateStr, count });
+            results.push({ date: dateStr, count: countMap.get(dateStr) ?? 0 });
         }
 
         return results;
