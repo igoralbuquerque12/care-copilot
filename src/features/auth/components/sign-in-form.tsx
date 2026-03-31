@@ -49,6 +49,7 @@ export function SignInForm() {
                 return
             }
             void router.push("/")
+            router.refresh()
         } catch (error) {
             console.log("SignIn Error:", error)
             toast.error(error instanceof Error ? error.message : "Erro ao fazer login. Tente novamente.")
