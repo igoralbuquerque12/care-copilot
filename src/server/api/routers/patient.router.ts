@@ -1,7 +1,6 @@
-// src/server/api/routers/patient.router.ts
-
+import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createPatientSchema, getPatientByIdSchema } from "~/schemas/patient";
+import { createPatientSchema, getPatientByIdSchema, searchPatientSchema } from "~/schemas/patient";
 import * as patientService from "~/server/services/patient.service";
 
 export const patientRouter = createTRPCRouter({
@@ -20,4 +19,26 @@ export const patientRouter = createTRPCRouter({
   list: protectedProcedure.query(({ ctx }) => {
     return patientService.listPatients(ctx.db, ctx.user.id);
   }),
+
+  search: protectedProcedure
+    .input(searchPatientSchema)
+    .query(({ ctx, input }) => {
+      return patientService.searchPatients(ctx.db, ctx.user.id, input.query);
+    }),
+
+  getFullProfile: protectedProcedure
+    .input(z.object({ patientId: z.string() }))
+    .query(({ ctx, input }) =>
+      patientService.getFullProfile(ctx.db, ctx.user.id, input.patientId)
+    ),
+
+  getAnamnesisPaginated: protectedProcedure
+    .input(z.object({
+      patientId: z.string(),
+      page: z.number().int().min(1).default(1),
+      pageSize: z.number().int().min(1).max(50).default(10),
+    }))
+    .query(({ ctx, input }) =>
+      patientService.getAnamnesisPaginated(ctx.db, ctx.user.id, input.patientId, input.page, input.pageSize)
+    ),
 });
