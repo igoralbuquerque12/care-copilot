@@ -53,7 +53,7 @@ export function PatientDataStep({
   }, [query]);
 
   const { data: rawResults = [], isLoading: isSearching } =
-    api.scheduleConsultation.searchPatients.useQuery(
+    api.patient.search.useQuery(
       { query: debouncedQuery },
       { enabled: debouncedQuery.length >= 2 },
     );

@@ -45,7 +45,7 @@ export function ConsultationsPage() {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-foreground font-semibold">
-            Consultations of the day
+            Consultas do Dia
           </h2>
           {total > 0 && (
             <span className="text-muted-foreground text-xs">

@@ -12,7 +12,7 @@ export function useConsultations() {
     const [page, setPage] = useState(1);
     const pageSize = 10;
 
-    const listQuery = api.scheduleConsultation.listPaginated.useQuery(
+    const listQuery = api.scheduleConsultation.listByDate.useQuery(
         { date: selectedDate, page, pageSize },
         { staleTime: 30_000 },
     );
@@ -25,7 +25,6 @@ export function useConsultations() {
     const utils = api.useUtils();
 
     const invalidate = () => {
-        void utils.scheduleConsultation.listPaginated.invalidate();
         void utils.scheduleConsultation.chartData.invalidate();
     };
 

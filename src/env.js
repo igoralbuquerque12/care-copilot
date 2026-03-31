@@ -12,6 +12,10 @@ export const env = createEnv({
     SUPABASE_URL: z.string().url(),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     APP_URL: z.string().url(),
+    GEMINI_API_KEY: z.string().min(1),
+    QSTASH_TOKEN: z.string().optional(),
+    QSTASH_CURRENT_SIGNING_KEY: z.string().optional(),
+    QSTASH_NEXT_SIGNING_KEY: z.string().optional(),
   },
 
   client: {},
@@ -24,6 +28,10 @@ export const env = createEnv({
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     SUPABASE_URL: process.env.SUPABASE_URL,
     APP_URL: process.env.APP_URL,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
   },
   
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

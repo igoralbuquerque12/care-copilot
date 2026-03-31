@@ -31,6 +31,7 @@ model Patient {
 
   anamneses     Anamnesis[]
   consultations ScheduleConsultation[]
+  aiDiagnoses   AiDiagnosis[]
 }
 
 model ClinicalProfile {
@@ -62,13 +63,11 @@ model ScheduleConsultation {
   date DateTime         @default(now())
   type ConsultationType @default(ROUTINE)
 
-  // Relacionamento com Paciente e Médico (Profile)
   patientId String
   patient   Patient @relation(fields: [patientId], references: [id])
   profileId String  @db.Uuid
   profile   Profile @relation(fields: [profileId], references: [id])
 
-  // Relacionamento 1:1 opcional com Anamnese
   anamnesis Anamnesis?
 
   createdAt DateTime @default(now())
@@ -102,6 +101,7 @@ model Anamnesis {
 
   physicalExam PhysicalExam?
   medications  PrescribedMedication[]
+  aiDiagnoses  AiDiagnosis[]
 
   diagnosticHypothesis String?   @db.Text
   conduct              String?   @db.Text
@@ -133,4 +133,23 @@ model PrescribedMedication {
   frequency   String
   anamnesisId String
   anamnesis   Anamnesis @relation(fields: [anamnesisId], references: [id])
+}
+
+model AiDiagnosis {
+  id          String   @id @default(cuid())
+  patientId   String
+  patient     Patient  @relation(fields: [patientId], references: [id])
+  anamnesisId String
+  anamnesis   Anamnesis @relation(fields: [anamnesisId], references: [id])
+
+  summary               String @db.Text
+  mainDiagnosisHypothesis String @db.Text
+  differentialDiagnoses  String @db.Text
+  identifiedPatterns     String @db.Text
+  riskAlerts             String @db.Text
+  recommendedActions     String @db.Text
+  confidenceLevel        String
+
+  isValid   Boolean  @default(true)
+  createdAt DateTime @default(now())
 }

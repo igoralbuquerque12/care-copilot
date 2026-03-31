@@ -23,7 +23,7 @@ export function PatientSearch({ selectedPatient, onSelect, onClear }: PatientSea
         return () => clearTimeout(timer);
     }, [query]);
 
-    const { data: rawResults = [], isLoading } = api.scheduleConsultation.searchPatients.useQuery(
+    const { data: rawResults = [], isLoading } = api.patient.search.useQuery(
         { query: debouncedQuery },
         { enabled: debouncedQuery.length >= 2 },
     );

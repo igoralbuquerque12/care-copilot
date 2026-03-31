@@ -1,4 +1,3 @@
-// src/schemas/patient.ts
 import { z } from "zod";
 
 export const genderSchema = z.enum(["Masculino", "Feminino", "Outro"]);
@@ -8,7 +7,6 @@ export const createPatientSchema = z.object({
   birthDate: z.coerce.date(),
   gender: genderSchema,
   cpf: z.string().optional(),
-  // Dados opcionais do perfil clínico inicial
   clinicalProfile: z.object({
     hasHypertension: z.boolean().optional(),
     hasDiabetes: z.boolean().optional(),
