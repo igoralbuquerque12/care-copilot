@@ -1,11 +1,10 @@
-// src/schemas/anamnesis.ts
 import { z } from "zod";
 
 export const nyhaClassSchema = z.enum(["I", "II", "III", "IV"]);
 
 export const createAnamnesisSchema = z.object({
   patientId: z.string().cuid(),
-  // optional: link to an existing ScheduleConsultation
+
   consultationId: z.string().cuid().optional(),
   chiefComplaint: z.string().min(1, "Campo obrigatório"),
   currentIllnessHistory: z.string().min(1, "Campo obrigatório"),
@@ -13,12 +12,12 @@ export const createAnamnesisSchema = z.object({
   symptomEvolution: z.string().optional(),
   newEvents: z.string().optional(),
   nyhaClass: nyhaClassSchema.default("I"),
-  // Sintomas
+
   hasPalpitations: z.boolean().default(false),
   hasSyncope: z.boolean().default(false),
   hasEdema: z.boolean().default(false),
   hasChestPain: z.boolean().default(false),
-  // Exame Físico (Aninhado)
+
   physicalExam: z.object({
     weight: z.number().optional(),
     height: z.number().optional(),
@@ -31,7 +30,7 @@ export const createAnamnesisSchema = z.object({
     peripheralPulses: z.string().optional(),
     edemaGrade: z.string().optional(),
   }).optional(),
-  // Medicamentos (Lista)
+
   medications: z.array(z.object({
     name: z.string(),
     dosage: z.string(),
