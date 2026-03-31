@@ -29,7 +29,6 @@ import { signOutAction } from "~/features/auth/actions/auth.actions";
 
 import type { SidebarItemProps, SidebarItemType } from "~/features/layout/types/sidebar.types";
 
-// Atualizando a importação para a nova logo
 import logo from "../../../public/logo.jpg"; 
 
 import { SIDEBAR_ITEMS } from "~/features/layout/constants/sidebarItems";
@@ -135,7 +134,6 @@ export function Sidebar() {
 export function SidebarItem({ item, isCollapsed, pathname }: SidebarItemProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   
-  // Lógica aprimorada para manter menus abertos se um filho estiver ativo
   const isActive = item.href ? pathname === item.href : false;
   const isGroupActive = item.subItems?.some((sub) => pathname === sub.href);
 
