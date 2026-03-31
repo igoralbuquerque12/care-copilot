@@ -1,12 +1,7 @@
 // src/features/schedule-consultation/types/schedule-consultation.types.ts
 
-export type ConsultationType = "FIRST_VISIT" | "FOLLOW_UP" | "ROUTINE";
-
-export const CONSULTATION_TYPE_LABELS: Record<ConsultationType, string> = {
-    FIRST_VISIT: "Primeira Consulta",
-    FOLLOW_UP: "Retorno",
-    ROUTINE: "Rotina",
-};
+export type { ConsultationType } from "~/types/consultation";
+export { CONSULTATION_TYPE_LABELS } from "~/types/consultation";
 
 export type PatientOption = {
     id: string;
