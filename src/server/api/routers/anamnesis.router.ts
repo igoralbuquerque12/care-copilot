@@ -1,4 +1,3 @@
-// src/server/api/routers/anamnesis.router.ts
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { createAnamnesisSchema, getAnamnesesFilterSchema } from "~/schemas/anamnesis";
 import * as anamnesisService from "~/server/services/anamnesis.service";
@@ -11,11 +10,9 @@ export const anamnesisRouter = createTRPCRouter({
 
   getByPatient: protectedProcedure
     .input(z.object({ patientId: z.string().cuid() }))
-    .query(({ ctx, input }) => ctx.db.anamnesis.findMany({
-      where: { patientId: input.patientId },
-      orderBy: { date: 'desc' },
-      include: { physicalExam: true, medications: true }
-    })),
+    .query(({ ctx, input }) =>
+      anamnesisService.getByPatient(ctx.db, ctx.user.id, input.patientId)
+    ),
 
   listMyAnamneses: protectedProcedure
     .input(getAnamnesesFilterSchema)
