@@ -1,17 +1,16 @@
-
 import { type PrismaClient } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
-import { 
-  type CreateProfileInput, 
-  type UpdateProfileInput 
+import {
+  type CreateProfileInput,
+  type UpdateProfileInput,
 } from "~/schemas/profile";
 
-
 export const createProfile = async (
-  db: PrismaClient, 
-  data: CreateProfileInput
+  db: PrismaClient,
+  data: CreateProfileInput,
 ) => {
-  return db.profile.create({
+  return await db.profile.create({
     data: {
       id: data.id,
       email: data.email,
@@ -22,30 +21,43 @@ export const createProfile = async (
   });
 };
 
-
 export const getProfileById = async (db: PrismaClient, id: string) => {
-  return db.profile.findUnique({
-    where: { id },
-    include: {
-      address: true,
-    },
-  });
+  try {
+    return await db.profile.findUnique({
+      where: { id },
+      include: {
+        address: true,
+      },
+    });
+  } catch (error) {
+    console.error("[Profile - getById]: ", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro ao buscar perfil",
+    });
+  }
 };
 
-
 export const getAllProfiles = async (db: PrismaClient) => {
-  return db.profile.findMany({
-    include: {
-      address: true,
-    },
-  })
-}
-
+  try {
+    return await db.profile.findMany({
+      include: {
+        address: true,
+      },
+    });
+  } catch (error) {
+    console.error("[Profile - getAll]: ", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro ao listar perfis",
+    });
+  }
+};
 
 export const updateProfile = async (
   db: PrismaClient,
   id: string,
-  data: UpdateProfileInput
+  data: UpdateProfileInput,
 ) => {
   const { address, ...profileData } = data;
 
@@ -68,7 +80,6 @@ export const updateProfile = async (
     },
   });
 };
-
 
 export const deleteProfile = async (db: PrismaClient, id: string) => {
   return db.profile.delete({

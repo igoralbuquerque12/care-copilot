@@ -33,7 +33,7 @@ export async function signInAction(data: SignInInput) {
         return { success: false, message: "Credenciais inválidas." };
     }
 
-    return { success: true };
+    return { success: true, message: "Login realizado com sucesso!" };
 }
 
 export async function signUpAction(input: SignUpInput) {
@@ -58,7 +58,7 @@ export async function signUpAction(input: SignUpInput) {
 
         if (error) {
             console.error("Supabase Register Error:", error);
-            return { success: false, message: error.message };
+            return { success: false, message: "Erro ao criar conta. Tente novamente." };
         }
 
         return { success: true, message: "Conta criada com sucesso! Verifique seu email." };

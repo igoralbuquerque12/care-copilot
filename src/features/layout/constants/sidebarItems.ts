@@ -1,12 +1,13 @@
-import { 
-  LayoutDashboard, 
-  Users, 
-  CalendarDays, 
-  Mic, 
-  FileText, 
-  Stethoscope, 
-  Pill, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Users,
+  CalendarDays,
+  CalendarPlus,
+  Mic,
+  FileText,
+  Stethoscope,
+  Pill,
+  Settings,
   History,
   Activity,
   FolderCode
@@ -24,7 +25,8 @@ export const SIDEBAR_ITEMS = [
     icon: CalendarDays,
     type: "group",
     subItems: [
-      { title: "Agenda do Dia", href: "/agenda", icon: CalendarDays },
+      { title: "Dashboard", href: "/consultas", icon: CalendarDays },
+      { title: "Agendar Consulta", href: "/consultas/agendar", icon: CalendarPlus },
       { title: "Histórico", href: "/agenda/historico", icon: History },
     ]
   },
@@ -35,6 +37,14 @@ export const SIDEBAR_ITEMS = [
     subItems: [
       { title: "Lista de Pacientes", href: "/pacientes", icon: Users },
       { title: "Novo Prontuário", href: "/pacientes/novo", icon: FileText },
+    ]
+  },
+  {
+    title: "Anamneses",
+    icon: Stethoscope,
+    type: "group",
+    subItems: [
+      { title: "Nova Anamnese", href: "/anamnesis", icon: Stethoscope },
     ]
   },
   {
