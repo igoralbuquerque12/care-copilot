@@ -27,7 +27,6 @@ export const SIDEBAR_ITEMS = [
     subItems: [
       { title: "Dashboard", href: "/consultas", icon: CalendarDays },
       { title: "Agendar Consulta", href: "/consultas/agendar", icon: CalendarPlus },
-      { title: "Histórico", href: "/agenda/historico", icon: History },
     ]
   },
   {
@@ -36,7 +35,6 @@ export const SIDEBAR_ITEMS = [
     type: "group",
     subItems: [
       { title: "Lista de Pacientes", href: "/pacientes", icon: Users },
-      { title: "Novo Prontuário", href: "/pacientes/novo", icon: FileText },
     ]
   },
   {
