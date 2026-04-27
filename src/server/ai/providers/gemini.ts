@@ -1,7 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "~/env";
 import type { AIClient, AIGenerateRequest, AIGenerateResponse } from "../client";
-import { AI_MODEL_NAME } from "~/server/services/aiDiagnosis/constants";
+
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 const createGeminiClient = () => new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
@@ -14,7 +15,7 @@ if (env.NODE_ENV !== "production") globalForGemini.gemini = geminiSDK;
 
 export class GeminiClient implements AIClient {
   async generate(request: AIGenerateRequest): Promise<AIGenerateResponse> {
-    const model = geminiSDK.getGenerativeModel({ model: AI_MODEL_NAME });
+    const model = geminiSDK.getGenerativeModel({ model: GEMINI_MODEL });
     const result = await model.generateContent(request.prompt);
     const text = result.response.text();
 

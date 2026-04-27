@@ -2,7 +2,7 @@
 
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { aiClient } from "~/server/ai";
+import { aiClientSmart } from "~/server/ai";
 import { qstash } from "~/server/qstash/client";
 import { env } from "~/env";
 import { buildDiagnosisPrompt } from "./prompt-builder";
@@ -76,7 +76,7 @@ export const processAiDiagnosis = async (
     };
 
     const prompt = buildDiagnosisPrompt(historyData);
-    const response = await aiClient.generate({ prompt, responseFormat: "json" });
+    const response = await aiClientSmart.generate({ prompt, responseFormat: "json" });
 
     const parsed = JSON.parse(response.text) as AiDiagnosisResult;
 
