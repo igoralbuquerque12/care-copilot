@@ -50,7 +50,7 @@ export const SIDEBAR_ITEMS = [
     icon: Mic,
     type: "group",
     subItems: [
-      { title: "Captura de Voz", href: "/ai/captura", icon: Mic },
+      { title: "Captura de Voz", href: "/anamnesis/audio", icon: Mic },
       { title: "Transcrições", href: "/ai/transcricoes", icon: FileText },
       { title: "Análises Clínicas", href: "/ai/insights", icon: Activity },
     ]

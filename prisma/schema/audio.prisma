@@ -1,0 +1,74 @@
+enum AudioSessionStatus {
+  WAITING_FOR_PATIENT
+  READY
+  RECORDING
+  PROCESSING
+  SYNCED
+  FINALIZED
+  ERROR
+  INSUFFICIENT_CREDITS
+}
+
+enum AudioBatchStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  ERROR
+}
+
+model AudioConsultationSession {
+  id String @id @default(cuid())
+
+  profileId String  @map("profile_id") @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  patientId String  @map("patient_id")
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  consultationId String?               @unique @map("consultation_id")
+  consultation   ScheduleConsultation? @relation(fields: [consultationId], references: [id])
+
+  status AudioSessionStatus @default(READY)
+
+  startedAt DateTime  @default(now()) @map("started_at")
+  endedAt   DateTime? @map("ended_at")
+
+  lastBatchIndex          Int    @default(-1) @map("last_batch_index")
+  currentFormState        Json   @map("current_form_state")
+  lastProcessedTranscript String? @map("last_processed_transcript") @db.Text
+  lastFieldOperations     Json?  @map("last_field_operations")
+  creditsConsumed         Int    @default(0) @map("credits_consumed")
+
+  errorMessage String? @map("error_message") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  batches AudioBatchRecord[]
+
+  @@index([profileId, status])
+  @@map("audio_consultation_session")
+}
+
+model AudioBatchRecord {
+  id String @id @default(cuid())
+
+  sessionId String                   @map("session_id")
+  session   AudioConsultationSession @relation(fields: [sessionId], references: [id])
+
+  batchIndex           Int   @map("batch_index")
+  storagePath          String @map("storage_path")
+  audioDurationSeconds Int    @map("audio_duration_seconds")
+
+  status  AudioBatchStatus @default(PENDING)
+  retries Int              @default(0)
+
+  errorMessage String?   @map("error_message") @db.Text
+  processedAt  DateTime? @map("processed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([sessionId, batchIndex])
+  @@index([status, createdAt])
+  @@map("audio_batch_record")
+}

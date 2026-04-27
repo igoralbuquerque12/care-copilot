@@ -5,12 +5,13 @@ import {
   type CreateProfileInput,
   type UpdateProfileInput,
 } from "~/schemas/profile";
+import { grantSignupBonus } from "~/server/services/credits/creditLedger.service";
 
 export const createProfile = async (
   db: PrismaClient,
   data: CreateProfileInput,
 ) => {
-  return await db.profile.create({
+  const profile = await db.profile.create({
     data: {
       id: data.id,
       email: data.email,
@@ -19,16 +20,26 @@ export const createProfile = async (
       photoUrl: data.photoUrl,
     },
   });
+
+  await grantSignupBonus(db, profile.id);
+
+  return profile;
 };
 
 export const getProfileById = async (db: PrismaClient, id: string) => {
   try {
-    return await db.profile.findUnique({
+    const profile = await db.profile.findUnique({
       where: { id },
       include: {
         address: true,
       },
     });
+
+    if (profile) {
+      await grantSignupBonus(db, profile.id);
+    }
+
+    return profile;
   } catch (error) {
     console.error("[Profile - getById]: ", error);
     throw new TRPCError({

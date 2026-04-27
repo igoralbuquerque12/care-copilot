@@ -1,5 +1,3 @@
-export const AI_MODEL_NAME = "gemini-2.5-flash";
-
 export const VALID_CONFIDENCE_LEVELS = ["ALTA", "MEDIA", "BAIXA"] as const;
 
 export const DEFAULT_CONFIDENCE_LEVEL = "MEDIA" as const;

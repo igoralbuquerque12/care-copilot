@@ -1,0 +1,28 @@
+enum CreditLedgerType {
+  SIGNUP_BONUS
+  AUDIO_TRANSCRIPTION
+  PROMPT_INPUT
+  LLM_OUTPUT
+  MANUAL_ADJUSTMENT
+  REFUND
+}
+
+model CreditLedgerEntry {
+  id String @id @default(cuid())
+
+  profileId String  @map("profile_id") @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  sessionId  String? @map("session_id")
+  batchIndex Int?    @map("batch_index")
+
+  type    CreditLedgerType
+  credits Int
+  metadata Json?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([sessionId, batchIndex, type], name: "uniq_credit_entry_per_batch_type")
+  @@index([profileId, createdAt])
+  @@map("credit_ledger_entry")
+}

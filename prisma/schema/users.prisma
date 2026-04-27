@@ -12,9 +12,14 @@ model Profile {
 
   address Address? @relation(fields: [addressId], references: [id])
 
+  creditsBalance Int @default(0) @map("credits_balance")
+
   patients      Patient[]
   anamneses     Anamnesis[]
   consultations ScheduleConsultation[]
+
+  audioSessions      AudioConsultationSession[]
+  creditLedgerEntries CreditLedgerEntry[]
 
   @@map("profile")
 }

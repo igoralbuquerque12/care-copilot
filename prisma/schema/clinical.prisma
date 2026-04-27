@@ -32,6 +32,7 @@ model Patient {
   anamneses     Anamnesis[]
   consultations ScheduleConsultation[]
   aiDiagnoses   AiDiagnosis[]
+  audioSessions AudioConsultationSession[]
 }
 
 model ClinicalProfile {
@@ -69,6 +70,7 @@ model ScheduleConsultation {
   profile   Profile @relation(fields: [profileId], references: [id])
 
   anamnesis Anamnesis?
+  audioSession AudioConsultationSession?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
