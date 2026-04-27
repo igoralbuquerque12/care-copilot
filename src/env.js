@@ -13,12 +13,20 @@ export const env = createEnv({
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     APP_URL: z.string().url(),
     GEMINI_API_KEY: z.string().min(1),
+    GROQ_API_KEY: z.string().min(1),
+    GROQ_STT_MODEL: z.string().default("whisper-large-v3"),
+    GROQ_LLM_AUDIO_MODEL: z.string().default("meta-llama/llama-4-scout-17b-16e-instruct"),
+    GROQ_LLM_SMART_MODEL: z.string().default("meta-llama/llama-4-maverick-17b-128e-instruct"),
+    OPENAI_API_KEY: z.string().optional(),
     QSTASH_TOKEN: z.string().optional(),
     QSTASH_CURRENT_SIGNING_KEY: z.string().optional(),
     QSTASH_NEXT_SIGNING_KEY: z.string().optional(),
   },
 
-  client: {},
+  client: {
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  },
 
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -29,9 +37,16 @@ export const env = createEnv({
     SUPABASE_URL: process.env.SUPABASE_URL,
     APP_URL: process.env.APP_URL,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
+    GROQ_STT_MODEL: process.env.GROQ_STT_MODEL,
+    GROQ_LLM_AUDIO_MODEL: process.env.GROQ_LLM_AUDIO_MODEL,
+    GROQ_LLM_SMART_MODEL: process.env.GROQ_LLM_SMART_MODEL,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     QSTASH_TOKEN: process.env.QSTASH_TOKEN,
     QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
     QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
   
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
