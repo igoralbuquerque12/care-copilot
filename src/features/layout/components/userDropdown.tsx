@@ -93,7 +93,7 @@ export function UserDropdown({ user }: UserDropdownProps) {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild className="p-3 cursor-pointer focus:bg-accent/50">
-            <Link href="/perfil" className="flex w-full items-center text-sm">
+            <Link href="/profile" className="flex w-full items-center text-sm">
               <User className="mr-4 h-5 w-5 text-muted-foreground/80" />
               Perfil
             </Link>
