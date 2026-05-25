@@ -4,7 +4,7 @@ import {
   finalizeAudioSessionSchema,
   startAudioSessionSchema,
 } from "~/schemas/audio-session";
-import * as audioSession from "~/server/services/audio/audioSession.service";
+import * as audioSession from "~/server/services/audio/services/session.service";
 
 export const audioConsultationRouter = createTRPCRouter({
   start: protectedProcedure
