@@ -83,7 +83,7 @@ export const assertMinimumBalanceForBatch = async (
 };
 
 export const debitBatch = async (
-  db: PrismaClient,
+  tx: Prisma.TransactionClient,
   input: DebitBatchInput,
 ) => {
   const { profileId, sessionId, batchIndex, breakdown } = input;
@@ -106,49 +106,47 @@ export const debitBatch = async (
     },
   ];
 
-  return db.$transaction(async (tx) => {
-    let charged = 0;
+  let charged = 0;
 
-    for (const entry of entries) {
-      if (entry.credits <= 0) continue;
+  for (const entry of entries) {
+    if (entry.credits <= 0) continue;
 
-      try {
-        await tx.creditLedgerEntry.create({
-          data: {
-            profileId,
-            sessionId,
-            batchIndex,
-            type: entry.type,
-            credits: entry.credits,
-            metadata: entry.metadata as Prisma.InputJsonValue,
-          },
-        });
-        charged += entry.credits;
-      } catch (error) {
-        if (
-          error instanceof Prisma.PrismaClientKnownRequestError &&
-          error.code === "P2002"
-        ) {
-          continue;
-        }
-        throw error;
+    try {
+      await tx.creditLedgerEntry.create({
+        data: {
+          profileId,
+          sessionId,
+          batchIndex,
+          type: entry.type,
+          credits: entry.credits,
+          metadata: entry.metadata as Prisma.InputJsonValue,
+        },
+      });
+      charged += entry.credits;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2002"
+      ) {
+        continue;
       }
+      throw error;
     }
+  }
 
-    if (charged > 0) {
-      await tx.profile.update({
-        where: { id: profileId },
-        data: { creditsBalance: { decrement: charged } },
-      });
+  if (charged > 0) {
+    await tx.profile.update({
+      where: { id: profileId },
+      data: { creditsBalance: { decrement: charged } },
+    });
 
-      await tx.audioConsultationSession.update({
-        where: { id: sessionId },
-        data: { creditsConsumed: { increment: charged } },
-      });
-    }
+    await tx.audioConsultationSession.update({
+      where: { id: sessionId },
+      data: { creditsConsumed: { increment: charged } },
+    });
+  }
 
-    return { charged };
-  });
+  return { charged };
 };
 
 export const getRecentLedger = async (
