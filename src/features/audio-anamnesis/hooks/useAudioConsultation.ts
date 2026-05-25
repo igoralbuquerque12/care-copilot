@@ -17,7 +17,15 @@ type Args = {
 };
 
 export const useAudioConsultation = ({ sessionId }: Args) => {
-  const sessionQuery = api.audioConsultation.getById.useQuery({ sessionId });
+  const sessionQuery = api.audioConsultation.getById.useQuery(
+    { sessionId },
+    {
+      refetchInterval: (query) => {
+        const status = query.state.data?.status;
+        return status && status !== "FINALIZED" ? 5000 : false;
+      },
+    },
+  );
 
   const initialSession = useMemo(
     () =>
