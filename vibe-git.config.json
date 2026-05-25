@@ -1,11 +1,13 @@
 {
-  "_aiProvider_info": "Options: 'gemini' | 'openai'",
+  "_aiProvider_info": "Options: 'gemini' | 'openai' | 'groq'",
   "aiProvider": "gemini",
+  "disableWarns": false,
   "PRs": {
     "createPRs": true,
     "useModel": true,
     "model": "# Description\nWrite a detailed description...\n\n# Justification\nExplain the reason...",
-    "idioma": "en"
+    "idioma": "en",
+    "prBase": "main"
   },
   "commits": {
     "useConventionalCommits": true,
@@ -26,5 +28,8 @@
   },
   "llm-openai-model": {
     "modelName": "gpt-4o"
+  },
+  "llm-groq-model": {
+    "modelName": "llama-3.3-70b-versatile"
   }
 }
