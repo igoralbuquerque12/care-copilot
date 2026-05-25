@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { PatientSearch } from "./patient-search";
 import { PatientInfoCard } from "./patient-info-card";
 import { PatientConsultationChart } from "./patient-consultation-chart";
 import { PatientAnamnesisTimeline } from "./patient-anamnesis-timeline";
 import { PatientAiDiagnosis } from "./patient-ai-diagnosis";
+import { AnamnesisDetailPage } from "./anamnesis-detail-page";
 import { usePatientDetail } from "../hooks/use-patient-detail";
 import { Users } from "lucide-react";
 
@@ -23,9 +25,27 @@ export function PatientsPage() {
     isMarkingInvalid,
   } = usePatientDetail();
 
+  const [openAnamnesisId, setOpenAnamnesisId] = useState<string | null>(null);
+
+  const openAnamnesis =
+    patient?.anamneses.find((a) => a.id === openAnamnesisId) ?? null;
+
+  // ── Anamnesis detail view ──────────────────────────────────────────────────
+  if (openAnamnesis && patient) {
+    return (
+      <div className="h-full flex flex-col">
+        <AnamnesisDetailPage
+          anamnesis={openAnamnesis}
+          patientId={patient.id}
+          onBack={() => setOpenAnamnesisId(null)}
+        />
+      </div>
+    );
+  }
+
+  // ── Main patient view ──────────────────────────────────────────────────────
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
           <Users className="h-5 w-5 text-primary" />
@@ -40,14 +60,12 @@ export function PatientsPage() {
         </div>
       </div>
 
-      {/* Search */}
       <PatientSearch
         onSelect={selectPatient}
         onClear={clearPatient}
         selectedPatientId={selectedPatientId}
       />
 
-      {/* Patient Detail */}
       {selectedPatientId && (
         <>
           {isLoadingPatient ? (
@@ -59,13 +77,8 @@ export function PatientsPage() {
             </div>
           ) : patient ? (
             <div className="space-y-6">
-              {/* Info Card */}
               <PatientInfoCard patient={patient} />
-
-              {/* Charts */}
               <PatientConsultationChart anamneses={patient.anamneses} />
-
-              {/* AI Diagnosis */}
               <PatientAiDiagnosis
                 diagnosis={aiDiagnosis}
                 isLoading={isLoadingAiDiagnosis}
@@ -74,9 +87,10 @@ export function PatientsPage() {
                 onMarkInvalid={markDiagnosisInvalid}
                 isMarkingInvalid={isMarkingInvalid}
               />
-
-              {/* Anamnesis Timeline */}
-              <PatientAnamnesisTimeline anamneses={patient.anamneses} />
+              <PatientAnamnesisTimeline
+                anamneses={patient.anamneses}
+                onOpenDetail={setOpenAnamnesisId}
+              />
             </div>
           ) : (
             <div className="flex items-center justify-center py-20">
@@ -86,7 +100,6 @@ export function PatientsPage() {
         </>
       )}
 
-      {/* Empty State */}
       {!selectedPatientId && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 mb-4">
