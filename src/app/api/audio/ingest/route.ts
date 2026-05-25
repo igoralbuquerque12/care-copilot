@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "~/server/db";
 import { getUser } from "~/server/auth/supabase.server";
-import { ingestBatch } from "~/server/services/audio/audioIngestion.service";
+import { ingestBatch } from "~/server/services/audio/services/batchIngestion.service";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
