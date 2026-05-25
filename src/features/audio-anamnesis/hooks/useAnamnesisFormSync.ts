@@ -24,8 +24,20 @@ type SyncedSession = {
   creditsConsumed: number;
 };
 
+const parseFormState = (value: unknown) => {
+  if (typeof value === "string") {
+    try {
+      return consolidatedFormStateSchema.safeParse(JSON.parse(value));
+    } catch {
+      return consolidatedFormStateSchema.safeParse(value);
+    }
+  }
+
+  return consolidatedFormStateSchema.safeParse(value);
+};
+
 const parseRow = (row: SessionRow): SyncedSession | null => {
-  const parsed = consolidatedFormStateSchema.safeParse(row.current_form_state);
+  const parsed = parseFormState(row.current_form_state);
   if (!parsed.success) {
     console.warn("[useAnamnesisFormSync] form state invalido:", parsed.error);
     return null;
@@ -47,13 +59,21 @@ export const useAnamnesisFormSync = (
 
   // useState only uses initial on mount; this syncs when the tRPC query resolves
   useEffect(() => {
-    setSession((prev) => prev ?? initial);
+    if (!initial) return;
+
+    setSession((prev) => {
+      if (!prev || initial.lastBatchIndex >= prev.lastBatchIndex) {
+        return initial;
+      }
+      return prev;
+    });
   }, [initial]);
 
   useEffect(() => {
     if (!sessionId) return;
 
     const supabase = getSupabaseBrowserClient();
+    console.log("[useAnamnesisFormSync] subscribing to realtime updates for session: audio-session:", sessionId);
     const channel = supabase
       .channel(`audio-session:${sessionId}`)
       .on(
@@ -65,7 +85,13 @@ export const useAnamnesisFormSync = (
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
+          console.log("[useAnamnesisFormSync] realtime payload recebido:", {
+            eventType: payload.eventType,
+            new: payload.new,
+            old: payload.old,
+          });
           const next = parseRow(payload.new as SessionRow);
+          console.log("[useAnamnesisFormSync] realtime payload parseado:", next);
           if (!next) return;
           setSession((prev) => {
             if (!prev || next.lastBatchIndex >= prev.lastBatchIndex) {
@@ -75,7 +101,13 @@ export const useAnamnesisFormSync = (
           });
         },
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        console.log("[useAnamnesisFormSync] realtime subscription:", {
+          channel: `audio-session:${sessionId}`,
+          status,
+          error,
+        });
+      });
 
     return () => {
       void supabase.removeChannel(channel);

@@ -3,27 +3,24 @@
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { aiClientSmart } from "~/server/ai";
-import { qstash } from "~/server/qstash/client";
+import { messageQueue } from "~/server/messaging";
 import { env } from "~/env";
 import { buildDiagnosisPrompt } from "./prompt-builder";
 import { VALID_CONFIDENCE_LEVELS, DEFAULT_CONFIDENCE_LEVEL } from "./constants";
 import type { PatientHistoryForAI, AiDiagnosisResult } from "./types";
+
+const AI_DIAGNOSIS_QUEUE_RETRIES = 3;
 
 export const triggerDiagnosis = async (
   patientId: string,
   anamnesisId: string,
 ) => {
   try {
-    if (qstash) {
-      await qstash.publishJSON({
-        url: `${env.APP_URL}/api/ai-diagnosis`,
-        body: { patientId, anamnesisId },
-        retries: 3,
-      });
-      return;
-    }
-    const { db } = await import("~/server/db");
-    await processAiDiagnosis(db, patientId, anamnesisId);
+    await messageQueue.publish({
+      url: `${env.APP_URL}/api/ai-diagnosis`,
+      body: { patientId, anamnesisId },
+      retries: AI_DIAGNOSIS_QUEUE_RETRIES,
+    });
   } catch (error) {
     console.error("[AI Diagnosis - trigger]: ", error);
   }

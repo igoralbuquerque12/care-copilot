@@ -34,7 +34,7 @@ export const SIDEBAR_ITEMS = [
     icon: Users,
     type: "group",
     subItems: [
-      { title: "Lista de Pacientes", href: "/pacientes", icon: Users },
+      { title: "Buscar paciente", href: "/pacientes", icon: Users },
     ]
   },
   {

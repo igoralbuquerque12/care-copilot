@@ -21,6 +21,7 @@ class GroqLLMClient implements AIClient {
     const response = await groqSDK.chat.completions.create({
       model: this.model,
       messages: [{ role: "user", content: request.prompt }],
+      max_tokens: 8192,
       ...(request.responseFormat === "json" && {
         response_format: { type: "json_object" },
       }),
