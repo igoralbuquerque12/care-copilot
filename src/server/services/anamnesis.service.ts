@@ -18,7 +18,7 @@ export const getByPatient = async (
     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao buscar anamneses" });
   }
 };
-import { type CreateAnamnesisInput } from "~/schemas/anamnesis";
+import { type CreateAnamnesisInput, type UpdateAnamnesisInput } from "~/schemas/anamnesis";
 import { triggerDiagnosis } from "~/server/services/aiDiagnosis";
 
 export const createAnamnesis = async (
@@ -40,10 +40,32 @@ export const createAnamnesis = async (
     include: { physicalExam: true, medications: true },
   });
 
-  // Fire-and-forget AI diagnosis (don't await to not block response)
   void triggerDiagnosis(data.patientId, anamnesis.id);
 
   return anamnesis;
+};
+
+export const updateAnamnesis = async (
+  db: PrismaClient,
+  profileId: string,
+  { id, physicalExam, medications, ...fields }: UpdateAnamnesisInput,
+) => {
+  const existing = await db.anamnesis.findFirst({ where: { id, profileId } });
+  if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese não encontrada" });
+
+  return db.anamnesis.update({
+    where: { id },
+    data: {
+      ...fields,
+      physicalExam: physicalExam
+        ? { upsert: { create: physicalExam, update: physicalExam } }
+        : undefined,
+      medications: medications
+        ? { deleteMany: {}, createMany: { data: medications } }
+        : undefined,
+    },
+    include: { physicalExam: true, medications: true },
+  });
 };
 
 export const listAnamneses = async (
