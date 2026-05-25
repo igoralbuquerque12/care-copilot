@@ -566,11 +566,11 @@ export default function StyleguidePage() {
               <TabsContent value="patients">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Lista de Pacientes</CardTitle>
+                    <CardTitle>Buscar paciente</CardTitle>
                     <CardDescription>Gerencie seus pacientes ativos</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">Conteúdo da lista de pacientes...</p>
+                    <p className="text-sm text-muted-foreground">Conteúdo da Buscar paciente...</p>
                   </CardContent>
                 </Card>
               </TabsContent>
