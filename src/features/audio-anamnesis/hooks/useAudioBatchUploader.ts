@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 import type { ReadyBatch } from "./useAudioBatchBuffer";
 
 type UploadInput = {
@@ -15,6 +16,28 @@ const MAX_RETRIES = 3;
 
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const getUploadErrorMessage = (error: unknown) => {
+  if (!(error instanceof Error)) {
+    return "Falha ao enviar lote de audio";
+  }
+
+  const body = error.message.match(/^Falha no upload \(\d+\):\s*(.*)$/s)?.[1];
+  if (!body) {
+    return error.message;
+  }
+
+  try {
+    const parsed = JSON.parse(body) as { error?: unknown };
+    if (typeof parsed.error === "string" && parsed.error.trim()) {
+      return parsed.error;
+    }
+  } catch {
+    return error.message;
+  }
+
+  return error.message;
+};
 
 const sendOnce = async (input: UploadInput): Promise<void> => {
   const form = new FormData();
@@ -80,6 +103,9 @@ export const useAudioBatchUploader = () => {
 
         if (lastError) {
           console.error("[useAudioBatchUploader] desistindo do lote", lastError);
+          toast.error(getUploadErrorMessage(lastError), {
+            id: "audio-batch-upload-error",
+          });
         }
         queueRef.current.shift();
       }
