@@ -23,7 +23,7 @@ export const SILENCE_TIMEOUT_MS = 7_000;
  * Ao atingir esse limite, o buffer e enviado mesmo sem silencio detectado.
  * Limite pratico do Whisper: ~25 MB / ~30 min. 150 s e seguro e economico.
  */
-export const MAX_BATCH_SECONDS = 150;
+export const MAX_BATCH_SECONDS = 15;
 
 /** Numero de amostras correspondente ao limite de batch. Derivado, nao altere diretamente. */
 export const MAX_BATCH_SAMPLES = MAX_BATCH_SECONDS * AUDIO_SAMPLE_RATE;
