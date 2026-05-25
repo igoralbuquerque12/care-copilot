@@ -1,19 +1,37 @@
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { audioBatchMetadataSchema } from "~/schemas/audio-session";
+import type { QstashAudioJob } from "~/schemas/audio-session";
 import { assertMinimumBalanceForBatch } from "~/server/services/credits/creditLedger.service";
-import {
-  createSignedAudioUrl,
-  uploadAudioBatch,
-} from "./audioBatchStorage.service";
-import { enqueueAudioProcessing } from "./audioProcessingQueue.service";
+import { messageQueue } from "~/server/messaging";
+import { env } from "~/env";
+import { AUDIO_QUEUE_RETRIES } from "../audio.config";
+import type { IngestInput } from "../entities/audio.entity";
+import { createSignedAudioUrl, uploadAudioBatch } from "./batchStorage.service";
 
-type IngestInput = {
-  profileId: string;
-  file: Blob;
-  rawPayload: unknown;
-};
+const enqueueAudioProcessing = (job: QstashAudioJob) =>
+  messageQueue.publish({
+    url: `${env.APP_URL}/api/audio/process`,
+    body: job,
+    retries: AUDIO_QUEUE_RETRIES,
+    deduplicationId: `${job.sessionId}:${job.batchIndex}`,
+  });
 
+// ── Ingestion ──────────────────────────────────────────────────────────────────
+
+/**
+ * Entry point for a new audio batch. Validates session ownership and credit
+ * balance, uploads the WAV file to storage, upserts the `AudioBatchRecord`,
+ * updates the session status to PROCESSING, and enqueues the processing job.
+ *
+ * Duplicate batches (same sessionId + batchIndex) that are not in ERROR status
+ * are ignored and returned with `deduped: true`.
+ *
+ * @param db - Prisma client
+ * @param input - Ingestion payload: profileId, WAV blob, raw form metadata
+ * @returns Object with `{ sessionId, batchIndex, deduped }`
+ * @throws FORBIDDEN if the session does not exist or the patient doesn't match
+ */
 export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
   const meta = audioBatchMetadataSchema.parse(input.rawPayload);
 
@@ -36,10 +54,7 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
 
   const existing = await db.audioBatchRecord.findUnique({
     where: {
-      sessionId_batchIndex: {
-        sessionId: meta.sessionId,
-        batchIndex: meta.batchIndex,
-      },
+      sessionId_batchIndex: { sessionId: meta.sessionId, batchIndex: meta.batchIndex },
     },
   });
 
@@ -56,10 +71,7 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
 
   await db.audioBatchRecord.upsert({
     where: {
-      sessionId_batchIndex: {
-        sessionId: meta.sessionId,
-        batchIndex: meta.batchIndex,
-      },
+      sessionId_batchIndex: { sessionId: meta.sessionId, batchIndex: meta.batchIndex },
     },
     update: {
       storagePath,
@@ -83,7 +95,7 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
   });
 
   const signedAudioUrl = await createSignedAudioUrl(storagePath);
-
+  console.log("Teste 1 - salvou no supabase o audio")
   await enqueueAudioProcessing({
     ...meta,
     profileId: input.profileId,
