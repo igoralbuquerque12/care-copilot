@@ -4,6 +4,9 @@ import { nyhaClassSchema } from "~/schemas/anamnesis";
 
 const exerciseLevelSchema = z.enum(["SEDENTARIO", "IRREGULAR", "ATIVO"]);
 
+// LLMs frequently return null for "no info" string fields. Normalize null/undefined to "".
+const tolerantString = z.preprocess((v) => v ?? "", z.string());
+
 const medicationSchema = z.object({
   name: z.string(),
   dosage: z.string(),
@@ -14,25 +17,25 @@ const clinicalProfileFormSchema = z.object({
   hasHypertension: z.boolean().nullable().optional(),
   hasDiabetes: z.boolean().nullable().optional(),
   diabetesDuration: z.number().int().nullable().optional(),
-  allergies: z.string().optional(),
+  allergies: tolerantString,
   hasDyslipidemia: z.boolean().nullable().optional(),
   hasPriorInfarction: z.boolean().nullable().optional(),
-  priorSurgeries: z.string().optional(),
+  priorSurgeries: tolerantString,
   familyHistoryCoronaryEarly: z.boolean().nullable().optional(),
   familyHistorySuddenDeath: z.boolean().nullable().optional(),
-  familyHistoryOthers: z.string().optional(),
+  familyHistoryOthers: tolerantString,
   smokingStatus: z.boolean().nullable().optional(),
   smokingPacksYear: z.number().int().nullable().optional(),
-  alcoholConsumption: z.string().optional(),
+  alcoholConsumption: tolerantString,
   exerciseLevel: exerciseLevelSchema.nullable().optional(),
 });
 
 const patientFormSchema = z.object({
-  name: z.string(),
+  name: tolerantString,
   birthDate: z.coerce.date().nullable().optional(),
   gender: genderSchema.nullable().optional(),
-  cpf: z.string().optional(),
-  clinicalProfile: clinicalProfileFormSchema,
+  cpf: tolerantString,
+  clinicalProfile: clinicalProfileFormSchema.default({}),
 });
 
 const physicalExamFormSchema = z.object({
@@ -42,34 +45,34 @@ const physicalExamFormSchema = z.object({
   bpDiastolic: z.number().int().nullable().optional(),
   heartRate: z.number().int().nullable().optional(),
   oxygenSaturation: z.number().int().nullable().optional(),
-  heartAuscultation: z.string().optional(),
-  lungAuscultation: z.string().optional(),
-  peripheralPulses: z.string().optional(),
-  edemaGrade: z.string().optional(),
+  heartAuscultation: tolerantString,
+  lungAuscultation: tolerantString,
+  peripheralPulses: tolerantString,
+  edemaGrade: tolerantString,
 });
 
 const anamnesisFormSchema = z.object({
   consultationId: z.string().nullable().optional(),
-  chiefComplaint: z.string().default(""),
-  currentIllnessHistory: z.string().default(""),
-  treatmentResponse: z.string().default(""),
-  symptomEvolution: z.string().default(""),
-  newEvents: z.string().default(""),
+  chiefComplaint: tolerantString,
+  currentIllnessHistory: tolerantString,
+  treatmentResponse: tolerantString,
+  symptomEvolution: tolerantString,
+  newEvents: tolerantString,
   nyhaClass: nyhaClassSchema.nullable().optional(),
   hasPalpitations: z.boolean().nullable().optional(),
   hasSyncope: z.boolean().nullable().optional(),
   hasEdema: z.boolean().nullable().optional(),
   hasChestPain: z.boolean().nullable().optional(),
-  physicalExam: physicalExamFormSchema,
+  physicalExam: physicalExamFormSchema.default({}),
   medications: z.array(medicationSchema).default([]),
-  diagnosticHypothesis: z.string().default(""),
-  conduct: z.string().default(""),
+  diagnosticHypothesis: tolerantString,
+  conduct: tolerantString,
   nextRecallDate: z.coerce.date().nullable().optional(),
 });
 
 export const consolidatedFormStateSchema = z.object({
-  patient: patientFormSchema,
-  anamnesis: anamnesisFormSchema,
+  patient: patientFormSchema.default({}),
+  anamnesis: anamnesisFormSchema.default({}),
 });
 
 export type ConsolidatedFormState = z.infer<typeof consolidatedFormStateSchema>;
