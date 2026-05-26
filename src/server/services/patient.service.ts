@@ -21,6 +21,16 @@ export const getFullProfile = async (
             physicalExam: true,
             medications: true,
             consultation: { select: { id: true, date: true, type: true } },
+            template: {
+              include: {
+                sections: {
+                  orderBy: { order: "asc" },
+                  include: {
+                    fields: { orderBy: { order: "asc" } },
+                  },
+                },
+              },
+            },
           },
         },
         consultations: {
@@ -57,6 +67,16 @@ export const getAnamnesisPaginated = async (
           physicalExam: true,
           medications: true,
           consultation: { select: { id: true, date: true, type: true } },
+          template: {
+            include: {
+              sections: {
+                orderBy: { order: "asc" },
+                include: {
+                  fields: { orderBy: { order: "asc" } },
+                },
+              },
+            },
+          },
         },
       }),
     ]);
