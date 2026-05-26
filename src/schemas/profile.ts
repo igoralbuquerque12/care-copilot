@@ -18,6 +18,14 @@ export const updateProfileSchema = z.object({
   address: updateAddressSchema.optional(),
 });
 
+export const createDoctorBySuperAdminSchema = z.object({
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  password: z.string().min(8, "A senha deve ter pelo menos 8 caracteres"),
+  phone: z.string().optional(),
+  emailConfirm: z.boolean(),
+});
+
 export const filterProfileSchema = z.object({
   email: z.string().email().optional(),
   name: z.string().optional(),
@@ -26,3 +34,6 @@ export const filterProfileSchema = z.object({
 export type CreateProfileInput = z.infer<typeof createProfileSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type FilterProfileInput = z.infer<typeof filterProfileSchema>;
+export type CreateDoctorBySuperAdminInput = z.infer<
+  typeof createDoctorBySuperAdminSchema
+>;
