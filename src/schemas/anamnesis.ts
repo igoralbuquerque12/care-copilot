@@ -6,6 +6,8 @@ export const createAnamnesisSchema = z.object({
   patientId: z.string().cuid(),
 
   consultationId: z.string().cuid().optional(),
+  templateId: z.string().cuid().optional(),
+  customResponses: z.record(z.string(), z.unknown()).optional(),
   chiefComplaint: z.string().min(1, "Campo obrigatório"),
   currentIllnessHistory: z.string().min(1, "Campo obrigatório"),
   treatmentResponse: z.string().optional(),
@@ -52,6 +54,8 @@ export type CreateAnamnesisInput = z.infer<typeof createAnamnesisSchema>;
 
 export const updateAnamnesisSchema = z.object({
   id: z.string().cuid(),
+  templateId: z.string().cuid().nullable().optional(),
+  customResponses: z.record(z.string(), z.unknown()).optional(),
   chiefComplaint: z.string().min(1).optional(),
   currentIllnessHistory: z.string().min(1).optional(),
   treatmentResponse: z.string().nullable().optional(),
