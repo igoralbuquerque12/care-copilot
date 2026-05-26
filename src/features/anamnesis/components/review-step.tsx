@@ -3,9 +3,41 @@ import type { FormData } from "~/features/anamnesis/hooks/use-anamnesis-form"
 type ReviewStepProps = {
   formData: Partial<FormData>
   medications: Array<{ name: string; dosage: string; frequency: string }>
+  template?: {
+    sections: Array<{
+      fields: Array<{
+        key: string
+        label: string
+        isSystemField: boolean
+        isVisible: boolean
+      }>
+    }>
+  }
+  customValues?: Record<string, unknown>
 }
 
-export function ReviewStep({ formData, medications }: ReviewStepProps) {
+const formatCustomValue = (value: unknown) => {
+  if (value == null || value === "") return "Nao informado"
+  if (value instanceof Date) return value.toLocaleDateString("pt-BR")
+  if (typeof value === "string") return value
+  if (typeof value === "number") return String(value)
+  if (typeof value === "boolean") return value ? "Sim" : "Nao"
+  if (Array.isArray(value)) return value.join(", ")
+  if (typeof value === "object") return JSON.stringify(value)
+  return "Nao informado"
+}
+
+export function ReviewStep({
+  formData,
+  medications,
+  template,
+  customValues = {},
+}: ReviewStepProps) {
+  const customFields =
+    template?.sections.flatMap((section) =>
+      section.fields.filter((field) => !field.isSystemField && field.isVisible),
+    ) ?? []
+
   return (
     <div className="space-y-6">
       <div className="bg-muted/50 p-4 rounded-lg">
@@ -110,6 +142,22 @@ export function ReviewStep({ formData, medications }: ReviewStepProps) {
         <div className="bg-muted/50 p-4 rounded-lg">
           <h3 className="font-medium mb-3">Conduta</h3>
           <p className="text-sm">{formData.conduct}</p>
+        </div>
+      )}
+
+      {customFields.length > 0 && (
+        <div className="bg-muted/50 p-4 rounded-lg">
+          <h3 className="font-medium mb-3">Campos personalizados</h3>
+          <div className="space-y-2 text-sm">
+            {customFields.map((field) => (
+              <div key={field.key} className="grid grid-cols-3 gap-2">
+                <span className="text-muted-foreground">{field.label}:</span>
+                <span className="col-span-2">
+                  {formatCustomValue(customValues[field.key])}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
