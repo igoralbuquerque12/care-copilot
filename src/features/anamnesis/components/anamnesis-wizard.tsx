@@ -12,8 +12,7 @@ import { AnamnesisDataStep } from "~/features/anamnesis/components/anamnesis-dat
 import { PhysicalExamStep } from "~/features/anamnesis/components/physical-exam-step"
 import { DiagnosisStep } from "~/features/anamnesis/components/diagnosis-step"
 import { ReviewStep } from "~/features/anamnesis/components/review-step"
-
-import { steps } from "~/features/anamnesis/constants/steps"
+import { DynamicSectionRenderer } from "~/features/anamnesis/components/dynamic-section-renderer"
 
 
 export function AnamnesisWizard({ consultationId }: { consultationId?: string }) {
@@ -22,6 +21,10 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
     isLoading,
     formData,
     setFormData,
+    template,
+    steps,
+    customValues,
+    setCustomValues,
     selectedPatientId,
     medications,
     handleNext,
@@ -33,6 +36,9 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
     updateMedication,
     removeMedication,
   } = useAnamnesisForm({ consultationId })
+
+  const isFinalStep = currentStep === steps.length
+  const currentTemplateSection = template?.sections[currentStep - 2]
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
@@ -58,9 +64,22 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
                 onClearExistingPatient={handleClearExistingPatient}
               />
             )}
-            {currentStep === 2 && <AnamnesisDataStep formData={formData} setFormData={setFormData} />}
-            {currentStep === 3 && <PhysicalExamStep formData={formData} setFormData={setFormData} />}
-            {currentStep === 4 && (
+            {template && currentTemplateSection && !isFinalStep && (
+              <DynamicSectionRenderer
+                section={currentTemplateSection}
+                formData={formData}
+                setFormData={setFormData}
+                customValues={customValues}
+                setCustomValues={setCustomValues}
+                medications={medications}
+                addMedication={addMedication}
+                updateMedication={updateMedication}
+                removeMedication={removeMedication}
+              />
+            )}
+            {!template && currentStep === 2 && <AnamnesisDataStep formData={formData} setFormData={setFormData} />}
+            {!template && currentStep === 3 && <PhysicalExamStep formData={formData} setFormData={setFormData} />}
+            {!template && currentStep === 4 && (
               <DiagnosisStep
                 formData={formData}
                 setFormData={setFormData}
@@ -70,7 +89,14 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
                 removeMedication={removeMedication}
               />
             )}
-            {currentStep === 5 && <ReviewStep formData={formData} medications={medications} />}
+            {isFinalStep && (
+              <ReviewStep
+                formData={formData}
+                medications={medications}
+                template={template}
+                customValues={customValues}
+              />
+            )}
 
             <div className="flex justify-between pt-6 border-t">
               <Button
@@ -83,14 +109,14 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
                 Voltar
               </Button>
 
-              {currentStep < 5 ? (
+              {currentStep < steps.length ? (
                 <Button
                   type="button"
                   onClick={handleNext}
                   disabled={
                     isLoading ||
                     (currentStep === 1 && (!formData.name || !formData.birthDate || !formData.gender)) ||
-                    (currentStep === 2 &&
+                    (!template && currentStep === 2 &&
                       (!formData.chiefComplaint || !formData.currentIllnessHistory))
                   }
                 >
