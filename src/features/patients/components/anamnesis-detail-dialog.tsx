@@ -10,10 +10,25 @@ import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
+import { DynamicFieldRenderer } from "~/features/anamnesis/components/dynamic-field-renderer";
+import type { FormFieldType } from "~/schemas/form-template";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Medication = { name: string; dosage: string; frequency: string };
+type CustomResponses = Record<string, unknown>;
+
+type TemplateField = {
+  id: string;
+  key: string;
+  label: string;
+  description?: string | null;
+  fieldType: FormFieldType;
+  isRequired: boolean;
+  isVisible: boolean;
+  config?: unknown;
+  isSystemField: boolean;
+};
 
 type PhysicalExam = {
   weight?: number | null;
@@ -46,6 +61,12 @@ export type AnamnesisDetail = {
   nextRecallDate?: Date | null;
   physicalExam?: PhysicalExam | null;
   medications: Medication[];
+  customResponses?: unknown;
+  template?: {
+    sections: Array<{
+      fields: TemplateField[];
+    }>;
+  } | null;
 };
 
 type FormState = {
@@ -75,6 +96,7 @@ type FormState = {
     edemaGrade: string;
   };
   medications: Medication[];
+  customResponses: CustomResponses;
 };
 
 type Props = {
@@ -85,6 +107,11 @@ type Props = {
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const toRecord = (value: unknown): CustomResponses =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as CustomResponses)
+    : {};
 
 const toForm = (a: AnamnesisDetail): FormState => ({
   chiefComplaint: a.chiefComplaint,
@@ -115,6 +142,7 @@ const toForm = (a: AnamnesisDetail): FormState => ({
     edemaGrade: a.physicalExam?.edemaGrade ?? "",
   },
   medications: a.medications.map((m) => ({ ...m })),
+  customResponses: toRecord(a.customResponses),
 });
 
 const num = (v: string) => (v === "" ? undefined : Number(v));
@@ -141,7 +169,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function ReadText({ value, empty = "—" }: { value?: string | null; empty?: string }) {
   return (
     <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-      {value || empty}
+      {value ?? empty}
     </p>
   );
 }
@@ -218,6 +246,12 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
       return { ...prev, medications: meds };
     });
 
+  const setCustom = (key: string, value: unknown) =>
+    setForm((prev) => ({
+      ...prev,
+      customResponses: { ...prev.customResponses, [key]: value },
+    }));
+
   const cancel = () => {
     setForm(toForm(anamnesis));
     setEditing(false);
@@ -252,6 +286,7 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
         edemaGrade: form.physicalExam.edemaGrade || null,
       },
       medications: form.medications.filter((m) => m.name.trim()),
+      customResponses: form.customResponses,
     });
   };
 
@@ -262,6 +297,10 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
     form.hasEdema && "Edema",
     form.hasChestPain && "Dor torácica",
   ].filter(Boolean) as string[];
+  const customFields =
+    anamnesis.template?.sections.flatMap((section) =>
+      section.fields.filter((field) => !field.isSystemField && field.isVisible),
+    ) ?? [];
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
@@ -459,6 +498,21 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                   )}
                 </Field>
               </div>
+
+              {customFields.length > 0 && (
+                <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+                  <SectionTitle>Campos Personalizados</SectionTitle>
+                  {customFields.map((field) => (
+                    <DynamicFieldRenderer
+                      key={field.id}
+                      field={field}
+                      value={form.customResponses[field.key]}
+                      onChange={(value) => setCustom(field.key, value)}
+                      readOnly={!editing}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* ── Right column (1/3) ── */}

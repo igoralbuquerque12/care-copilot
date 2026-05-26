@@ -10,6 +10,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import type { AnamnesisDetail } from "./anamnesis-detail-dialog";
+import { DynamicFieldRenderer } from "~/features/anamnesis/components/dynamic-field-renderer";
 
 type FormState = {
   chiefComplaint: string;
@@ -31,6 +32,7 @@ type FormState = {
     lungAuscultation: string; peripheralPulses: string; edemaGrade: string;
   };
   medications: { name: string; dosage: string; frequency: string }[];
+  customResponses: Record<string, unknown>;
 };
 
 type Props = {
@@ -40,6 +42,11 @@ type Props = {
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 const toForm = (a: AnamnesisDetail): FormState => ({
   chiefComplaint: a.chiefComplaint,
@@ -70,6 +77,7 @@ const toForm = (a: AnamnesisDetail): FormState => ({
     edemaGrade: a.physicalExam?.edemaGrade ?? "",
   },
   medications: a.medications.map((m) => ({ ...m })),
+  customResponses: toRecord(a.customResponses),
 });
 
 const num = (v: string) => (v === "" ? undefined : Number(v));
@@ -103,7 +111,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function ReadText({ value, empty = "—" }: { value?: string | null; empty?: string }) {
   return (
     <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-      {value || empty}
+      {value ?? empty}
     </p>
   );
 }
@@ -166,6 +174,12 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
       ),
     }));
 
+  const setCustom = (key: string, value: unknown) =>
+    setForm((prev) => ({
+      ...prev,
+      customResponses: { ...prev.customResponses, [key]: value },
+    }));
+
   const cancel = () => { setForm(toForm(anamnesis)); setEditing(false); };
 
   const save = () => {
@@ -197,6 +211,7 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
         edemaGrade: form.physicalExam.edemaGrade || null,
       },
       medications: form.medications.filter((m) => m.name.trim()),
+      customResponses: form.customResponses,
     });
   };
 
@@ -207,6 +222,10 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
     form.hasEdema && "Edema",
     form.hasChestPain && "Dor torácica",
   ].filter(Boolean) as string[];
+  const customFields =
+    anamnesis.template?.sections.flatMap((section) =>
+      section.fields.filter((field) => !field.isSystemField && field.isVisible),
+    ) ?? [];
 
   return (
     <div className="flex flex-col h-full">
@@ -400,6 +419,21 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
                 )}
               </Field>
             </div>
+
+            {customFields.length > 0 && (
+              <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+                <SectionTitle>Campos Personalizados</SectionTitle>
+                {customFields.map((field) => (
+                  <DynamicFieldRenderer
+                    key={field.id}
+                    field={field}
+                    value={form.customResponses[field.key]}
+                    onChange={(value) => setCustom(field.key, value)}
+                    readOnly={!editing}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ── Right (1/3) ── */}
