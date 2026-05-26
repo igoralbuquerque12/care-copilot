@@ -6,6 +6,7 @@ model Profile {
   phone     String? @map("phone")
   photoUrl  String? @map("photo_url")
   addressId String? @unique @map("address_id") @db.Uuid
+  superAdmin Boolean @default(false) @map("super_admin")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
@@ -17,8 +18,9 @@ model Profile {
   patients      Patient[]
   anamneses     Anamnesis[]
   consultations ScheduleConsultation[]
+  formTemplates AnamnesisFormTemplate[]
 
-  audioSessions      AudioConsultationSession[]
+  audioSessions       AudioConsultationSession[]
   creditLedgerEntries CreditLedgerEntry[]
 
   @@map("profile")

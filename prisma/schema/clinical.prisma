@@ -69,7 +69,7 @@ model ScheduleConsultation {
   profileId String  @db.Uuid
   profile   Profile @relation(fields: [profileId], references: [id])
 
-  anamnesis Anamnesis?
+  anamnesis    Anamnesis?
   audioSession AudioConsultationSession?
 
   createdAt DateTime @default(now())
@@ -77,8 +77,8 @@ model ScheduleConsultation {
 }
 
 model Anamnesis {
-  id   String           @id @default(cuid())
-  date DateTime         @default(now())
+  id   String   @id @default(cuid())
+  date DateTime @default(now())
 
   patientId String
   patient   Patient @relation(fields: [patientId], references: [id])
@@ -98,8 +98,12 @@ model Anamnesis {
   hasEdema        Boolean   @default(false)
   hasChestPain    Boolean   @default(false)
 
-  consultationId String?       @unique
+  consultationId String?               @unique
   consultation   ScheduleConsultation? @relation(fields: [consultationId], references: [id])
+
+  templateId      String?
+  template        AnamnesisFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  customResponses Json                   @default("{}")
 
   physicalExam PhysicalExam?
   medications  PrescribedMedication[]
@@ -138,19 +142,19 @@ model PrescribedMedication {
 }
 
 model AiDiagnosis {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   patientId   String
-  patient     Patient  @relation(fields: [patientId], references: [id])
+  patient     Patient   @relation(fields: [patientId], references: [id])
   anamnesisId String
   anamnesis   Anamnesis @relation(fields: [anamnesisId], references: [id])
 
-  summary               String @db.Text
+  summary                 String @db.Text
   mainDiagnosisHypothesis String @db.Text
-  differentialDiagnoses  String @db.Text
-  identifiedPatterns     String @db.Text
-  riskAlerts             String @db.Text
-  recommendedActions     String @db.Text
-  confidenceLevel        String
+  differentialDiagnoses   String @db.Text
+  identifiedPatterns      String @db.Text
+  riskAlerts              String @db.Text
+  recommendedActions      String @db.Text
+  confidenceLevel         String
 
   isValid   Boolean  @default(true)
   createdAt DateTime @default(now())
