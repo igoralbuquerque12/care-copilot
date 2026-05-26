@@ -1,0 +1,77 @@
+enum FormFieldType {
+  TEXT
+  SHORT_TEXT
+  NUMBER
+  BOOLEAN
+  SELECT
+  RADIO
+  DATE
+  NYHA_CLASS
+  MEDICATIONS
+
+  @@map("form_field_type")
+}
+
+model AnamnesisFormTemplate {
+  id String @id @default(cuid())
+
+  profileId String  @map("profile_id") @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String? @db.Text
+  isDefault   Boolean @default(false) @map("is_default")
+  isArchived  Boolean @default(false) @map("is_archived")
+
+  sections  AnamnesisFormSection[]
+  anamneses Anamnesis[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([profileId, isArchived])
+  @@index([profileId, isDefault])
+  @@map("anamnesis_form_template")
+}
+
+model AnamnesisFormSection {
+  id String @id @default(cuid())
+
+  templateId String                @map("template_id")
+  template   AnamnesisFormTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  name          String
+  description   String? @db.Text
+  order         Int
+  isCollapsible Boolean @default(false) @map("is_collapsible")
+
+  fields AnamnesisFormField[]
+
+  @@index([templateId, order])
+  @@map("anamnesis_form_section")
+}
+
+model AnamnesisFormField {
+  id String @id @default(cuid())
+
+  sectionId String               @map("section_id")
+  section   AnamnesisFormSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  key         String
+  label       String
+  description String? @db.Text
+  order       Int
+
+  fieldType  FormFieldType @map("field_type")
+  isRequired Boolean       @default(false) @map("is_required")
+  isVisible  Boolean       @default(true) @map("is_visible")
+
+  config Json?
+
+  isSystemField Boolean @default(false) @map("is_system_field")
+  systemKey     String? @map("system_key")
+
+  @@unique([sectionId, key])
+  @@index([sectionId, order])
+  @@map("anamnesis_form_field")
+}
