@@ -1,5 +1,8 @@
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { updateProfileSchema } from "~/schemas/profile";
+import {
+  createDoctorBySuperAdminSchema,
+  updateProfileSchema,
+} from "~/schemas/profile";
 import * as profileService from "~/server/services/profile.service";
 
 export const profileRouter = createTRPCRouter({
@@ -15,6 +18,12 @@ export const profileRouter = createTRPCRouter({
     .input(updateProfileSchema)
     .mutation(async ({ ctx, input }) => {
       return profileService.updateProfile(ctx.db, ctx.user.id, input);
+    }),
+
+  createDoctorBySuperAdmin: protectedProcedure
+    .input(createDoctorBySuperAdminSchema)
+    .mutation(async ({ ctx, input }) => {
+      return profileService.createDoctorBySuperAdmin(ctx.db, ctx.user.id, input);
     }),
 
   delete: protectedProcedure.mutation(async ({ ctx }) => {
