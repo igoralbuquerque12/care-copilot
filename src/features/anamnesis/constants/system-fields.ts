@@ -1,0 +1,30 @@
+export const PHYSICAL_EXAM_FIELD_KEYS = new Set([
+  "weight",
+  "height",
+  "bpSystolic",
+  "bpDiastolic",
+  "heartRate",
+  "oxygenSaturation",
+  "heartAuscultation",
+  "lungAuscultation",
+  "peripheralPulses",
+  "edemaGrade",
+]);
+
+export const SYSTEM_FIELD_KEYS = new Set([
+  "chiefComplaint",
+  "currentIllnessHistory",
+  "treatmentResponse",
+  "symptomEvolution",
+  "newEvents",
+  "nyhaClass",
+  "hasPalpitations",
+  "hasSyncope",
+  "hasEdema",
+  "hasChestPain",
+  "medications",
+  "diagnosticHypothesis",
+  "conduct",
+  "nextRecallDate",
+  ...PHYSICAL_EXAM_FIELD_KEYS,
+]);
