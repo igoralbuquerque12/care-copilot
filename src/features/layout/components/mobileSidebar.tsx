@@ -13,8 +13,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "~/components/ui/sheet";
-import { SIDEBAR_ITEMS } from "~/features/layout/constants/sidebarItems";
-import type { SidebarItemType } from "~/features/layout/types/sidebar.types";
+import { getVisibleSidebarItems } from "~/features/layout/constants/sidebarItems";
+import { api } from "~/trpc/react";
 import { SidebarItem } from "./sidebar";
 
 // Nova Logo
@@ -23,6 +23,8 @@ import logo from "../../../public/logo.jpg";
 export function MobileSidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const profile = api.profile.get.useQuery();
+  const sidebarItems = getVisibleSidebarItems(Boolean(profile.data?.superAdmin));
 
   useEffect(() => {
     setOpen(false);
@@ -59,12 +61,12 @@ export function MobileSidebar() {
                 </div>
             </div>
 
-            <ScrollArea className="flex-1 px-3 py-4">
+            <ScrollArea className="min-h-0 flex-1 px-3 py-4">
                 <nav className="flex flex-col gap-2">
-                {SIDEBAR_ITEMS.map((item) => (
+                {sidebarItems.map((item) => (
                     <SidebarItem
                         key={item.title}
-                        item={item as SidebarItemType}
+                        item={item}
                         isCollapsed={false}
                         pathname={pathname}
                     />
