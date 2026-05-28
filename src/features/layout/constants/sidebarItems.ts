@@ -8,12 +8,14 @@ import {
   Stethoscope,
   Pill,
   Settings,
-  History,
   Activity,
-  FolderCode
+  FolderCode,
+  ClipboardList,
+  ShieldCheck
 } from "lucide-react";
+import type { SidebarItemType } from "~/features/layout/types/sidebar.types";
 
-export const SIDEBAR_ITEMS = [
+export const SIDEBAR_ITEMS: SidebarItemType[] = [
   {
     title: "Visão Geral",
     icon: LayoutDashboard,
@@ -67,8 +69,17 @@ export const SIDEBAR_ITEMS = [
   {
     title: "Configurações",
     icon: Settings,
-    href: "/profile",
-    type: "link"
+    type: "group",
+    subItems: [
+      { title: "Minha Conta", href: "/profile", icon: Settings },
+      { title: "Formulários", href: "/configuracoes/formularios", icon: ClipboardList },
+      {
+        title: "Super Admin",
+        href: "/configuracoes/superadmin",
+        icon: ShieldCheck,
+        superAdminOnly: true,
+      },
+    ]
   },
   {
     title: "StyleGuide",
@@ -77,3 +88,18 @@ export const SIDEBAR_ITEMS = [
     type: "link"
   }
 ];
+
+export const getVisibleSidebarItems = (isSuperAdmin: boolean) =>
+  SIDEBAR_ITEMS
+    .filter((item) => !item.superAdminOnly || isSuperAdmin)
+    .map((item) => {
+      if (!item.subItems) return item;
+
+      return {
+        ...item,
+        subItems: item.subItems.filter(
+          (subItem) => !subItem.superAdminOnly || isSuperAdmin,
+        ),
+      };
+    })
+    .filter((item) => item.type === "link" || (item.subItems?.length ?? 0) > 0);

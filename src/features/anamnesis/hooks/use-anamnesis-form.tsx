@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import { api } from "~/trpc/react"
 import { type CreatePatientInput } from "~/schemas/patient"
 import { type CreateAnamnesisInput } from "~/schemas/anamnesis"
 import { useRouter } from "next/navigation"
+import { steps as DEFAULT_STEPS } from "~/features/anamnesis/constants/steps"
+import { PHYSICAL_EXAM_FIELD_KEYS } from "~/features/anamnesis/constants/system-fields"
 
 export type FormData = {
   name: string
@@ -57,6 +59,29 @@ type UseAnamnesisFormOptions = {
   consultationId?: string
 }
 
+const getSystemValue = (formData: Partial<FormData>, key: string) => {
+  if (PHYSICAL_EXAM_FIELD_KEYS.has(key)) {
+    return formData.physicalExam?.[
+      key as keyof NonNullable<FormData["physicalExam"]>
+    ]
+  }
+
+  return formData[key as keyof FormData]
+}
+
+const isEmptyRequiredValue = (value: unknown) => {
+  if (value == null) return true
+  if (typeof value === "string") return value.trim().length === 0
+  if (Array.isArray(value)) return value.length === 0
+  return false
+}
+
+const cleanOptionalString = (value?: string) => {
+  const trimmed = value?.trim()
+  if (!trimmed) return undefined
+  return trimmed
+}
+
 export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
   const router = useRouter();
 
@@ -73,6 +98,10 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
   })
 
   const [medications, setMedications] = useState<Array<{ name: string; dosage: string; frequency: string }>>([])
+  const [customValues, setCustomValues] = useState<Record<string, unknown>>({})
+
+  const { data: defaultTemplate, isLoading: isLoadingTemplate } =
+    api.formTemplate.getDefault.useQuery()
 
   const { data: consultation, isLoading: isLoadingConsultation } = api.scheduleConsultation.getById.useQuery(
     { id: opts.consultationId! },
@@ -123,7 +152,28 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
     }
   })
 
-  const isLoading = createPatientMutation.isPending || createAnamnesisMutation.isPending || isLoadingConsultation
+  const steps = useMemo(() => {
+    if (!defaultTemplate) return DEFAULT_STEPS
+
+    return [
+      { number: 1, title: "Dados do Paciente" },
+      ...defaultTemplate.sections.map((section, index) => ({
+        number: index + 2,
+        title: section.name,
+        sectionId: section.id,
+      })),
+      {
+        number: defaultTemplate.sections.length + 2,
+        title: "Revisão Final",
+      },
+    ]
+  }, [defaultTemplate])
+
+  const isLoading =
+    createPatientMutation.isPending ||
+    createAnamnesisMutation.isPending ||
+    isLoadingConsultation ||
+    isLoadingTemplate
 
   const handleSelectExistingPatient = (id: string) => {
     setSelectedPatientId(id)
@@ -158,12 +208,31 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
         name: formData.name,
         birthDate: formData.birthDate,
         gender: genderMap[formData.gender] ?? "Outro",
-        cpf: formData.cpf || undefined,
+        cpf: cleanOptionalString(formData.cpf),
         clinicalProfile: formData.clinicalProfile,
       }
 
       createPatientMutation.mutate(patientData)
       return
+    }
+
+    if (defaultTemplate && currentStep > 1 && currentStep < steps.length) {
+      const section = defaultTemplate.sections[currentStep - 2]
+      const missingField = section?.fields
+        .filter((field) => field.isVisible && field.isRequired)
+        .find((field) => {
+          const key = field.systemKey ?? field.key
+          const value = field.isSystemField
+            ? getSystemValue(formData, key)
+            : customValues[field.key]
+
+          return isEmptyRequiredValue(value)
+        })
+
+      if (missingField) {
+        toast.error(`Preencha o campo obrigatório: ${missingField.label}.`)
+        return
+      }
     }
 
     setCurrentStep(currentStep + 1)
@@ -206,6 +275,8 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
       diagnosticHypothesis: formData.diagnosticHypothesis,
       conduct: formData.conduct,
       nextRecallDate: formData.nextRecallDate,
+      templateId: defaultTemplate?.id,
+      customResponses: customValues,
     }
 
     createAnamnesisMutation.mutate(anamnesisData)
@@ -235,6 +306,10 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
     isLoading,
     formData,
     setFormData,
+    template: defaultTemplate,
+    steps,
+    customValues,
+    setCustomValues,
     medications,
     handleNext,
     handlePrevious,

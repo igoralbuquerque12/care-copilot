@@ -73,9 +73,20 @@ const anamnesisFormSchema = z.object({
 export const consolidatedFormStateSchema = z.object({
   patient: patientFormSchema.default({}),
   anamnesis: anamnesisFormSchema.default({}),
+  customFields: z.record(z.string(), z.unknown()).default({}),
+  templateId: z.string().nullable().optional(),
 });
 
 export type ConsolidatedFormState = z.infer<typeof consolidatedFormStateSchema>;
+
+type EmptyConsolidatedFormStatePartial = {
+  patient?: Omit<Partial<ConsolidatedFormState["patient"]>, "clinicalProfile"> & {
+    clinicalProfile?: Partial<ConsolidatedFormState["patient"]["clinicalProfile"]>;
+  };
+  anamnesis?: Partial<ConsolidatedFormState["anamnesis"]>;
+  customFields?: Record<string, unknown>;
+  templateId?: string | null;
+};
 
 export const fieldOperationSchema = z.object({
   action: z.enum(["replace", "append", "merge", "noop"]),
@@ -90,10 +101,7 @@ export const llmExtractionResponseSchema = z.object({
 export type LlmExtractionResponse = z.infer<typeof llmExtractionResponseSchema>;
 
 export const buildEmptyConsolidatedFormState = (
-  partial?: Partial<{
-    patient: Partial<ConsolidatedFormState["patient"]>;
-    anamnesis: Partial<ConsolidatedFormState["anamnesis"]>;
-  }>,
+  partial?: EmptyConsolidatedFormStatePartial,
 ): ConsolidatedFormState => {
   return consolidatedFormStateSchema.parse({
     patient: {
@@ -121,10 +129,41 @@ export const buildEmptyConsolidatedFormState = (
       conduct: partial?.anamnesis?.conduct ?? "",
       nextRecallDate: partial?.anamnesis?.nextRecallDate ?? null,
     },
+    customFields: partial?.customFields ?? {},
+    templateId: partial?.templateId ?? null,
   });
 };
 
-export const consolidatedFormStateSchemaDescription = `Schema esperado (JSON):
+type TemplateForSchemaDescription = {
+  sections: Array<{
+    name: string;
+    fields: Array<{
+      key: string;
+      label: string;
+      fieldType: string;
+      description?: string | null;
+      isSystemField: boolean;
+    }>;
+  }>;
+};
+
+const describeCustomFields = (template?: TemplateForSchemaDescription | null) => {
+  const fields =
+    template?.sections.flatMap((section) =>
+      section.fields
+        .filter((field) => !field.isSystemField)
+        .map((field) => {
+          const description = field.description ? ` - ${field.description}` : "";
+          return `    "${field.key}": ${field.fieldType} // ${field.label}${description}`;
+        }),
+    ) ?? [];
+
+  return fields.length ? fields.join(",\n") : "    // nenhum campo personalizado";
+};
+
+export const buildConsolidatedFormStateSchemaDescription = (
+  template?: TemplateForSchemaDescription | null,
+) => `Schema esperado (JSON):
 {
   "patient": {
     "name": string,
@@ -176,5 +215,12 @@ export const consolidatedFormStateSchemaDescription = `Schema esperado (JSON):
     "diagnosticHypothesis": string,
     "conduct": string,
     "nextRecallDate": string ISO ou null
-  }
+  },
+  "customFields": {
+${describeCustomFields(template)}
+  },
+  "templateId": string | null
 }`;
+
+export const consolidatedFormStateSchemaDescription =
+  buildConsolidatedFormStateSchemaDescription();

@@ -10,6 +10,7 @@ export type SubItemType = {
   title: string;
   href: string;
   icon?: LucideIcon;
+  superAdminOnly?: boolean;
 };
 
 export type SidebarItemType = {
@@ -18,4 +19,5 @@ export type SidebarItemType = {
   href?: string;
   type: "link" | "group";
   subItems?: SubItemType[];
+  superAdminOnly?: boolean;
 };

@@ -5,16 +5,50 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import type { ConsolidatedFormState } from "~/schemas/audio-anamnesis-form";
+import { DynamicFieldRenderer } from "~/features/anamnesis/components/dynamic-field-renderer";
+import { PHYSICAL_EXAM_FIELD_KEYS } from "~/features/anamnesis/constants/system-fields";
+import type { FormFieldType } from "~/schemas/form-template";
 
 type Props = {
   formState: ConsolidatedFormState;
+  template?: {
+    sections: Array<{
+      id: string;
+      name: string;
+      fields: Array<{
+        id: string;
+        key: string;
+        label: string;
+        description?: string | null;
+        fieldType: FormFieldType;
+        isRequired: boolean;
+        isVisible: boolean;
+        config?: unknown;
+        isSystemField: boolean;
+        systemKey?: string | null;
+      }>;
+    }>;
+  };
   readOnly?: boolean;
 };
 
 const yesNo = (v: boolean | null | undefined) =>
   v === true ? "Sim" : v === false ? "Nao" : "-";
 
-export function AudioAnamnesisForm({ formState, readOnly }: Props) {
+const getAudioSystemValue = (
+  anamnesis: ConsolidatedFormState["anamnesis"],
+  key: string,
+) => {
+  if (PHYSICAL_EXAM_FIELD_KEYS.has(key)) {
+    return anamnesis.physicalExam[
+      key as keyof ConsolidatedFormState["anamnesis"]["physicalExam"]
+    ];
+  }
+
+  return anamnesis[key as keyof ConsolidatedFormState["anamnesis"]];
+};
+
+export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
   const p = formState.patient;
   const cp = p.clinicalProfile;
   const a = formState.anamnesis;
@@ -66,6 +100,34 @@ export function AudioAnamnesisForm({ formState, readOnly }: Props) {
         </CardContent>
       </Card>
 
+      {template ? (
+        template.sections.map((section) => (
+          <Card key={section.id}>
+            <CardHeader>
+              <CardTitle>{section.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {section.fields
+                .filter((field) => field.isVisible)
+                .map((field) => (
+                  <DynamicFieldRenderer
+                    key={field.id}
+                    field={field}
+                    value={
+                      field.isSystemField
+                        ? getAudioSystemValue(a, field.systemKey ?? field.key)
+                        : formState.customFields[field.key]
+                    }
+                    onChange={() => undefined}
+                    medications={a.medications}
+                    readOnly
+                  />
+                ))}
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <>
       <Card>
         <CardHeader>
           <CardTitle>Anamnese</CardTitle>
@@ -172,6 +234,8 @@ export function AudioAnamnesisForm({ formState, readOnly }: Props) {
           />
         </CardContent>
       </Card>
+        </>
+      )}
 
       {readOnly && (
         <p className="text-xs text-muted-foreground">

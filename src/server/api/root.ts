@@ -7,6 +7,7 @@ import { scheduleConsultationRouter } from "~/server/api/routers/scheduleConsult
 import { aiDiagnosisRouter } from "~/server/api/routers/aiDiagnosis.router";
 import { creditsRouter } from "~/server/api/routers/credits.router";
 import { audioConsultationRouter } from "~/server/api/routers/audioConsultation.router";
+import { formTemplateRouter } from "~/server/api/routers/formTemplate.router";
 
 export const appRouter = createTRPCRouter({
   profile: profileRouter,
@@ -16,6 +17,7 @@ export const appRouter = createTRPCRouter({
   aiDiagnosis: aiDiagnosisRouter,
   credits: creditsRouter,
   audioConsultation: audioConsultationRouter,
+  formTemplate: formTemplateRouter,
 });
 
 export type AppRouter = typeof appRouter;

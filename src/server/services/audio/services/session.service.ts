@@ -1,4 +1,4 @@
-import { type PrismaClient, Prisma } from "@prisma/client";
+import type { AudioBatchStatus, Prisma, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import {
   buildEmptyConsolidatedFormState,
@@ -8,10 +8,22 @@ import {
 import type { CreateAnamnesisInput } from "~/schemas/anamnesis";
 import { assertMinimumBalanceForSession } from "~/server/services/credits/creditLedger.service";
 import { createAnamnesis } from "~/server/services/anamnesis.service";
+import { getDefaultTemplate } from "~/server/services/formTemplate.service";
 
 // ── Mapper ─────────────────────────────────────────────────────────────────────
 
 type MapContext = { patientId: string; consultationId?: string };
+
+const OPEN_BATCH_STATUSES: AudioBatchStatus[] = ["PENDING", "PROCESSING"];
+
+const getMetadataNumber = (metadata: Prisma.JsonValue | null, key: string) => {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return 0;
+  }
+
+  const value = (metadata as Record<string, unknown>)[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+};
 
 /**
  * Converts a consolidated audio-consultation form state into the input shape
@@ -26,7 +38,7 @@ const mapConsolidatedFormToAnamnesisInput = (
   const px = a.physicalExam;
 
   const physicalExam =
-    px.weight ??
+    (px.weight ??
     px.height ??
     px.bpSystolic ??
     px.bpDiastolic ??
@@ -35,7 +47,7 @@ const mapConsolidatedFormToAnamnesisInput = (
     px.heartAuscultation ??
     px.lungAuscultation ??
     px.peripheralPulses ??
-    px.edemaGrade
+    px.edemaGrade)
       ? {
           weight: px.weight ?? undefined,
           height: px.height ?? undefined,
@@ -54,7 +66,8 @@ const mapConsolidatedFormToAnamnesisInput = (
     patientId: ctx.patientId,
     consultationId: ctx.consultationId,
     chiefComplaint: a.chiefComplaint || "Coletado por captura de audio",
-    currentIllnessHistory: a.currentIllnessHistory || "Coletado por captura de audio",
+    currentIllnessHistory:
+      a.currentIllnessHistory || "Coletado por captura de audio",
     treatmentResponse: a.treatmentResponse || undefined,
     symptomEvolution: a.symptomEvolution || undefined,
     newEvents: a.newEvents || undefined,
@@ -68,6 +81,8 @@ const mapConsolidatedFormToAnamnesisInput = (
     diagnosticHypothesis: a.diagnosticHypothesis || undefined,
     conduct: a.conduct || undefined,
     nextRecallDate: a.nextRecallDate ?? undefined,
+    templateId: form.templateId ?? undefined,
+    customResponses: form.customFields,
   };
 };
 
@@ -98,12 +113,19 @@ export const startSession = async (
   });
 
   if (!patient) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Paciente nao encontrado" });
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Paciente nao encontrado",
+    });
   }
 
   if (input.consultationId) {
     const consultation = await db.scheduleConsultation.findFirst({
-      where: { id: input.consultationId, profileId, patientId: input.patientId },
+      where: {
+        id: input.consultationId,
+        profileId,
+        patientId: input.patientId,
+      },
       select: { id: true },
     });
     if (!consultation) {
@@ -115,12 +137,20 @@ export const startSession = async (
   }
 
   await assertMinimumBalanceForSession(db, profileId);
+  const template = await getDefaultTemplate(db, profileId);
+  const customFields = Object.fromEntries(
+    template.sections
+      .flatMap((section) => section.fields)
+      .filter((field) => !field.isSystemField)
+      .map((field) => [field.key, null]),
+  );
 
   const initialFormState = buildEmptyConsolidatedFormState({
     patient: {
       name: patient.name,
       birthDate: patient.birthDate,
-      gender: (patient.gender as ConsolidatedFormState["patient"]["gender"]) ?? null,
+      gender:
+        (patient.gender as ConsolidatedFormState["patient"]["gender"]) ?? null,
       cpf: patient.cpf ?? "",
       clinicalProfile: patient.clinicalProfile
         ? {
@@ -131,12 +161,16 @@ export const startSession = async (
             hasDyslipidemia: patient.clinicalProfile.hasDyslipidemia,
             hasPriorInfarction: patient.clinicalProfile.hasPriorInfarction,
             priorSurgeries: patient.clinicalProfile.priorSurgeries ?? "",
-            familyHistoryCoronaryEarly: patient.clinicalProfile.familyHistoryCoronaryEarly,
-            familyHistorySuddenDeath: patient.clinicalProfile.familyHistorySuddenDeath,
-            familyHistoryOthers: patient.clinicalProfile.familyHistoryOthers ?? "",
+            familyHistoryCoronaryEarly:
+              patient.clinicalProfile.familyHistoryCoronaryEarly,
+            familyHistorySuddenDeath:
+              patient.clinicalProfile.familyHistorySuddenDeath,
+            familyHistoryOthers:
+              patient.clinicalProfile.familyHistoryOthers ?? "",
             smokingStatus: patient.clinicalProfile.smokingStatus,
             smokingPacksYear: patient.clinicalProfile.smokingPacksYear,
-            alcoholConsumption: patient.clinicalProfile.alcoholConsumption ?? "",
+            alcoholConsumption:
+              patient.clinicalProfile.alcoholConsumption ?? "",
             exerciseLevel: patient.clinicalProfile.exerciseLevel,
           }
         : {},
@@ -144,6 +178,8 @@ export const startSession = async (
     anamnesis: {
       consultationId: input.consultationId ?? null,
     },
+    customFields,
+    templateId: template.id,
   });
 
   const session = await db.audioConsultationSession.create({
@@ -178,10 +214,86 @@ export const getSession = async (
   });
 
   if (!session) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Sessao nao encontrada" });
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Sessao nao encontrada",
+    });
   }
 
   return session;
+};
+
+export const getReviewSummary = async (
+  db: PrismaClient,
+  profileId: string,
+  sessionId: string,
+) => {
+  const session = await db.audioConsultationSession.findFirst({
+    where: { id: sessionId, profileId },
+    select: {
+      id: true,
+      status: true,
+      startedAt: true,
+      endedAt: true,
+      creditsConsumed: true,
+    },
+  });
+
+  if (!session) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Sessao nao encontrada",
+    });
+  }
+
+  const [pendingBatchCount, batches, ledgerEntries] = await Promise.all([
+    db.audioBatchRecord.count({
+      where: { sessionId, status: { in: OPEN_BATCH_STATUSES } },
+    }),
+    db.audioBatchRecord.findMany({
+      where: { sessionId },
+      select: { audioDurationSeconds: true },
+    }),
+    db.creditLedgerEntry.findMany({
+      where: { profileId, sessionId },
+      select: { metadata: true },
+    }),
+  ]);
+
+  const inputTokens = ledgerEntries.reduce(
+    (total, entry) => total + getMetadataNumber(entry.metadata, "inputTokens"),
+    0,
+  );
+  const outputTokens = ledgerEntries.reduce(
+    (total, entry) => total + getMetadataNumber(entry.metadata, "outputTokens"),
+    0,
+  );
+  const transcriptionSeconds = batches.reduce(
+    (total, batch) => total + batch.audioDurationSeconds,
+    0,
+  );
+  const durationSeconds = Math.max(
+    0,
+    Math.round(
+      ((session.endedAt ?? new Date()).getTime() -
+        session.startedAt.getTime()) /
+        1000,
+    ),
+  );
+
+  return {
+    sessionId: session.id,
+    status: session.status,
+    pendingBatchCount,
+    startedAt: session.startedAt,
+    endedAt: session.endedAt,
+    durationSeconds,
+    transcriptionSeconds,
+    inputTokens,
+    outputTokens,
+    totalTokens: inputTokens + outputTokens,
+    creditsConsumed: session.creditsConsumed,
+  };
 };
 
 /**
@@ -218,20 +330,40 @@ export const finalizeSession = async (
   db: PrismaClient,
   profileId: string,
   sessionId: string,
+  formStateOverride?: ConsolidatedFormState,
 ) => {
   const session = await db.audioConsultationSession.findFirst({
     where: { id: sessionId, profileId },
   });
 
   if (!session) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Sessao nao encontrada" });
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Sessao nao encontrada",
+    });
   }
 
   if (session.status === "FINALIZED") {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Sessao ja foi finalizada" });
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Sessao ja foi finalizada",
+    });
   }
 
-  const parsed = consolidatedFormStateSchema.parse(session.currentFormState);
+  const pendingBatchCount = await db.audioBatchRecord.count({
+    where: { sessionId, status: { in: OPEN_BATCH_STATUSES } },
+  });
+
+  if (pendingBatchCount > 0 || session.status === "PROCESSING") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Aguarde o processamento dos lotes de audio antes de finalizar",
+    });
+  }
+
+  const parsed = consolidatedFormStateSchema.parse(
+    formStateOverride ?? session.currentFormState,
+  );
 
   const anamnesisInput = mapConsolidatedFormToAnamnesisInput(parsed, {
     patientId: session.patientId,
@@ -242,7 +374,11 @@ export const finalizeSession = async (
 
   await db.audioConsultationSession.update({
     where: { id: sessionId },
-    data: { status: "FINALIZED", endedAt: new Date() },
+    data: {
+      status: "FINALIZED",
+      endedAt: new Date(),
+      currentFormState: parsed as unknown as Prisma.InputJsonValue,
+    },
   });
 
   return { sessionId, anamnesisId: anamnesis.id };

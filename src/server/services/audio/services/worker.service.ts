@@ -1,10 +1,10 @@
-import { type PrismaClient, Prisma } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { calculateCreditConsumptionBreakdown } from "~/server/ai/credits/utils";
 import { getAudioTranscriber } from "~/server/ai/transcription";
 import { aiClientAudio } from "~/server/ai";
 import {
   consolidatedFormStateSchema,
-  consolidatedFormStateSchemaDescription,
+  buildConsolidatedFormStateSchemaDescription,
   llmExtractionResponseSchema,
   type ConsolidatedFormState,
 } from "~/schemas/audio-anamnesis-form";
@@ -15,6 +15,7 @@ import {
 } from "~/server/services/credits/creditLedger.service";
 import { deleteAudioBatch, downloadAudioFromSignedUrl } from "./batchStorage.service";
 import type { MergeContext, MergeResult } from "../entities/audio.entity";
+import { getDefaultTemplate, getTemplateById } from "~/server/services/formTemplate.service";
 
 // ── LLM merge ─────────────────────────────────────────────────────────────────
 
@@ -36,7 +37,22 @@ const buildUserPrompt = (
   ctx: MergeContext,
   currentFormState: ConsolidatedFormState,
   transcript: string,
-) => `Contexto da sessao:
+  template?: Awaited<ReturnType<typeof getDefaultTemplate>>,
+) => {
+  const customFieldLines =
+    template?.sections.flatMap((section) =>
+      section.fields
+        .filter((field) => !field.isSystemField)
+        .map(
+          (field) =>
+            `- customFields.${field.key} (${field.fieldType}): "${field.label}"`,
+        ),
+    ) ?? [];
+  const customFieldsDescription = customFieldLines.length
+    ? customFieldLines.join("\n")
+    : "Nenhum";
+
+  return `Contexto da sessao:
 - sessionId: ${ctx.sessionId}
 - patientId: ${ctx.patientId}
 - consultationId: ${ctx.consultationId ?? "null"}
@@ -45,7 +61,10 @@ const buildUserPrompt = (
 Observacao importante:
 O inicio desta transcricao pode repetir os ultimos segundos do lote anterior. Considere essas frases como overlap e nao como informacao nova por padrao.
 
-${consolidatedFormStateSchemaDescription}
+${buildConsolidatedFormStateSchemaDescription(template)}
+
+Campos personalizados do medico a preencher em customFields:
+${customFieldsDescription}
 
 Formulario atual (JSON):
 ${JSON.stringify(currentFormState)}
@@ -56,6 +75,7 @@ Nova transcricao:
 Retorne um objeto JSON com exatamente as chaves:
 1. "nextFormState" - o JSON consolidado atualizado, mantendo o mesmo schema do formulario atual.
 2. "fieldOperations" - mapa de "secao.campo" => { "action": "replace"|"append"|"merge"|"noop", "reason": string }.`;
+};
 
 /**
  * Calls the LLM to merge a new audio transcript into the current form state.
@@ -71,8 +91,14 @@ const mergeBatch = async (params: {
   ctx: MergeContext;
   currentFormState: ConsolidatedFormState;
   transcript: string;
+  template?: Awaited<ReturnType<typeof getDefaultTemplate>>;
 }): Promise<MergeResult> => {
-  const userPrompt = buildUserPrompt(params.ctx, params.currentFormState, params.transcript);
+  const userPrompt = buildUserPrompt(
+    params.ctx,
+    params.currentFormState,
+    params.transcript,
+    params.template,
+  );
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
 
   const raw = await aiClientAudio.generate({ prompt: fullPrompt, responseFormat: "json" });
@@ -176,6 +202,9 @@ export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => 
     );
 
     const currentFormState = consolidatedFormStateSchema.parse(session.currentFormState);
+    const template = currentFormState.templateId
+      ? await getTemplateById(db, job.profileId, currentFormState.templateId)
+      : await getDefaultTemplate(db, job.profileId);
 
     const merge = await mergeBatch({
       ctx: {
@@ -186,6 +215,7 @@ export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => 
       },
       currentFormState,
       transcript: transcription.text,
+      template,
     });
 
     const breakdown = calculateCreditConsumptionBreakdown({

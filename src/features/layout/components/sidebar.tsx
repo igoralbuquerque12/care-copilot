@@ -26,16 +26,22 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { signOutAction } from "~/features/auth/actions/auth.actions";
+import { api } from "~/trpc/react";
 
-import type { SidebarItemProps, SidebarItemType } from "~/features/layout/types/sidebar.types";
+import type { SidebarItemProps } from "~/features/layout/types/sidebar.types";
 
 import logo from "../../../public/logo.jpg"; 
 
-import { SIDEBAR_ITEMS } from "~/features/layout/constants/sidebarItems";
+import { getVisibleSidebarItems } from "~/features/layout/constants/sidebarItems";
 
 export function Sidebar() {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
   const pathname = usePathname();
+  const profile = api.profile.get.useQuery();
+  const sidebarItems = React.useMemo(
+    () => getVisibleSidebarItems(Boolean(profile.data?.superAdmin)),
+    [profile.data?.superAdmin],
+  );
 
   const handleLogout = async () => {
      await signOutAction();
@@ -45,7 +51,7 @@ export function Sidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          "relative flex flex-col h-screen bg-card border-r border-border transition-all duration-300 ease-in-out font-sans shadow-sm z-20",
+          "relative flex min-h-0 flex-col h-screen bg-card border-r border-border transition-all duration-300 ease-in-out font-sans shadow-sm z-20",
           isCollapsed ? "w-20" : "w-[260px]"
         )}
       >
@@ -100,12 +106,12 @@ export function Sidebar() {
             </div>
         )}
 
-        <ScrollArea className="flex-1 px-3 pt-2">
+        <ScrollArea className="min-h-0 flex-1 px-3 pt-2">
           <nav className="flex flex-col gap-2 pb-4">
-            {SIDEBAR_ITEMS.map((item) => (
+            {sidebarItems.map((item) => (
               <SidebarItem
                 key={item.title}
-                item={item as SidebarItemType}
+                item={item}
                 isCollapsed={isCollapsed}
                 pathname={pathname}
               />
