@@ -21,11 +21,13 @@ const assets = [
 for (const rel of assets) {
   const src = join(root, rel);
   const filename = rel.split("/").at(-1);
+  if (!filename) continue;
   const dest = join(pub, filename);
   try {
     copyFileSync(src, dest);
     console.log(`[copy-vad-assets] ✓ ${filename}`);
   } catch (e) {
-    console.warn(`[copy-vad-assets] ✗ ${filename}: ${e.message}`);
+    const message = e instanceof Error ? e.message : String(e);
+    console.warn(`[copy-vad-assets] ✗ ${filename}: ${message}`);
   }
 }

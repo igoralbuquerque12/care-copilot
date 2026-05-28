@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { consolidatedFormStateSchema } from "~/schemas/audio-anamnesis-form";
 
 export const audioSessionStatusSchema = z.enum([
   "WAITING_FOR_PATIENT",
@@ -43,6 +44,7 @@ export type QstashAudioJob = z.infer<typeof qstashAudioJobSchema>;
 
 export const finalizeAudioSessionSchema = z.object({
   sessionId: z.string().cuid(),
+  formState: consolidatedFormStateSchema.optional(),
 });
 
 export type FinalizeAudioSessionInput = z.infer<

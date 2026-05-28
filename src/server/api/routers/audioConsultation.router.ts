@@ -19,9 +19,20 @@ export const audioConsultationRouter = createTRPCRouter({
       audioSession.getSession(ctx.db, ctx.user.id, input.sessionId),
     ),
 
+  getReviewSummary: protectedProcedure
+    .input(z.object({ sessionId: z.string().cuid() }))
+    .query(({ ctx, input }) =>
+      audioSession.getReviewSummary(ctx.db, ctx.user.id, input.sessionId),
+    ),
+
   finalize: protectedProcedure
     .input(finalizeAudioSessionSchema)
     .mutation(({ ctx, input }) =>
-      audioSession.finalizeSession(ctx.db, ctx.user.id, input.sessionId),
+      audioSession.finalizeSession(
+        ctx.db,
+        ctx.user.id,
+        input.sessionId,
+        input.formState,
+      ),
     ),
 });
