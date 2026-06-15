@@ -1,3 +1,5 @@
+import type { ConsultationType } from "~/types/consultation";
+
 export type { ConsultationType } from "~/types/consultation";
 export { CONSULTATION_TYPE_LABELS } from "~/types/consultation";
 
