@@ -11,7 +11,8 @@ import {
   Activity,
   FolderCode,
   ClipboardList,
-  ShieldCheck
+  ShieldCheck,
+  HeartPulse
 } from "lucide-react";
 import type { SidebarItemType } from "~/features/layout/types/sidebar.types";
 
@@ -29,6 +30,7 @@ export const SIDEBAR_ITEMS: SidebarItemType[] = [
     subItems: [
       { title: "Dashboard", href: "/consultas", icon: CalendarDays },
       { title: "Agendar Consulta", href: "/consultas/agendar", icon: CalendarPlus },
+      { title: "Risco Cirúrgico", href: "/risco-cirurgico", icon: HeartPulse },
     ]
   },
   {
