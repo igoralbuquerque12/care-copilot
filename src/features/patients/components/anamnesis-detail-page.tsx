@@ -4,13 +4,22 @@ import { useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft, Pencil, Save, Undo2, Calendar, Pill, AlertCircle,
-  Stethoscope, Activity, Plus, Trash2,
+  Stethoscope, Activity, Plus, Trash2, HeartPulse,
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import type { AnamnesisDetail } from "./anamnesis-detail-dialog";
 import { DynamicFieldRenderer } from "~/features/anamnesis/components/dynamic-field-renderer";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "~/components/ui/sheet";
+import { SurgicalRiskForm } from "~/features/surgical-risk/components/surgical-risk-form";
+import { SurgicalRiskReport } from "~/features/surgical-risk/components/surgical-risk-report";
 
 type FormState = {
   chiefComplaint: string;
@@ -136,8 +145,13 @@ function EditTextarea({
 export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toForm(anamnesis));
+  const [riskSheetOpen, setRiskSheetOpen] = useState(false);
 
   const utils = api.useUtils();
+
+  const { data: surgicalRisk } = api.surgicalRisk.getByAnamnesisId.useQuery({
+    anamnesisId: anamnesis.id,
+  });
 
   const updateMutation = api.anamnesis.update.useMutation({
     onSuccess: async () => {
@@ -260,6 +274,17 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          {/* Botão de Risco Cirúrgico */}
+          <Button
+            variant={surgicalRisk ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setRiskSheetOpen(true)}
+            className="gap-1.5"
+          >
+            <HeartPulse className="h-3.5 w-3.5" />
+            {surgicalRisk ? `Risco ${surgicalRisk.riskClass}` : "Risco Cirúrgico"}
+          </Button>
+
           {editing ? (
             <>
               <Button variant="outline" size="sm" onClick={cancel} disabled={updateMutation.isPending}>
@@ -576,6 +601,44 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
           </div>
         </div>
       </div>
+
+      {/* ── Sheet de Risco Cirúrgico ── */}
+      <Sheet open={riskSheetOpen} onOpenChange={setRiskSheetOpen}>
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader className="mb-6 px-4 pt-6 sm:px-6 sm:pt-8">
+            <SheetTitle className="flex items-center gap-2">
+              <HeartPulse className="h-5 w-5 text-primary" />
+              Risco Cirúrgico Perioperatório
+            </SheetTitle>
+            <SheetDescription>
+              Avaliação baseada no Índice de Lee (RCRI). Campos pré-preenchidos
+              conforme os dados da anamnese e perfil clínico do paciente.
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="px-4 pb-6 sm:px-6 sm:pb-8">
+            {surgicalRisk ? (
+              <div className="space-y-4">
+                <SurgicalRiskReport assessment={surgicalRisk} />
+                <p className="text-xs text-muted-foreground text-center">
+                  Deseja alterar a avaliação?{" "}
+                  <button
+                    onClick={() => setRiskSheetOpen(false)}
+                    className="text-primary underline hover:no-underline"
+                  >
+                    Fechar e editar
+                  </button>
+                </p>
+              </div>
+            ) : (
+              <SurgicalRiskForm
+                anamnesisId={anamnesis.id}
+                onSuccess={() => setRiskSheetOpen(false)}
+              />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
