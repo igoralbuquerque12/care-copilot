@@ -105,13 +105,48 @@ model Anamnesis {
   template        AnamnesisFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   customResponses Json                   @default("{}")
 
-  physicalExam PhysicalExam?
-  medications  PrescribedMedication[]
-  aiDiagnoses  AiDiagnosis[]
+  physicalExam  PhysicalExam?
+  medications   PrescribedMedication[]
+  aiDiagnoses   AiDiagnosis[]
+  surgicalRisk  SurgicalRiskAssessment?
 
   diagnosticHypothesis String?   @db.Text
   conduct              String?   @db.Text
   nextRecallDate       DateTime?
+}
+
+model SurgicalRiskAssessment {
+  id String @id @default(cuid())
+
+  profileId String  @map("profile_id") @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id])
+
+  anamnesisId String    @unique @map("anamnesis_id")
+  anamnesis   Anamnesis @relation(fields: [anamnesisId], references: [id], onDelete: Cascade)
+
+  surgeryName String @map("surgery_name")
+
+  isHighRiskSurgery         Boolean @default(false) @map("is_high_risk_surgery")
+  hasIschemicHeartDisease   Boolean @default(false) @map("has_ischemic_heart_disease")
+  hasCongestiveHeartFailure Boolean @default(false) @map("has_congestive_heart_failure")
+  hasCerebrovascularDisease Boolean @default(false) @map("has_cerebrovascular_disease")
+  isInsulinDependent        Boolean @default(false) @map("is_insulin_dependent")
+  hasElevatedCreatinine     Boolean @default(false) @map("has_elevated_creatinine")
+
+  leeScore  Int    @map("lee_score")
+  riskClass String @map("risk_class") // "I", "II", "III", "IV"
+
+  asaClass String? @map("asa_class")
+  mets     Int?    @map("mets")
+
+  recommendation String?  @db.Text
+  isCleared      Boolean  @default(true) @map("is_cleared")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([profileId])
+  @@map("surgical_risk_assessment")
 }
 
 model PhysicalExam {

@@ -1,6 +1,6 @@
 {
   "_aiProvider_info": "Options: 'gemini' | 'openai' | 'groq'",
-  "aiProvider": "groq",
+  "aiProvider": "gemini",
   "disableWarns": false,
   "PRs": {
     "createPRs": true,
