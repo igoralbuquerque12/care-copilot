@@ -99,6 +99,7 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
 
   const [medications, setMedications] = useState<Array<{ name: string; dosage: string; frequency: string }>>([])
   const [customValues, setCustomValues] = useState<Record<string, unknown>>({})
+  const [createdAnamnesisId, setCreatedAnamnesisId] = useState<string | null>(null)
 
   const { data: defaultTemplate, isLoading: isLoadingTemplate } =
     api.formTemplate.getDefault.useQuery()
@@ -142,9 +143,10 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
   })
 
   const createAnamnesisMutation = api.anamnesis.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Anamnese finalizada com sucesso!")
-      router.push("/")
+      setCreatedAnamnesisId(data.id)
+      // Navigation is now handled by the wizard after the CTA is dismissed
     },
     onError: (error) => {
       console.error("Erro ao criar anamnese:", error)
@@ -319,5 +321,7 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
     addMedication,
     updateMedication,
     removeMedication,
+    createdAnamnesisId,
+    navigateHome: () => router.push("/"),
   }
 }

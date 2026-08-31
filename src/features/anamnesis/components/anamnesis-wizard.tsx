@@ -1,9 +1,17 @@
 "use client"
 
-import { Loader2, ChevronRight, ChevronLeft, Check } from "lucide-react"
+import { useState } from "react"
+import { Loader2, ChevronRight, ChevronLeft, Check, HeartPulse, SkipForward } from "lucide-react"
 
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "~/components/ui/sheet"
 
 import { useAnamnesisForm } from "~/features/anamnesis/hooks/use-anamnesis-form"
 import { StepIndicator } from "~/features/anamnesis/components/step-indicator"
@@ -13,9 +21,11 @@ import { PhysicalExamStep } from "~/features/anamnesis/components/physical-exam-
 import { DiagnosisStep } from "~/features/anamnesis/components/diagnosis-step"
 import { ReviewStep } from "~/features/anamnesis/components/review-step"
 import { DynamicSectionRenderer } from "~/features/anamnesis/components/dynamic-section-renderer"
-
+import { SurgicalRiskForm } from "~/features/surgical-risk/components/surgical-risk-form"
 
 export function AnamnesisWizard({ consultationId }: { consultationId?: string }) {
+  const [sheetOpen, setSheetOpen] = useState(false)
+
   const {
     currentStep,
     isLoading,
@@ -35,6 +45,8 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
     addMedication,
     updateMedication,
     removeMedication,
+    createdAnamnesisId,
+    navigateHome,
   } = useAnamnesisForm({ consultationId })
 
   const isFinalStep = currentStep === steps.length
@@ -150,6 +162,59 @@ export function AnamnesisWizard({ consultationId }: { consultationId?: string })
             </div>
           </CardContent>
         </Card>
+
+        {/* CTA pós-salvar: Risco Cirúrgico */}
+        {createdAnamnesisId && (
+          <Card className="mt-4 border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <HeartPulse className="h-5 w-5 text-primary" />
+                Emitir Avaliação de Risco Cirúrgico?
+              </CardTitle>
+              <CardDescription>
+                A anamnese foi salva com sucesso. Deseja calcular o risco cirúrgico perioperatório
+                para esta consulta com base nos dados registrados?
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex gap-3">
+              <Button onClick={() => setSheetOpen(true)}>
+                <HeartPulse className="h-4 w-4 mr-2" />
+                Calcular Risco Cirúrgico
+              </Button>
+              <Button variant="ghost" onClick={navigateHome}>
+                <SkipForward className="h-4 w-4 mr-2" />
+                Pular
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Sheet com o formulário de risco cirúrgico */}
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+            <SheetHeader className="mb-6 px-4 pt-6 sm:px-6 sm:pt-8">
+              <SheetTitle className="flex items-center gap-2">
+                <HeartPulse className="h-5 w-5 text-primary" />
+                Risco Cirúrgico Perioperatório
+              </SheetTitle>
+              <SheetDescription>
+                Avaliação baseada no Índice de Lee (RCRI). Os campos foram
+                pré-preenchidos com base nos dados da anamnese registrada.
+              </SheetDescription>
+            </SheetHeader>
+            <div className="px-4 pb-6 sm:px-6 sm:pb-8">
+              {createdAnamnesisId && (
+                <SurgicalRiskForm
+                  anamnesisId={createdAnamnesisId}
+                  onSuccess={() => {
+                    setSheetOpen(false)
+                    navigateHome()
+                  }}
+                />
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   )
