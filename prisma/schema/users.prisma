@@ -23,6 +23,8 @@ model Profile {
   audioSessions       AudioConsultationSession[]
   creditLedgerEntries CreditLedgerEntry[]
   surgicalRiskAssessments SurgicalRiskAssessment[]
+  aiProviderCredentials   AiProviderCredential[]
+  aiAnalysisSettings      AiAnalysisSettings?
 
   @@map("profile")
 }
