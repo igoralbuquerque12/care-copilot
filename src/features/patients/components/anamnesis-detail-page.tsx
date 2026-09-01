@@ -48,6 +48,7 @@ type Props = {
   anamnesis: AnamnesisDetail;
   patientId: string;
   onBack: () => void;
+  initialRiskOpen?: boolean;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -142,10 +143,10 @@ function EditTextarea({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
+export function AnamnesisDetailPage({ anamnesis, patientId, onBack, initialRiskOpen = false }: Props) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toForm(anamnesis));
-  const [riskSheetOpen, setRiskSheetOpen] = useState(false);
+  const [riskSheetOpen, setRiskSheetOpen] = useState(initialRiskOpen);
 
   const utils = api.useUtils();
 
@@ -282,7 +283,7 @@ export function AnamnesisDetailPage({ anamnesis, patientId, onBack }: Props) {
             className="gap-1.5"
           >
             <HeartPulse className="h-3.5 w-3.5" />
-            {surgicalRisk ? `Risco ${surgicalRisk.riskClass}` : "Risco Cirúrgico"}
+            {surgicalRisk ? `RCRI ${surgicalRisk.riskClass} · ${surgicalRisk.leeScore}/6` : "Risco Cirúrgico"}
           </Button>
 
           {editing ? (
