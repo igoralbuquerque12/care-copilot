@@ -68,7 +68,7 @@ const PREDICTOR_LABELS: Record<string, string> = {
 };
 
 export function SurgicalRiskReport({ assessment, onEdit }: SurgicalRiskReportProps) {
-  const riskDisplay = RISK_DISPLAY[assessment.riskClass] ?? RISK_DISPLAY["I"]!;
+  const riskDisplay = RISK_DISPLAY[assessment.riskClass] ?? RISK_DISPLAY.I!;
   const RiskIcon = riskDisplay.icon;
 
   const predictors = [

@@ -46,17 +46,14 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
     updateMutation,
   } = useSurgicalRiskForm(anamnesisId);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form = useForm<any>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: zodResolver(createSurgicalRiskSchema) as any,
+  const form = useForm<CreateSurgicalRiskInput>({
+    resolver: zodResolver(createSurgicalRiskSchema),
     values: defaultValues,
   });
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CreateSurgicalRiskInput) => {
     try {
       if (existingRisk) {
         await updateMutation.mutateAsync({ id: existingRisk.id, ...data });
