@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Calendar, Loader2, CalendarOff } from "lucide-react";
+import { Clock, Calendar, CalendarOff } from "lucide-react";
 import { Badge } from "~/components/ui/badge";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useDailyAppointments } from "~/features/create-schedule-consultation/hooks/use-daily-appointments";

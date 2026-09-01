@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { api } from "~/trpc/react";
-import type { ScheduleConsultationFormData, PatientOption, ConsultationType } from "~/features/create-schedule-consultation/types/schedule-consultation.types";
+import type { ScheduleConsultationFormData, PatientOption } from "~/features/create-schedule-consultation/types/schedule-consultation.types";
 
 const initialFormData: ScheduleConsultationFormData = {
     patientId: undefined,
@@ -77,7 +77,7 @@ export function useScheduleConsultationForm() {
                 }
                 : undefined,
             date: dateTimeUtc.toISOString(),
-            type: formData.type as ConsultationType,
+            type: formData.type,
         });
     };
 
