@@ -1,0 +1,80 @@
+enum ClinicalChatMessageRole {
+  USER
+  ASSISTANT
+}
+
+enum ClinicalChatMessageStatus {
+  STREAMING
+  COMPLETED
+  FAILED
+}
+
+model ClinicalChat {
+  id String @id @default(cuid())
+
+  profileId String  @map("profile_id") @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  patientId String  @map("patient_id")
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  isGenerating       Boolean   @default(false) @map("is_generating")
+  generationStartedAt DateTime? @map("generation_started_at")
+  nextSequence       Int       @default(1) @map("next_sequence")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  messages ClinicalChatMessage[]
+
+  @@unique([profileId, patientId])
+  @@index([profileId, updatedAt])
+  @@map("clinical_chat")
+}
+
+model ClinicalChatMessage {
+  id String @id @default(cuid())
+
+  chatId String       @map("chat_id")
+  chat   ClinicalChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  sequence Int
+  role     ClinicalChatMessageRole
+  status   ClinicalChatMessageStatus @default(COMPLETED)
+  content  String                    @default("") @db.Text
+
+  contextAnamnesisId String?    @map("context_anamnesis_id")
+  contextAnamnesis   Anamnesis? @relation(fields: [contextAnamnesisId], references: [id], onDelete: SetNull)
+
+  model        String?
+  errorCode    String? @map("error_code")
+  errorMessage String? @map("error_message") @db.Text
+  inputTokens  Int?    @map("input_tokens")
+  outputTokens Int?    @map("output_tokens")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  completedAt DateTime? @map("completed_at")
+
+  attachments ClinicalChatAttachment[]
+
+  @@unique([chatId, sequence])
+  @@index([chatId, sequence])
+  @@index([contextAnamnesisId])
+  @@map("clinical_chat_message")
+}
+
+model ClinicalChatAttachment {
+  id String @id @default(cuid())
+
+  messageId String              @map("message_id")
+  message   ClinicalChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  storagePath String @unique @map("storage_path")
+  originalName String @map("original_name")
+  mimeType     String @map("mime_type")
+  sizeBytes    Int    @map("size_bytes")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([messageId])
+  @@map("clinical_chat_attachment")
+}

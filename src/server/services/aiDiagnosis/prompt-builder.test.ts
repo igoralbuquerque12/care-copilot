@@ -18,13 +18,12 @@ describe("buildDiagnosisPrompt", () => {
       ],
     }, "Priorize interacoes medicamentosas.");
 
-    expect(prompt.userPrompt).toContain('"currentAnamnesis"');
-    expect(prompt.userPrompt).toContain("2025-02-10");
-    expect(prompt.userPrompt).toContain("2026-01-10");
-    expect(prompt.userPrompt).toContain("elapsedBeforeCurrent");
+    expect(prompt.systemPrompt).toContain('"currentAnamnesis"');
+    expect(prompt.systemPrompt).toContain("2025-02-10");
+    expect(prompt.systemPrompt).toContain("2026-01-10");
+    expect(prompt.systemPrompt).toContain("elapsedBeforeCurrent");
     expect(prompt.systemPrompt).toContain("Priorize interacoes medicamentosas");
-    expect(prompt.userPrompt).not.toContain("cpf");
-    expect(prompt.userPrompt.split("Gere a analise clinica")[0]).not.toContain("aiDiagnosis");
+    expect(prompt.systemPrompt).not.toContain("cpf");
     expect(prompt.coverage).toEqual({
       totalAnamneses: 3,
       representedAnamneses: 3,
@@ -41,8 +40,31 @@ describe("buildDiagnosisPrompt", () => {
       current: { id: "now", date: new Date("2026-08-20"), templateName: "Atual", fields: { Queixa: "Dor" } },
       previous: [{ id: "old", date: new Date("2020-01-01"), templateName: "Antigo", fields: { Texto: "x".repeat(2_000) } }],
     });
-    expect(prompt.userPrompt).toContain("2020-01-01");
-    expect(prompt.userPrompt).toContain("[campo truncado]");
+    expect(prompt.systemPrompt).toContain("2020-01-01");
+    expect(prompt.systemPrompt).toContain("[campo truncado]");
     expect(prompt.coverage.truncatedFields).toBe(1);
+  });
+
+  it("renders a fully custom analysis template", () => {
+    const prompt = buildDiagnosisPrompt(
+      {
+        patient: { ageAtCurrentAnamnesis: 40, gender: "Masculino" },
+        clinicalProfile: null,
+        current: {
+          id: "now",
+          date: new Date("2026-08-20"),
+          templateName: "Atual",
+          fields: { Queixa: "Dor" },
+        },
+        previous: [],
+      },
+      "Texto adicional",
+      "ATUAL=${anamnese_atual}\nEXTRA=${instrucoes_adicionais}",
+    );
+
+    expect(prompt.systemPrompt).toContain("Dor");
+    expect(prompt.systemPrompt).toContain("Texto adicional");
+    expect(prompt.systemPrompt).not.toContain("${anamnese_atual}");
+    expect(prompt.systemPrompt).not.toContain("Formato de saida");
   });
 });

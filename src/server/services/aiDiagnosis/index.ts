@@ -6,90 +6,19 @@ import { anamnesisAnalysisResultSchema, type AnamnesisAnalysisResult } from "~/s
 import { messageQueue } from "~/server/messaging";
 import { BASE_PROMPT_VERSION } from "./constants";
 import { decryptApiKey } from "./credentials";
-import { createFormSnapshot, readFormSnapshot } from "./form-snapshot";
 import { buildDiagnosisPrompt } from "./prompt-builder";
 import { generateStructuredAnalysis, isTransientProviderError } from "./providers";
 import { getResolvedConfiguration } from "./settings";
-import type { AnalysisAnamnesisInput, PatientHistoryForAI } from "./types";
+import type { PatientHistoryForAI } from "./types";
+import {
+  anamnesisToClinicalRecord,
+  clinicalTemplateInclude,
+} from "~/server/services/clinical-context";
+import { DEFAULT_ANALYSIS_PROMPT_TEMPLATE } from "../ai-prompt-templates";
 
 const QUEUE_RETRIES = 3;
 const PROVIDER_RETRIES = 3;
 const RESULT_SCHEMA_VERSION = 2;
-
-const toRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
-    : {};
-
-const templateInclude = {
-  sections: {
-    orderBy: { order: "asc" as const },
-    include: { fields: { orderBy: { order: "asc" as const } } },
-  },
-};
-
-type AnamnesisWithRelations = Prisma.AnamnesisGetPayload<{
-  include: {
-    physicalExam: true;
-    medications: true;
-    template: { include: typeof templateInclude };
-  };
-}>;
-
-const toAnalysisInput = (anamnesis: AnamnesisWithRelations): AnalysisAnamnesisInput => {
-  const snapshot = readFormSnapshot(anamnesis.formSnapshot) ?? (
-    anamnesis.template
-      ? readFormSnapshot(createFormSnapshot(anamnesis.template, "APPROXIMATED"))
-      : null
-  );
-  const labels = new Map(
-    snapshot?.sections.flatMap((section) => section.fields.map((field) => [field.key, field.label] as const)) ?? [],
-  );
-  const custom = Object.fromEntries(
-    Object.entries(toRecord(anamnesis.customResponses)).map(([key, value]) => [
-      labels.get(key) ?? key,
-      value,
-    ]),
-  );
-  const exam = anamnesis.physicalExam;
-
-  return {
-    id: anamnesis.id,
-    date: anamnesis.date,
-    templateName: snapshot?.templateName ?? anamnesis.template?.name ?? "Formulario nao identificado",
-    fields: {
-      "Queixa principal": anamnesis.chiefComplaint,
-      "Historia da doenca atual": anamnesis.currentIllnessHistory,
-      "Resposta ao tratamento": anamnesis.treatmentResponse,
-      "Evolucao dos sintomas": anamnesis.symptomEvolution,
-      "Novos eventos": anamnesis.newEvents,
-      "Classe NYHA": anamnesis.nyhaClass,
-      Sintomas: {
-        palpitacoes: anamnesis.hasPalpitations,
-        sincope: anamnesis.hasSyncope,
-        edema: anamnesis.hasEdema,
-        dorToracica: anamnesis.hasChestPain,
-      },
-      "Exame fisico": exam ? {
-        peso: exam.weight,
-        altura: exam.height,
-        pressaoSistolica: exam.bpSystolic,
-        pressaoDiastolica: exam.bpDiastolic,
-        frequenciaCardiaca: exam.heartRate,
-        saturacaoOxigenio: exam.oxygenSaturation,
-        auscultaCardiaca: exam.heartAuscultation,
-        auscultaPulmonar: exam.lungAuscultation,
-        pulsosPerifericos: exam.peripheralPulses,
-        grauEdema: exam.edemaGrade,
-      } : null,
-      Medicamentos: anamnesis.medications.map(({ name, dosage, frequency }) => ({ name, dosage, frequency })),
-      "Hipotese diagnostica do medico": anamnesis.diagnosticHypothesis,
-      "Conduta do medico": anamnesis.conduct,
-      "Proximo retorno": anamnesis.nextRecallDate,
-      "Campos personalizados": custom,
-    },
-  };
-};
 
 const confidenceLevelFor = (score: number): AnamnesisAnalysisResult["confidence"]["level"] =>
   score < 50 ? "LOW" : score < 80 ? "MEDIUM" : "HIGH";
@@ -154,6 +83,9 @@ export const createAnalysisJob = async (
         model: configuration.settings.model,
         basePromptVersion: BASE_PROMPT_VERSION,
         customInstructionsSnapshot: configuration.settings.customInstructions,
+        promptTemplateSnapshot:
+          configuration.settings.analysisPromptTemplate ??
+          DEFAULT_ANALYSIS_PROMPT_TEMPLATE,
         resultSchemaVersion: RESULT_SCHEMA_VERSION,
       },
     });
@@ -222,7 +154,7 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
           include: {
             physicalExam: true,
             medications: true,
-            template: { include: templateInclude },
+            template: { include: clinicalTemplateInclude },
           },
         },
       },
@@ -241,7 +173,7 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
     });
     if (!credential) throw new Error("Credencial do provedor nao encontrada");
 
-    const current = toAnalysisInput(currentRecord);
+    const current = anamnesisToClinicalRecord(currentRecord);
     const history: PatientHistoryForAI = {
       patient: {
         ageAtCurrentAnamnesis: Math.max(0, Math.floor(
@@ -253,9 +185,13 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
       current,
       previous: patient.anamneses
         .filter((item) => item.id !== current.id && item.date <= current.date)
-        .map(toAnalysisInput),
+        .map(anamnesisToClinicalRecord),
     };
-    const prompt = buildDiagnosisPrompt(history, analysis.customInstructionsSnapshot ?? "");
+    const prompt = buildDiagnosisPrompt(
+      history,
+      analysis.customInstructionsSnapshot ?? "",
+      analysis.promptTemplateSnapshot ?? DEFAULT_ANALYSIS_PROMPT_TEMPLATE,
+    );
 
     let result: AnamnesisAnalysisResult | null = null;
     let lastValidationError = "";

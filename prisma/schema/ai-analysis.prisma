@@ -41,6 +41,8 @@ model AiAnalysisSettings {
   provider           AiProvider
   model              String
   customInstructions String     @default("") @map("custom_instructions") @db.Text
+  analysisPromptTemplate     String? @map("analysis_prompt_template") @db.Text
+  clinicalChatPromptTemplate String? @map("clinical_chat_prompt_template") @db.Text
   createdAt          DateTime   @default(now()) @map("created_at")
   updatedAt          DateTime   @default(now()) @updatedAt @map("updated_at")
 
