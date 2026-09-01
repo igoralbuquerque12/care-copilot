@@ -33,7 +33,7 @@ type Props = {
 };
 
 const yesNo = (v: boolean | null | undefined) =>
-  v === true ? "Sim" : v === false ? "Nao" : "-";
+  v === true ? "Sim" : v === false ? "Não" : "-";
 
 const getAudioSystemValue = (
   anamnesis: ConsolidatedFormState["anamnesis"],
@@ -73,7 +73,7 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Perfil clinico</CardTitle>
+          <CardTitle>Perfil clínico</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="Hipertensao" value={yesNo(cp.hasHypertension)} />
@@ -135,7 +135,7 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
         <CardContent className="space-y-4">
           <FieldFull label="Queixa principal" value={a.chiefComplaint} multiline />
           <FieldFull
-            label="Historia da doenca atual"
+            label="História da doença atual"
             value={a.currentIllnessHistory}
             multiline
           />
@@ -145,24 +145,24 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
             multiline
           />
           <FieldFull
-            label="Evolucao dos sintomas"
+            label="Evolução dos sintomas"
             value={a.symptomEvolution}
             multiline
           />
           <FieldFull label="Eventos novos" value={a.newEvents} multiline />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Field label="NYHA" value={a.nyhaClass ?? ""} />
-            <Field label="Palpitacoes" value={yesNo(a.hasPalpitations)} />
-            <Field label="Sincope" value={yesNo(a.hasSyncope)} />
+            <Field label="Palpitações" value={yesNo(a.hasPalpitations)} />
+            <Field label="Síncope" value={yesNo(a.hasSyncope)} />
             <Field label="Edema" value={yesNo(a.hasEdema)} />
-            <Field label="Dor toracica" value={yesNo(a.hasChestPain)} />
+            <Field label="Dor torácica" value={yesNo(a.hasChestPain)} />
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle>Exame fisico</CardTitle>
+          <CardTitle>Exame físico</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           <Field label="Peso (kg)" value={px.weight ? String(px.weight) : ""} />
@@ -181,9 +181,9 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
             value={px.oxygenSaturation ? `${px.oxygenSaturation}%` : ""}
           />
           <Field label="Edema" value={px.edemaGrade ?? ""} />
-          <FieldFull label="Ausculta cardiaca" value={px.heartAuscultation ?? ""} />
+          <FieldFull label="Ausculta cardíaca" value={px.heartAuscultation ?? ""} />
           <FieldFull label="Ausculta pulmonar" value={px.lungAuscultation ?? ""} />
-          <FieldFull label="Pulsos perifericos" value={px.peripheralPulses ?? ""} />
+          <FieldFull label="Pulsos periféricos" value={px.peripheralPulses ?? ""} />
         </CardContent>
       </Card>
 
@@ -194,7 +194,7 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
         <CardContent>
           {a.medications.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhuma medicacao registrada ainda.
+              Nenhuma medicação registrada ainda.
             </p>
           ) : (
             <ul className="space-y-2">
@@ -215,11 +215,11 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Hipotese e conduta</CardTitle>
+          <CardTitle>Hipótese e conduta</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <FieldFull
-            label="Hipotese diagnostica"
+            label="Hipótese diagnóstica"
             value={a.diagnosticHypothesis}
             multiline
           />
@@ -239,8 +239,8 @@ export function AudioAnamnesisForm({ formState, template, readOnly }: Props) {
 
       {readOnly && (
         <p className="text-xs text-muted-foreground">
-          Os dados sao atualizados automaticamente pela IA conforme novos lotes
-          de audio sao processados.
+          Os dados são atualizados automaticamente pela IA conforme novos lotes
+          de áudio são processados.
         </p>
       )}
     </div>

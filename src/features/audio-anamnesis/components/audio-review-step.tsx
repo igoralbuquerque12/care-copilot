@@ -73,7 +73,7 @@ type Props = {
 };
 
 const yesNo = (value: boolean | null | undefined) =>
-  value === true ? "Sim" : value === false ? "Nao" : "-";
+  value === true ? "Sim" : value === false ? "Não" : "-";
 
 const formatDate = (value: Date | string | null | undefined) => {
   if (!value) return "";
@@ -255,7 +255,7 @@ const fallbackRequiredFields = [
   {
     id: "currentIllnessHistory",
     key: "currentIllnessHistory",
-    label: "Historia da Doenca Atual",
+    label: "História da Doença Atual",
     sectionName: "Anamnese",
     isSystemField: true,
     systemKey: "currentIllnessHistory",
@@ -445,11 +445,11 @@ export function AudioReviewStep({
           <Loader2 className="text-primary h-8 w-8 animate-spin" />
           <div className="space-y-1">
             <h2 className="text-lg font-semibold">
-              Processando os ultimos lotes de audio
+              Processando os últimos lotes de áudio
             </h2>
             <p className="text-muted-foreground max-w-xl text-sm">
-              A revisao sera liberada assim que a IA terminar de sincronizar a
-              transcricao da consulta.
+              A revisão será liberada assim que a IA terminar de sincronizar a
+              transcrição da consulta.
             </p>
           </div>
           {summary?.pendingBatchCount ? (
@@ -468,12 +468,12 @@ export function AudioReviewStep({
 
       <Card>
         <CardHeader>
-          <CardTitle>Revisao da anamnese gerada por IA</CardTitle>
+          <CardTitle>Revisão da anamnese gerada por IA</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground text-sm">
-            Confira as informacoes abaixo, ajuste o que for necessario e envie
-            para salvar a anamnese no prontuario.
+            Confira as informações abaixo, ajuste o que for necessário e envie
+            para salvar a anamnese no prontuário.
           </p>
           <MetricsGrid summary={summary} />
         </CardContent>
@@ -495,7 +495,7 @@ export function AudioReviewStep({
               </h2>
               <p className="text-destructive/90 text-sm">
                 Selecione um item da lista para ir direto ao campo que precisa
-                de revisao.
+                de revisão.
               </p>
             </div>
           </div>
@@ -613,7 +613,7 @@ function MetricsGrid({ summary }: { summary?: ReviewSummary }) {
       />
       <Metric
         icon={<Mic2 className="h-4 w-4" />}
-        label="Audio processado"
+        label="Áudio processado"
         value={formatDuration(summary?.transcriptionSeconds)}
       />
       <Metric
@@ -626,7 +626,7 @@ function MetricsGrid({ summary }: { summary?: ReviewSummary }) {
       />
       <Metric
         icon={<Coins className="h-4 w-4" />}
-        label="Creditos usados"
+        label="Créditos usados"
         value={formatNumber(summary?.creditsConsumed)}
       />
     </div>
@@ -639,21 +639,21 @@ function ManualNotesReviewCard({ notes }: { notes: string }) {
   return (
     <Card className="border-amber-500/40 bg-amber-500/5">
       <CardHeader>
-        <CardTitle>Super rascunho do medico</CardTitle>
+        <CardTitle>Super rascunho do médico</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-200">
           <AlertCircle className="mt-0.5 h-4 w-4" />
           <p>
-            Este rascunho livre sera descartado depois do envio. Copie para um
-            campo da anamnese qualquer informacao que precise ficar salva.
+            Este rascunho livre será descartado depois do envio. Copie para um
+            campo da anamnese qualquer informação que precise ficar salva.
           </p>
         </div>
         {trimmed ? (
           <Textarea value={trimmed} readOnly rows={5} />
         ) : (
           <p className="text-muted-foreground text-sm">
-            Nenhuma super observacao foi registrada no rascunho manual.
+            Nenhuma superobservação foi registrada no rascunho manual.
           </p>
         )}
       </CardContent>
@@ -732,7 +732,7 @@ function PatientReviewCard({
 
       <Card>
         <CardHeader>
-          <CardTitle>Perfil clinico</CardTitle>
+          <CardTitle>Perfil clínico</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <ReadOnlyField
@@ -793,7 +793,7 @@ function FallbackAnamnesisReview({
     },
     {
       key: "currentIllnessHistory",
-      label: "Historia da Doenca Atual",
+      label: "História da Doença Atual",
       fieldType: "TEXT" as const,
       isRequired: true,
       isVisible: true,

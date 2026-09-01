@@ -100,10 +100,10 @@ function Header() {
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div>
         <h1 className="text-foreground text-3xl font-semibold">
-          Consulta com captura de audio
+          Consulta com captura de áudio
         </h1>
         <p className="text-muted-foreground">
-          A IA preenche a anamnese a partir da fala. Voce so precisa conduzir a
+          A IA preenche a anamnese a partir da fala. Você só precisa conduzir a
           consulta.
         </p>
       </div>
@@ -183,7 +183,7 @@ function SessionView({
         <div className="mx-auto max-w-3xl">
           <Card>
             <CardContent className="text-muted-foreground py-10 text-center text-sm">
-              Carregando sessao...
+              Carregando sessão...
             </CardContent>
           </Card>
         </div>
@@ -201,7 +201,7 @@ function SessionView({
       const message =
         error instanceof Error
           ? error.message
-          : "Erro ao preparar a revisao da consulta";
+          : "Erro ao preparar a revisão da consulta";
       toast.error(message);
     } finally {
       setIsOpeningReview(false);
@@ -293,7 +293,7 @@ function FormModeSwitch({
   return (
     <div
       role="group"
-      aria-label="Alternar formulario da consulta"
+      aria-label="Alternar formulário da consulta"
       className="bg-card flex w-full flex-col gap-2 rounded-xl border p-2 sm:w-fit sm:flex-row"
     >
       <Button

@@ -1,6 +1,6 @@
 /**
- * Configuracoes centralizadas do modulo de audio-anamnese.
- * Modifique aqui para ajustar comportamento de VAD, batches, overlap e creditos.
+ * Configurações centralizadas do módulo de áudio-anamnese.
+ * Modifique aqui para ajustar comportamento de VAD, batches, overlap e créditos.
  */
 
 // --- Audio ---
@@ -19,13 +19,13 @@ export const SILENCE_TIMEOUT_MS = 7_000;
 // --- Batches ---
 
 /**
- * Duracao maxima de um batch de audio (segundos).
- * Ao atingir esse limite, o buffer e enviado mesmo sem silencio detectado.
+ * Duração máxima de um batch de áudio (segundos).
+ * Ao atingir esse limite, o buffer é enviado mesmo sem silêncio detectado.
  * Limite pratico do Whisper: ~25 MB / ~30 min. 150 s e seguro e economico.
  */
 export const MAX_BATCH_SECONDS = 15;
 
-/** Numero de amostras correspondente ao limite de batch. Derivado, nao altere diretamente. */
+/** Número de amostras correspondente ao limite de batch. Derivado, não altere diretamente. */
 export const MAX_BATCH_SAMPLES = MAX_BATCH_SECONDS * AUDIO_SAMPLE_RATE;
 
 /**
@@ -35,13 +35,13 @@ export const MAX_BATCH_SAMPLES = MAX_BATCH_SECONDS * AUDIO_SAMPLE_RATE;
  */
 export const OVERLAP_SECONDS = 5;
 
-/** Numero de amostras de sobreposicao. Derivado, nao altere diretamente. */
+/** Número de amostras de sobreposição. Derivado, não altere diretamente. */
 export const OVERLAP_SAMPLES = AUDIO_SAMPLE_RATE * OVERLAP_SECONDS;
 
-// --- Creditos ---
+// --- Créditos ---
 
-/** Saldo minimo (creditos) para iniciar uma nova sessao. */
+/** Saldo mínimo (créditos) para iniciar uma nova sessão. */
 export const CREDITS_MIN_TO_START = 300;
 
-/** Saldo minimo (creditos) necessario para processar mais um batch. */
+/** Saldo mínimo (créditos) necessário para processar mais um batch. */
 export const CREDITS_MIN_PER_BATCH = 100;

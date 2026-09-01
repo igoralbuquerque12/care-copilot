@@ -137,17 +137,17 @@ export function AudioManualDraftForm({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Super observacoes</CardTitle>
+          <CardTitle>Observações</CardTitle>
         </CardHeader>
         <CardContent>
           <Label htmlFor="audio-manual-super-notes" className="mb-2 block">
-            Rascunho livre do medico
+            Rascunho livre do médico
           </Label>
           <Textarea
             id="audio-manual-super-notes"
             value={notes}
             onChange={(event) => onNotesChange(event.target.value)}
-            placeholder="Escreva qualquer observacao livre da consulta. Este texto aparecera no topo da revisao, mas nao sera salvo automaticamente."
+            placeholder="Escreva qualquer observação livre da consulta. Este texto aparecerá no topo da revisão, mas não será salvo automaticamente."
             rows={6}
           />
         </CardContent>

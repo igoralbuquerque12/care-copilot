@@ -19,7 +19,7 @@ const sleep = (ms: number) =>
 
 const getUploadErrorMessage = (error: unknown) => {
   if (!(error instanceof Error)) {
-    return "Falha ao enviar lote de audio";
+    return "Falha ao enviar lote de áudio";
   }
 
   const body = /^Falha no upload \(\d+\):\s*(.*)$/s.exec(error.message)?.[1];
