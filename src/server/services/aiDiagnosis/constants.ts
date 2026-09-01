@@ -1,14 +1,17 @@
-export const VALID_CONFIDENCE_LEVELS = ["ALTA", "MEDIA", "BAIXA"] as const;
+export const BASE_PROMPT_VERSION = "clinical-analysis-v2";
 
-export const DEFAULT_CONFIDENCE_LEVEL = "MEDIA" as const;
-
-/** Schema JSON embutido no prompt para instruir o modelo sobre o formato esperado */
-export const AI_DIAGNOSIS_RESPONSE_SCHEMA = `{
-  "summary": "Resumo geral do quadro clínico do paciente em 2-3 parágrafos",
-  "mainDiagnosisHypothesis": "Hipótese diagnóstica principal baseada no conjunto de dados",
-  "differentialDiagnoses": "Diagnósticos diferenciais a considerar, separados por ponto e vírgula",
-  "identifiedPatterns": "Padrões identificados ao longo das consultas (progressão, tendências, correlações)",
-  "riskAlerts": "Alertas de risco que o médico deve considerar",
-  "recommendedActions": "Ações recomendadas: exames, ajustes de medicação, encaminhamentos",
-  "confidenceLevel": "ALTA, MEDIA ou BAIXA — baseado na quantidade e qualidade dos dados disponíveis"
+export const ANALYSIS_JSON_SHAPE = `{
+  "summary": "string",
+  "longitudinalComparison": {
+    "overview": "string",
+    "changes": [{"field":"string","currentValue":"string","previousValue":"string|null","previousDate":"YYYY-MM-DD|null","interpretation":"string"}]
+  },
+  "physicianReview": [{"subject":"string","physicianEntry":"string","assessment":"AGREEMENT|REVIEW|INSUFFICIENT_DATA","rationale":"string"}],
+  "aiDiagnosis": {"primary":"string","differentials":["string"]},
+  "riskAlerts": [{"title":"string","severity":"LOW|MEDIUM|HIGH","rationale":"string"}],
+  "suggestedNextSteps": [{"action":"string","rationale":"string"}],
+  "missingQuestions": [{"question":"string","reason":"string","priority":"LOW|MEDIUM|HIGH"}],
+  "evidence": [{"date":"YYYY-MM-DD","field":"string","note":"string"}],
+  "confidence": {"score":0,"level":"LOW|MEDIUM|HIGH","rationale":"string","supportingFactors":["string"],"limitingFactors":["string"]},
+  "historyCoverage": {"totalAnamneses":0,"representedAnamneses":0,"totalFields":0,"representedFields":0,"truncatedFields":0}
 }`;
