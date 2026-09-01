@@ -8,6 +8,7 @@ import { creditsRouter } from "~/server/api/routers/credits.router";
 import { audioConsultationRouter } from "~/server/api/routers/audioConsultation.router";
 import { formTemplateRouter } from "~/server/api/routers/formTemplate.router";
 import { surgicalRiskRouter } from "~/server/api/routers/surgicalRisk.router";
+import { aiDiagnosisRouter } from "~/server/api/routers/aiDiagnosis.router";
 
 export const appRouter = createTRPCRouter({
   profile: profileRouter,
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   audioConsultation: audioConsultationRouter,
   formTemplate: formTemplateRouter,
   surgicalRisk: surgicalRiskRouter,
+  aiDiagnosis: aiDiagnosisRouter,
 });
 
 export type AppRouter = typeof appRouter;
