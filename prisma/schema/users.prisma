@@ -25,6 +25,7 @@ model Profile {
   surgicalRiskAssessments SurgicalRiskAssessment[]
   aiProviderCredentials   AiProviderCredential[]
   aiAnalysisSettings      AiAnalysisSettings?
+  clinicalChats           ClinicalChat[]
 
   @@map("profile")
 }
