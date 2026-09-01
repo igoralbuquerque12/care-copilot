@@ -22,7 +22,7 @@ const getUploadErrorMessage = (error: unknown) => {
     return "Falha ao enviar lote de audio";
   }
 
-  const body = error.message.match(/^Falha no upload \(\d+\):\s*(.*)$/s)?.[1];
+  const body = /^Falha no upload \(\d+\):\s*(.*)$/s.exec(error.message)?.[1];
   if (!body) {
     return error.message;
   }

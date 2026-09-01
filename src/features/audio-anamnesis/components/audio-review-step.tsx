@@ -125,10 +125,8 @@ const isEmptyRequiredValue = (value: unknown) => {
 };
 
 const areValuesEqual = (a: unknown, b: unknown) => {
-  const normalize = (value: unknown) =>
-    JSON.stringify(value, (_key, nestedValue) =>
-      nestedValue instanceof Date ? nestedValue.toISOString() : nestedValue,
-    );
+  const normalize = (value: unknown): string =>
+    value instanceof Date ? value.toISOString() : (JSON.stringify(value) ?? "");
 
   return normalize(a) === normalize(b);
 };

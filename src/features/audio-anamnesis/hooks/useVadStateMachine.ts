@@ -10,8 +10,6 @@ type VadOptions = {
   shouldFlush: (currentBufferSeconds: number) => boolean;
 };
 
-type MicVadModule = typeof import("@ricky0123/vad-web");
-
 export const useVadStateMachine = (options: VadOptions) => {
   const [state, setState] = useState<VadFsmState>("IDLE");
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,9 +44,9 @@ export const useVadStateMachine = (options: VadOptions) => {
       return;
     }
 
-    let mod: MicVadModule;
+    let mod;
     try {
-      mod = (await import("@ricky0123/vad-web")) as MicVadModule;
+      mod = await import("@ricky0123/vad-web");
     } catch (error) {
       console.error("[useVadStateMachine] VAD module not installed:", error);
       throw new Error(
@@ -73,7 +71,7 @@ export const useVadStateMachine = (options: VadOptions) => {
 
     vadInstanceRef.current = vad;
     startedAtRef.current = Date.now();
-    vad.start();
+    await vad.start();
     setState("BUFFERING");
     scheduleIdle();
   }, [scheduleIdle]);

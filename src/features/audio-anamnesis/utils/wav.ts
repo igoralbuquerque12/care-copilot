@@ -55,8 +55,8 @@ export const encodeWav = (
   view.setUint32(40, pcm.length * 2, true);
 
   let offset = 44;
-  for (let i = 0; i < pcm.length; i++) {
-    view.setInt16(offset, pcm[i] ?? 0, true);
+  for (const sample of pcm) {
+    view.setInt16(offset, sample, true);
     offset += 2;
   }
 

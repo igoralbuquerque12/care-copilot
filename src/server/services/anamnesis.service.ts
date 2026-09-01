@@ -6,6 +6,8 @@ import {
   getTemplateById,
   sanitizeCustomResponses,
 } from "~/server/services/formTemplate.service";
+import { createFormSnapshot } from "~/server/services/aiDiagnosis/form-snapshot";
+import { createAnalysisJob } from "~/server/services/aiDiagnosis";
 
 export const getByPatient = async (
   db: PrismaClient,
@@ -35,7 +37,6 @@ export const getByPatient = async (
   }
 };
 import { type CreateAnamnesisInput, type UpdateAnamnesisInput } from "~/schemas/anamnesis";
-import { triggerDiagnosis } from "~/server/services/aiDiagnosis";
 
 export const createAnamnesis = async (
   db: PrismaClient,
@@ -53,6 +54,7 @@ export const createAnamnesis = async (
       profileId,
       templateId: template.id,
       customResponses: sanitizeCustomResponses(customResponses),
+      formSnapshot: createFormSnapshot(template),
       physicalExam: physicalExam ? { create: physicalExam } : undefined,
       medications: medications
         ? { createMany: { data: medications } }
@@ -61,9 +63,22 @@ export const createAnamnesis = async (
     include: { physicalExam: true, medications: true, template: true },
   });
 
-  void triggerDiagnosis(data.patientId, anamnesis.id);
+  let analysis: Awaited<ReturnType<typeof createAnalysisJob>> | {
+    id: undefined;
+    status: "FAILED";
+  };
+  try {
+    analysis = await createAnalysisJob(
+      db,
+      profileId,
+      data.patientId,
+      anamnesis.id,
+    );
+  } catch {
+    analysis = { id: undefined, status: "FAILED" as const };
+  }
 
-  return anamnesis;
+  return { anamnesisId: anamnesis.id, patientId: data.patientId, analysis };
 };
 
 export const updateAnamnesis = async (
@@ -74,15 +89,16 @@ export const updateAnamnesis = async (
   const existing = await db.anamnesis.findFirst({ where: { id, profileId } });
   if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese não encontrada" });
 
-  if (templateId) {
-    await getTemplateById(db, profileId, templateId);
-  }
+  const template = templateId
+    ? await getTemplateById(db, profileId, templateId)
+    : null;
 
   return db.anamnesis.update({
     where: { id },
     data: {
       ...fields,
       templateId,
+      formSnapshot: template ? createFormSnapshot(template) : undefined,
       customResponses: customResponses
         ? sanitizeCustomResponses(customResponses)
         : undefined,
@@ -92,6 +108,7 @@ export const updateAnamnesis = async (
       medications: medications
         ? { deleteMany: {}, createMany: { data: medications } }
         : undefined,
+      contentVersion: { increment: 1 },
     },
     include: { physicalExam: true, medications: true, template: true },
   });

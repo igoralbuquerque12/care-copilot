@@ -16,7 +16,7 @@ type MapContext = { patientId: string; consultationId?: string };
 
 const OPEN_BATCH_STATUSES: AudioBatchStatus[] = ["PENDING", "PROCESSING"];
 
-const getMetadataNumber = (metadata: Prisma.JsonValue | null, key: string) => {
+const getMetadataNumber = (metadata: Prisma.JsonValue, key: string) => {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
     return 0;
   }
@@ -381,5 +381,5 @@ export const finalizeSession = async (
     },
   });
 
-  return { sessionId, anamnesisId: anamnesis.id };
+  return { sessionId, anamnesisId: anamnesis.anamnesisId };
 };

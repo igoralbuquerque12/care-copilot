@@ -120,8 +120,7 @@ function computeRiskClass(score: number): string {
 }
 
 type SurgicalRiskCalculatorProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<any>;
+  control: Control<CreateSurgicalRiskInput>;
 };
 
 export function SurgicalRiskCalculator({ control }: SurgicalRiskCalculatorProps) {
@@ -147,7 +146,7 @@ export function SurgicalRiskCalculator({ control }: SurgicalRiskCalculatorProps)
               <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-muted/40 transition-colors">
                 <FormControl>
                   <Checkbox
-                    checked={field.value as boolean}
+                    checked={field.value}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>

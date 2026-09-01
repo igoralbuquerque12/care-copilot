@@ -104,6 +104,9 @@ model Anamnesis {
   templateId      String?
   template        AnamnesisFormTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   customResponses Json                   @default("{}")
+  formSnapshot    Json?
+  contentVersion  Int                    @default(1)
+  updatedAt       DateTime               @default(now()) @updatedAt
 
   physicalExam  PhysicalExam?
   medications   PrescribedMedication[]
@@ -183,14 +186,31 @@ model AiDiagnosis {
   anamnesisId String
   anamnesis   Anamnesis @relation(fields: [anamnesisId], references: [id])
 
-  summary                 String @db.Text
-  mainDiagnosisHypothesis String @db.Text
-  differentialDiagnoses   String @db.Text
-  identifiedPatterns      String @db.Text
-  riskAlerts              String @db.Text
-  recommendedActions      String @db.Text
-  confidenceLevel         String
+  summary                 String? @db.Text
+  mainDiagnosisHypothesis String? @db.Text
+  differentialDiagnoses   String? @db.Text
+  identifiedPatterns      String? @db.Text
+  riskAlerts              String? @db.Text
+  recommendedActions      String? @db.Text
+  confidenceLevel         String?
+
+  status                     AnalysisStatus @default(COMPLETED)
+  attempt                    Int            @default(1)
+  anamnesisVersion           Int            @default(1)
+  provider                   AiProvider?
+  model                      String?
+  result                     Json?
+  resultSchemaVersion        Int            @default(1)
+  basePromptVersion          String?
+  customInstructionsSnapshot String?         @db.Text
+  errorCode                  String?
+  errorMessage               String?         @db.Text
+  startedAt                  DateTime?
+  completedAt                DateTime?
 
   isValid   Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  @@index([anamnesisId, createdAt])
+  @@index([status])
 }
