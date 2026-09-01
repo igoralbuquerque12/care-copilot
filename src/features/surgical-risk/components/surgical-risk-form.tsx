@@ -28,14 +28,20 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { SurgicalRiskCalculator } from "~/features/surgical-risk/components/surgical-risk-calculator";
 import { useSurgicalRiskForm } from "~/features/surgical-risk/hooks/use-surgical-risk-form";
-import { createSurgicalRiskSchema, type CreateSurgicalRiskInput } from "~/schemas/surgical-risk";
+import {
+  createSurgicalRiskSchema,
+  type CreateSurgicalRiskInput,
+} from "~/schemas/surgical-risk";
 
 type SurgicalRiskFormProps = {
   anamnesisId: string;
   onSuccess?: () => void;
 };
 
-export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormProps) {
+export function SurgicalRiskForm({
+  anamnesisId,
+  onSuccess,
+}: SurgicalRiskFormProps) {
   const {
     defaultValues,
     wasInferred,
@@ -57,20 +63,20 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
     try {
       if (existingRisk) {
         await updateMutation.mutateAsync({ id: existingRisk.id, ...data });
-        toast.success("Avaliacao de risco atualizada com sucesso");
+        toast.success("Avaliação de risco atualizada com sucesso");
       } else {
         await createMutation.mutateAsync(data);
-        toast.success("Avaliacao de risco cirurgico salva com sucesso");
+        toast.success("Avaliação de risco cirúrgico salva com sucesso");
       }
       onSuccess?.();
     } catch {
-      toast.error("Erro ao salvar avaliacao de risco cirurgico");
+      toast.error("Erro ao salvar avaliação de risco cirúrgico");
     }
   };
 
   if (isLoadingInference) {
     return (
-      <div className="flex items-center justify-center py-12 gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-2 py-12">
         <Loader2 className="h-5 w-5 animate-spin" />
         <span>Carregando dados do paciente...</span>
       </div>
@@ -84,8 +90,9 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
           <Alert className="border-yellow-300 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950">
             <AlertCircle className="h-4 w-4 text-yellow-700 dark:text-yellow-400" />
             <AlertDescription className="text-yellow-700 dark:text-yellow-400">
-              <strong>Atencao:</strong> Alguns campos foram pre-preenchidos com base no historico
-              do paciente ({inferredFields.join(", ")}). Confirme os dados antes de salvar.
+              <strong>Atenção:</strong> Alguns campos foram pré-preenchidos com
+              base no histórico do paciente ({inferredFields.join(", ")}).
+              Confirme os dados antes de salvar.
             </AlertDescription>
           </Alert>
         )}
@@ -97,7 +104,10 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
             <FormItem>
               <FormLabel>Nome da Cirurgia / Procedimento *</FormLabel>
               <FormControl>
-                <Input placeholder="Ex: Colecistectomia laparoscopica" {...field} />
+                <Input
+                  placeholder="Ex.: colecistectomia laparoscópica"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,35 +117,49 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
         <Separator />
 
         <div>
-          <h3 className="text-sm font-semibold mb-1">Preditores do Indice de Lee (RCRI)</h3>
-          <p className="text-xs text-muted-foreground mb-3">
-            Marque os fatores de risco presentes. O escore e calculado automaticamente.
+          <h3 className="mb-1 text-sm font-semibold">
+            Preditores do Índice de Lee (RCRI)
+          </h3>
+          <p className="text-muted-foreground mb-3 text-xs">
+            Marque os fatores de risco presentes. O escore é calculado
+            automaticamente.
           </p>
           <SurgicalRiskCalculator control={form.control} />
         </div>
 
         <Separator />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
             name="asaClass"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Classificacao ASA</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                <FormLabel>Classificação ASA</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value ?? ""}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione..." />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="I">ASA I - Saudavel</SelectItem>
-                    <SelectItem value="II">ASA II - Doenca sistemica leve</SelectItem>
-                    <SelectItem value="III">ASA III - Doenca sistemica grave</SelectItem>
-                    <SelectItem value="IV">ASA IV - Ameaca constante a vida</SelectItem>
+                    <SelectItem value="I">ASA I - Saudável</SelectItem>
+                    <SelectItem value="II">
+                      ASA II - Doença sistêmica leve
+                    </SelectItem>
+                    <SelectItem value="III">
+                      ASA III - Doença sistêmica grave
+                    </SelectItem>
+                    <SelectItem value="IV">
+                      ASA IV - Ameaça constante à vida
+                    </SelectItem>
                     <SelectItem value="V">ASA V - Moribundo</SelectItem>
-                    <SelectItem value="VI">ASA VI - Morte encefalica (doador)</SelectItem>
+                    <SelectItem value="VI">
+                      ASA VI - Morte encefálica (doador)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -157,7 +181,9 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
                     placeholder="1-12"
                     value={field.value ?? ""}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                      field.onChange(
+                        e.target.value ? parseInt(e.target.value) : undefined,
+                      )
                     }
                   />
                 </FormControl>
@@ -172,10 +198,10 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
           name="recommendation"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Parecer / Recomendacao</FormLabel>
+              <FormLabel>Parecer / Recomendação</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Paciente apresenta risco cirurgico intermediario. Recomenda-se..."
+                  placeholder="Paciente apresenta risco cirúrgico intermediário. Recomenda-se..."
                   className="min-h-[100px]"
                   value={field.value ?? ""}
                   onChange={field.onChange}
@@ -192,9 +218,11 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-md border p-3">
               <div>
-                <FormLabel className="text-sm font-medium">Liberado para cirurgia</FormLabel>
-                <p className="text-xs text-muted-foreground">
-                  Indica se o paciente esta apto para o procedimento cirurgico
+                <FormLabel className="text-sm font-medium">
+                  Liberado para cirurgia
+                </FormLabel>
+                <p className="text-muted-foreground text-xs">
+                  Indica se o paciente está apto para o procedimento cirúrgico
                 </p>
               </div>
               <FormControl>
@@ -210,13 +238,15 @@ export function SurgicalRiskForm({ anamnesisId, onSuccess }: SurgicalRiskFormPro
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Salvando...
             </>
           ) : (
             <>
-              <FileCheck className="h-4 w-4 mr-2" />
-              {existingRisk ? "Atualizar Avaliacao" : "Salvar Avaliacao de Risco"}
+              <FileCheck className="mr-2 h-4 w-4" />
+              {existingRisk
+                ? "Atualizar Avaliação"
+                : "Salvar Avaliação de Risco"}
             </>
           )}
         </Button>
