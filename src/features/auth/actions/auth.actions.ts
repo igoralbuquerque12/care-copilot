@@ -37,6 +37,8 @@ export async function signInAction(data: SignInInput) {
 }
 
 export async function signUpAction(input: SignUpInput) {
+    return { success: false, message: "Ação indisponível no momento." };
+
     const parsed = signUpSchema.safeParse(input);
 
     if (!parsed.success) {

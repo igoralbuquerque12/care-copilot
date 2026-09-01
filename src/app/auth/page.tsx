@@ -28,7 +28,7 @@ export default function AuthPage() {
 
             <AuthTabs />
 
-            <p className="text-center text-xs text-muted-foreground">
+            {/* <p className="text-center text-xs text-muted-foreground">
               Ao continuar, você concorda com nossos{" "}
               <a href="#" className="underline underline-offset-4 hover:text-primary">
                 Termos de Serviço
@@ -38,7 +38,7 @@ export default function AuthPage() {
                 Política de Privacidade
               </a>
               .
-            </p>
+            </p> */}
           </div>
         </div>
       </div>
