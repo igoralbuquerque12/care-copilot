@@ -35,7 +35,9 @@ const generateOpenAiCompatible = async (
   const response = await client.chat.completions.create({
     model: request.model,
     messages: [
-      { role: "system", content: request.systemPrompt },
+      ...(request.systemPrompt.trim()
+        ? [{ role: "system" as const, content: request.systemPrompt }]
+        : []),
       { role: "user", content: request.userPrompt },
     ],
     response_format: { type: "json_object" },
@@ -48,7 +50,9 @@ const generateGemini = async (request: GenerateRequest) => {
   const client = new GoogleGenerativeAI(request.apiKey);
   const model = client.getGenerativeModel({
     model: request.model,
-    systemInstruction: request.systemPrompt,
+    ...(request.systemPrompt.trim()
+      ? { systemInstruction: request.systemPrompt }
+      : {}),
     generationConfig: { responseMimeType: "application/json" },
   });
   const response = await model.generateContent(request.userPrompt);
@@ -66,7 +70,9 @@ const generateAnthropic = async (request: GenerateRequest) => {
     body: JSON.stringify({
       model: request.model,
       max_tokens: 12_000,
-      system: request.systemPrompt,
+      ...(request.systemPrompt.trim()
+        ? { system: request.systemPrompt }
+        : {}),
       messages: [{ role: "user", content: request.userPrompt }],
     }),
   });

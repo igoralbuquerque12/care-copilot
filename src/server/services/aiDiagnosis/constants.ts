@@ -1,4 +1,4 @@
-export const BASE_PROMPT_VERSION = "clinical-analysis-v2";
+export const BASE_PROMPT_VERSION = "clinical-analysis-v3-template";
 
 export const ANALYSIS_JSON_SHAPE = `{
   "summary": "string",
