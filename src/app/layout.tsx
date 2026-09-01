@@ -7,30 +7,18 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "sonner";
+import logo from "~/public/logo.jpg";
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Care Copilot - Design System",
+  title: "Care Copilot",
   description: "Sistema de design para aplicações de suporte clínico",
   generator: "v0.app",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    icon: logo.src,
+    apple: logo.src,
   },
 }
 

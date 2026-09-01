@@ -1,0 +1,11 @@
+.git
+.next
+node_modules
+.env
+.env.*
+coverage
+docs
+vibe-git
+*.md
+*.tsbuildinfo
+npm-debug.log*
