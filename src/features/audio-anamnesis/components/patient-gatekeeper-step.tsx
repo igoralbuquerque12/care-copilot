@@ -49,7 +49,7 @@ export function PatientGatekeeperStep({ consultationId, onReady }: Props) {
       onReady(session.id);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Erro ao iniciar sessao";
+        error instanceof Error ? error.message : "Erro ao iniciar sessão";
       toast.error(message);
     }
   };
@@ -85,11 +85,11 @@ export function PatientGatekeeperStep({ consultationId, onReady }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Antes de comecar</CardTitle>
+        <CardTitle>Antes de começar</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground">
-          A gravacao so pode comecar com um paciente associado. Selecione um
+          A gravação só pode começar com um paciente associado. Selecione um
           existente ou cadastre um novo agora.
         </p>
 

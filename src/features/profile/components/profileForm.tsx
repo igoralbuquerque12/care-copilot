@@ -52,8 +52,8 @@ export function ProfileForm() {
   }
 
   return (
-    <div className="min-h-screen pb-10">
-      <div className="mx-auto max-w-7xl">
+    <div className="w-full pb-6">
+      <div className="w-full">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card className="border-border/50 overflow-hidden shadow-md">
@@ -78,6 +78,9 @@ export function ProfileForm() {
                         variant="secondary"
                         className="border-border h-9 w-9 rounded-full border shadow-md"
                         type="button"
+                        onClick={() => form.setFocus("photoUrl")}
+                        title="Alterar foto do perfil"
+                        aria-label="Alterar foto do perfil"
                       >
                         <Camera className="text-muted-foreground h-4 w-4" />
                       </Button>
@@ -164,179 +167,205 @@ export function ProfileForm() {
                       Para alterar seu email, entre em contato com o suporte.
                     </FormDescription>
                   </FormItem>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="border-border/50 shadow-md">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                    <Coins className="text-primary h-4 w-4" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Créditos</CardTitle>
-                    <CardDescription>
-                      Total de créditos disponíveis na sua conta.
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end gap-2">
-                  <p className="text-3xl font-bold tracking-tight">
-                    {formattedCredits}
-                  </p>
-                  <p className="text-muted-foreground pb-1 text-sm">
-                    créditos
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 shadow-md">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                    <MapPin className="text-primary h-4 w-4" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">Endereço</CardTitle>
-                    <CardDescription>
-                      Localização para correspondências.
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-6 md:grid-cols-12">
-                  <div className="md:col-span-3">
-                    <FormField
-                      control={form.control}
-                      name="address.zipCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CEP</FormLabel>
-                          <FormControl>
+                  <FormField
+                    control={form.control}
+                    name="photoUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Foto do perfil</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Camera className="text-muted-foreground absolute top-2.5 left-3 h-4 w-4" />
                             <Input
-                              placeholder="00000-000"
+                              placeholder="https://exemplo.com/minha-foto.jpg"
                               {...field}
-                              onChange={(e) =>
-                                field.onChange(maskCep(e.target.value))
-                              }
-                              maxLength={9}
+                              className="bg-background pl-9"
                             />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="md:col-span-9">
-                    <FormField
-                      control={form.control}
-                      name="address.street"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Logradouro</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Rua, Avenida..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="md:col-span-3">
-                    <FormField
-                      control={form.control}
-                      name="address.number"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número</FormLabel>
-                          <FormControl>
-                            <Input placeholder="123" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="md:col-span-9">
-                    <FormField
-                      control={form.control}
-                      name="address.complement"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Complemento{" "}
-                            <span className="text-muted-foreground text-xs font-normal">
-                              (Opcional)
-                            </span>
-                          </FormLabel>
-                          <FormControl>
-                            <Input placeholder="Apto, Bloco..." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div className="md:col-span-5">
-                    <FormField
-                      control={form.control}
-                      name="address.neighborhood"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Bairro</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Bairro" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="md:col-span-5">
-                    <FormField
-                      control={form.control}
-                      name="address.city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cidade</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Cidade" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="address.state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>UF</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="UF"
-                              maxLength={2}
-                              className="uppercase"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Informe o endereço público de uma imagem.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </CardContent>
             </Card>
+
+            <div className="grid items-start gap-6 xl:grid-cols-[minmax(280px,0.7fr)_minmax(0,2fr)]">
+              <Card className="border-border/50 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                      <Coins className="text-primary h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Créditos</CardTitle>
+                      <CardDescription>
+                        Total de créditos disponíveis na sua conta.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-end gap-2">
+                    <p className="text-3xl font-bold tracking-tight">
+                      {formattedCredits}
+                    </p>
+                    <p className="text-muted-foreground pb-1 text-sm">
+                      créditos
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/50 shadow-md">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                      <MapPin className="text-primary h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Endereço</CardTitle>
+                      <CardDescription>
+                        Localização para correspondências.
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 md:grid-cols-12">
+                    <div className="md:col-span-3">
+                      <FormField
+                        control={form.control}
+                        name="address.zipCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CEP</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="00000-000"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(maskCep(e.target.value))
+                                }
+                                maxLength={9}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="md:col-span-9">
+                      <FormField
+                        control={form.control}
+                        name="address.street"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Logradouro</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Rua, Avenida..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="md:col-span-3">
+                      <FormField
+                        control={form.control}
+                        name="address.number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número</FormLabel>
+                            <FormControl>
+                              <Input placeholder="123" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="md:col-span-9">
+                      <FormField
+                        control={form.control}
+                        name="address.complement"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Complemento{" "}
+                              <span className="text-muted-foreground text-xs font-normal">
+                                (Opcional)
+                              </span>
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="Apto, Bloco..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="md:col-span-5">
+                      <FormField
+                        control={form.control}
+                        name="address.neighborhood"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bairro</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Bairro" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="md:col-span-5">
+                      <FormField
+                        control={form.control}
+                        name="address.city"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cidade</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Cidade" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="address.state"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>UF</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="UF"
+                                maxLength={2}
+                                className="uppercase"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <div className="flex items-center justify-end gap-4">
               <Button

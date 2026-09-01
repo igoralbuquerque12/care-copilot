@@ -5,7 +5,7 @@ type Props = {
 };
 
 export const metadata = {
-  title: "Editor de Formulario | Care Copilot",
+  title: "Editor de Formulário | Care Copilot",
 };
 
 export default async function TemplateEditorRoute({ params }: Props) {

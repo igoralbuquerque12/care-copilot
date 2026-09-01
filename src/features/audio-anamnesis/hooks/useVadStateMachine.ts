@@ -50,7 +50,7 @@ export const useVadStateMachine = (options: VadOptions) => {
     } catch (error) {
       console.error("[useVadStateMachine] VAD module not installed:", error);
       throw new Error(
-        "Dependencia '@ricky0123/vad-web' nao instalada. Instale com `npm i @ricky0123/vad-web onnxruntime-web`.",
+        "Dependência '@ricky0123/vad-web' não instalada. Instale com `npm i @ricky0123/vad-web onnxruntime-web`.",
       );
     }
 

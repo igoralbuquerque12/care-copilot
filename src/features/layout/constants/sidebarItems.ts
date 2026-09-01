@@ -3,17 +3,13 @@ import {
   Users,
   CalendarDays,
   CalendarPlus,
-  Mic,
-  FileText,
   Stethoscope,
-  Pill,
   Settings,
-  Activity,
-  FolderCode,
   ClipboardList,
   BrainCircuit,
   ShieldCheck,
-  HeartPulse
+  HeartPulse,
+  Mic,
 } from "lucide-react";
 import type { SidebarItemType } from "~/features/layout/types/sidebar.types";
 
@@ -22,63 +18,64 @@ export const SIDEBAR_ITEMS: SidebarItemType[] = [
     title: "Visão Geral",
     icon: LayoutDashboard,
     href: "/",
-    type: "link"
+    type: "link",
   },
   {
     title: "Atendimentos",
     icon: CalendarDays,
     type: "group",
     subItems: [
-      { title: "Dashboard", href: "/consultas", icon: CalendarDays },
-      { title: "Agendar Consulta", href: "/consultas/agendar", icon: CalendarPlus },
-      { title: "Risco Cirúrgico", href: "/risco-cirurgico", icon: HeartPulse },
-    ]
+      {
+        title: "Agendar Consulta",
+        href: "/consultas/agendar",
+        icon: CalendarPlus,
+      },
+    ],
   },
   {
     title: "Pacientes",
     icon: Users,
     type: "group",
-    subItems: [
-      { title: "Buscar paciente", href: "/pacientes", icon: Users },
-    ]
+    subItems: [{ title: "Buscar paciente", href: "/pacientes", icon: Users }],
   },
   {
     title: "Anamneses",
     icon: Stethoscope,
     type: "group",
     subItems: [
-      { title: "Nova Anamnese", href: "/anamnesis", icon: Stethoscope },
-    ]
+      { title: "Anamnese manual", href: "/anamnesis", icon: Stethoscope },
+      { title: "Anamnese por voz", href: "/anamnesis/audio", icon: Mic },
+      { title: "Risco Cirúrgico", href: "/risco-cirurgico", icon: HeartPulse },
+    ],
   },
-  // {
-  //   title: "Care AI",
-  //   icon: Mic,
-  //   type: "group",
-  //   subItems: [
-  //     { title: "Captura de Voz", href: "/anamnesis/audio", icon: Mic },
-  //   ]
-  // },
   {
     title: "Configurações",
     icon: Settings,
     type: "group",
     subItems: [
       { title: "Minha Conta", href: "/profile", icon: Settings },
-      { title: "Formulários", href: "/configuracoes/formularios", icon: ClipboardList },
-      { title: "Inteligência Artificial", href: "/configuracoes/ia", icon: BrainCircuit },
+      {
+        title: "Formulários",
+        href: "/configuracoes/formularios",
+        icon: ClipboardList,
+      },
+      {
+        title: "Inteligência Artificial",
+        href: "/configuracoes/ia",
+        icon: BrainCircuit,
+      },
       {
         title: "Super Admin",
         href: "/configuracoes/superadmin",
         icon: ShieldCheck,
         superAdminOnly: true,
       },
-    ]
+    ],
   },
 ];
 
 export const getVisibleSidebarItems = (isSuperAdmin: boolean) =>
-  SIDEBAR_ITEMS
-    .filter((item) => !item.superAdminOnly || isSuperAdmin)
+  SIDEBAR_ITEMS.filter((item) => !item.superAdminOnly || isSuperAdmin)
     .map((item) => {
       if (!item.subItems) return item;
 

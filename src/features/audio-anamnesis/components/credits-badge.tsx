@@ -12,7 +12,7 @@ export function CreditsBadge() {
       <span className="font-medium text-foreground">
         {isLoading ? "..." : (balance ?? 0).toLocaleString("pt-BR")}
       </span>
-      <span className="text-xs text-muted-foreground">creditos</span>
+      <span className="text-xs text-muted-foreground">créditos</span>
     </div>
   );
 }

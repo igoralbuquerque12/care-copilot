@@ -10,8 +10,8 @@ export const leeFactorsSchema = z.object({
 });
 
 export const createSurgicalRiskSchema = z.object({
-  anamnesisId: z.string().cuid("ID de anamnese inv�lido"),
-  surgeryName: z.string().min(1, "Nome da cirurgia � obrigat�rio"),
+  anamnesisId: z.string().cuid("ID de anamnese inválido"),
+  surgeryName: z.string().min(1, "Nome da cirurgia é obrigatório"),
 
   isHighRiskSurgery: z.boolean(),
   hasIschemicHeartDisease: z.boolean(),
@@ -28,7 +28,7 @@ export const createSurgicalRiskSchema = z.object({
 
 export const updateSurgicalRiskSchema = createSurgicalRiskSchema
   .partial()
-  .extend({ id: z.string().cuid("ID inv�lido") });
+  .extend({ id: z.string().cuid("ID inválido") });
 
 export type CreateSurgicalRiskInput = z.infer<typeof createSurgicalRiskSchema>;
 export type UpdateSurgicalRiskInput = z.infer<typeof updateSurgicalRiskSchema>;

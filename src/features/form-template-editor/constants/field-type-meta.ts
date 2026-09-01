@@ -21,10 +21,10 @@ export const FIELD_TYPE_META: Record<
 > = {
   TEXT: { label: "Texto longo", icon: Pilcrow },
   SHORT_TEXT: { label: "Texto curto", icon: TextCursorInput },
-  NUMBER: { label: "Numero", icon: Hash },
-  BOOLEAN: { label: "Sim/Nao", icon: CheckSquare },
+  NUMBER: { label: "Número", icon: Hash },
+  BOOLEAN: { label: "Sim/Não", icon: CheckSquare },
   SELECT: { label: "Lista", icon: ListChecks },
-  RADIO: { label: "Escolha unica", icon: CircleDot },
+  RADIO: { label: "Escolha única", icon: CircleDot },
   DATE: { label: "Data", icon: Calendar },
   NYHA_CLASS: { label: "Classe NYHA", icon: HeartPulse },
   MEDICATIONS: { label: "Medicamentos", icon: Pill },

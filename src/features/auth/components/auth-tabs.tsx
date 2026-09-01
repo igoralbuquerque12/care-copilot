@@ -10,7 +10,7 @@ export function AuthTabs() {
     <Tabs defaultValue="signin" className="w-full">
       <TabsList className="grid w-full grid-cols-2 h-auto">
         <TabsTrigger value="signin">Entrar</TabsTrigger>
-        <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+        <TabsTrigger disabled value="signup">Cadastrar (Indisponível)</TabsTrigger>
       </TabsList>
       <TabsContent value="signin" className="mt-6">
         <SignInForm />

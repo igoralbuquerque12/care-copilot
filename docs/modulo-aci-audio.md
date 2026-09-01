@@ -79,7 +79,7 @@ Banco (Prisma / PostgreSQL)
 | `SUPABASE_URL` | Sim | URL do projeto Supabase (server-side) |
 | `SUPABASE_ANON_KEY` | Sim | Chave anonima do Supabase (server-side) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Sim | Chave de servico para operacoes admin no Storage |
-| `APP_URL` | Sim | URL base da aplicacao (ex: `https://app.taqto.com`) — usada pelo QStash para callback |
+| `APP_URL` | Sim | URL base da aplicacao (ex: `https://app.care-copilot.com`) — usada pelo QStash para callback |
 | `GEMINI_API_KEY` | Sim | Chave da API Gemini para o LLM de extracao/merge |
 | `QSTASH_TOKEN` | Opcional | Token do QStash. Se ausente, o processamento roda inline (sem fila) |
 | `QSTASH_CURRENT_SIGNING_KEY` | Opcional | Chave de verificacao de assinatura QStash (producao) |

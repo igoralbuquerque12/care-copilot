@@ -1,6 +1,16 @@
 "use client";
 
-import { ArrowDown, ArrowLeft, ArrowUp, Eye, EyeOff, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  Plus,
+  Save,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -8,6 +18,11 @@ import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/components/ui/collapsible";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
@@ -19,8 +34,15 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { FIELD_TYPE_META, FIELD_TYPE_OPTIONS } from "~/features/form-template-editor/constants/field-type-meta";
-import type { EditorField, EditorSection, EditorState } from "~/features/form-template-editor/types/editor.types";
+import {
+  FIELD_TYPE_META,
+  FIELD_TYPE_OPTIONS,
+} from "~/features/form-template-editor/constants/field-type-meta";
+import type {
+  EditorField,
+  EditorSection,
+  EditorState,
+} from "~/features/form-template-editor/types/editor.types";
 import type { FormFieldConfig, FormFieldType } from "~/schemas/form-template";
 import { api } from "~/trpc/react";
 import type { RouterOutputs } from "~/trpc/react";
@@ -119,10 +141,10 @@ export function TemplateEditorPage({ templateId }: Props) {
 
   if (template.isLoading || !editor) {
     return (
-      <div className="min-h-screen bg-background p-4 md:p-8">
-        <div className="mx-auto max-w-5xl">
+      <div className="bg-background w-full p-4 md:p-6 lg:p-8">
+        <div>
           <Card>
-            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            <CardContent className="text-muted-foreground py-10 text-center text-sm">
               Carregando editor...
             </CardContent>
           </Card>
@@ -180,7 +202,11 @@ export function TemplateEditorPage({ templateId }: Props) {
     setEditor({ ...editor, sections: renumberSections(sections) });
   };
 
-  const moveField = (sectionIndex: number, fieldIndex: number, direction: -1 | 1) => {
+  const moveField = (
+    sectionIndex: number,
+    fieldIndex: number,
+    direction: -1 | 1,
+  ) => {
     const section = editor.sections[sectionIndex];
     if (!section) return;
     const target = fieldIndex + direction;
@@ -224,8 +250,8 @@ export function TemplateEditorPage({ templateId }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <main className="bg-background w-full p-4 md:p-6 lg:p-8">
+      <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => router.back()}>
@@ -233,9 +259,10 @@ export function TemplateEditorPage({ templateId }: Props) {
               <span className="sr-only">Voltar</span>
             </Button>
             <div>
-              <h1 className="text-3xl font-semibold">Editor de formulario</h1>
+              <h1 className="text-3xl font-semibold">Editor de formulário</h1>
               <p className="text-muted-foreground">
-                {editor.sections.length} secoes, {visibleFieldCount} campos visiveis
+                {editor.sections.length} seções, {visibleFieldCount} campos
+                visíveis
               </p>
             </div>
           </div>
@@ -261,7 +288,7 @@ export function TemplateEditorPage({ templateId }: Props) {
             </div>
             <div>
               <Label htmlFor="template-description" className="mb-2 block">
-                Descricao
+                Descrição
               </Label>
               <Input
                 id="template-description"
@@ -278,89 +305,116 @@ export function TemplateEditorPage({ templateId }: Props) {
                   setEditor({ ...editor, isDefault: checked })
                 }
               />
-              Padrao
+              Padrão
             </label>
           </CardContent>
         </Card>
 
         <div className="space-y-4">
           {editor.sections.map((section, sectionIndex) => (
-            <Card key={section.tempId}>
-              <CardHeader className="gap-4 md:grid-cols-[1fr_auto]">
-                <div className="grid gap-3 md:grid-cols-2">
-                  <Input
-                    value={section.name}
-                    onChange={(event) =>
-                      setSection(sectionIndex, { name: event.target.value })
-                    }
-                    aria-label="Nome da secao"
-                  />
-                  <Input
-                    value={section.description ?? ""}
-                    onChange={(event) =>
-                      setSection(sectionIndex, {
-                        description: event.target.value,
-                      })
-                    }
-                    aria-label="Descricao da secao"
-                    placeholder="Descricao opcional"
-                  />
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => moveSection(sectionIndex, -1)}
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                    <span className="sr-only">Subir secao</span>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => moveSection(sectionIndex, 1)}
-                  >
-                    <ArrowDown className="h-4 w-4" />
-                    <span className="sr-only">Descer secao</span>
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {section.fields.map((field, fieldIndex) => (
-                  <FieldEditor
-                    key={field.tempId}
-                    field={field}
-                    onChange={(patch) =>
-                      setField(sectionIndex, fieldIndex, patch)
-                    }
-                    onMoveUp={() => moveField(sectionIndex, fieldIndex, -1)}
-                    onMoveDown={() => moveField(sectionIndex, fieldIndex, 1)}
-                    onRemove={() =>
-                      setSection(sectionIndex, {
-                        fields: section.fields.filter((_, i) => i !== fieldIndex),
-                      })
-                    }
-                  />
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() =>
-                    setSection(sectionIndex, {
-                      fields: [
-                        ...section.fields,
-                        buildField(section.fields.length),
-                      ],
-                    })
-                  }
-                >
-                  <Plus className="h-4 w-4" />
-                  Adicionar campo
-                </Button>
-              </CardContent>
-            </Card>
+            <Collapsible
+              key={section.tempId}
+              defaultOpen={sectionIndex === 0}
+              className="group"
+            >
+              <Card>
+                <CardHeader className="gap-4 md:grid-cols-[1fr_auto]">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <Input
+                      value={section.name}
+                      onChange={(event) =>
+                        setSection(sectionIndex, { name: event.target.value })
+                      }
+                      aria-label="Nome da seção"
+                    />
+                    <Input
+                      value={section.description ?? ""}
+                      onChange={(event) =>
+                        setSection(sectionIndex, {
+                          description: event.target.value,
+                        })
+                      }
+                      aria-label="Descrição da seção"
+                      placeholder="Descrição opcional"
+                    />
+                  </div>
+                  <div className="flex gap-1">
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mr-1 gap-1.5"
+                      >
+                        {section.fields.length}{" "}
+                        {section.fields.length === 1 ? "campo" : "campos"}
+                        <ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" />
+                        <span className="sr-only">
+                          Expandir ou recolher campos da seção
+                        </span>
+                      </Button>
+                    </CollapsibleTrigger>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveSection(sectionIndex, -1)}
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                      <span className="sr-only">Subir seção</span>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveSection(sectionIndex, 1)}
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                      <span className="sr-only">Descer seção</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CollapsibleContent>
+                  <CardContent className="space-y-3">
+                    {section.fields.map((field, fieldIndex) => (
+                      <FieldEditor
+                        key={field.tempId}
+                        field={field}
+                        onChange={(patch) =>
+                          setField(sectionIndex, fieldIndex, patch)
+                        }
+                        onMoveUp={() => moveField(sectionIndex, fieldIndex, -1)}
+                        onMoveDown={() =>
+                          moveField(sectionIndex, fieldIndex, 1)
+                        }
+                        onRemove={() =>
+                          setSection(sectionIndex, {
+                            fields: section.fields.filter(
+                              (_, i) => i !== fieldIndex,
+                            ),
+                          })
+                        }
+                      />
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        setSection(sectionIndex, {
+                          fields: [
+                            ...section.fields,
+                            buildField(section.fields.length),
+                          ],
+                        })
+                      }
+                    >
+                      <Plus className="h-4 w-4" />
+                      Adicionar campo
+                    </Button>
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           ))}
         </div>
 
@@ -373,7 +427,7 @@ export function TemplateEditorPage({ templateId }: Props) {
               sections: [
                 ...editor.sections,
                 {
-                  name: "Nova secao",
+                  name: "Nova seção",
                   description: "",
                   order: editor.sections.length,
                   isCollapsible: false,
@@ -385,10 +439,10 @@ export function TemplateEditorPage({ templateId }: Props) {
           }
         >
           <Plus className="h-4 w-4" />
-          Adicionar secao
+          Adicionar seção
         </Button>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -413,7 +467,7 @@ function FieldEditor({
       <div className="grid gap-3 lg:grid-cols-[1.2fr_1fr_180px_auto]">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="text-muted-foreground h-4 w-4" />
             <Input
               value={field.label}
               onChange={(event) => onChange({ label: event.target.value })}
@@ -425,7 +479,7 @@ function FieldEditor({
             value={field.description ?? ""}
             onChange={(event) => onChange({ description: event.target.value })}
             placeholder="Texto de ajuda opcional"
-            aria-label="Descricao do campo"
+            aria-label="Descrição do campo"
           />
         </div>
 
@@ -464,11 +518,11 @@ function FieldEditor({
                 checked={field.isRequired}
                 onCheckedChange={(checked) => onChange({ isRequired: checked })}
               />
-              Obrigatorio
+              Obrigatório
             </label>
             <button
               type="button"
-              className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-1"
               onClick={() => onChange({ isVisible: !field.isVisible })}
             >
               {field.isVisible ? (
@@ -476,7 +530,7 @@ function FieldEditor({
               ) : (
                 <EyeOff className="h-4 w-4" />
               )}
-              {field.isVisible ? "Visivel" : "Oculto"}
+              {field.isVisible ? "Visível" : "Oculto"}
             </button>
           </div>
         </div>
@@ -486,7 +540,12 @@ function FieldEditor({
             <ArrowUp className="h-4 w-4" />
             <span className="sr-only">Subir campo</span>
           </Button>
-          <Button type="button" variant="ghost" size="icon" onClick={onMoveDown}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onMoveDown}
+          >
             <ArrowDown className="h-4 w-4" />
             <span className="sr-only">Descer campo</span>
           </Button>

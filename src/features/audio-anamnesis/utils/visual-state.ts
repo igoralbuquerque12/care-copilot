@@ -33,10 +33,10 @@ export const VISUAL_STATE_LABEL: Record<AudioVisualState, string> = {
   waiting_for_patient: "Aguardando paciente",
   ready_to_record: "Pronto para gravar",
   listening: "Ouvindo",
-  buffering: "Aguardando proxima fala",
-  uploading: "Enviando audio",
+  buffering: "Aguardando próxima fala",
+  uploading: "Enviando áudio",
   processing: "Processando com IA",
   synced: "Atualizado",
   error: "Erro",
-  insufficient_credits: "Creditos insuficientes",
+  insufficient_credits: "Créditos insuficientes",
 };

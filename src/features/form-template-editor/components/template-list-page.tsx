@@ -26,7 +26,7 @@ export function TemplateListPage() {
   const setDefault = api.formTemplate.setDefault.useMutation({
     onSuccess: async () => {
       await utils.formTemplate.list.invalidate();
-      toast.success("Template padrao atualizado");
+      toast.success("Template padrão atualizado");
     },
     onError: (error) => toast.error(error.message),
   });
@@ -40,13 +40,13 @@ export function TemplateListPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <main className="bg-background w-full p-4 md:p-6 lg:p-8">
+      <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold">Formularios de anamnese</h1>
+            <h1 className="text-3xl font-semibold">Formulários de anamnese</h1>
             <p className="text-muted-foreground">
-              Personalize as secoes e campos usados nas suas consultas.
+              Personalize as seções e os campos usados nas suas consultas.
             </p>
           </div>
           {templates.data?.[0] && (
@@ -55,34 +55,34 @@ export function TemplateListPage() {
               disabled={duplicate.isPending}
             >
               <Copy className="h-4 w-4" />
-              Novo a partir do padrao
+              Novo a partir do padrão
             </Button>
           )}
         </div>
 
         {templates.isLoading && (
           <Card>
-            <CardContent className="py-10 text-center text-sm text-muted-foreground">
+            <CardContent className="text-muted-foreground py-10 text-center text-sm">
               Carregando templates...
             </CardContent>
           </Card>
         )}
 
-        <div className="grid gap-4">
+        <div className="grid gap-4 xl:grid-cols-2">
           {templates.data?.map((template) => (
             <Card key={template.id}>
               <CardHeader className="gap-3 sm:grid-cols-[1fr_auto]">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-5 w-5 text-primary" />
+                  <div className="bg-primary/10 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                    <FileText className="text-primary h-5 w-5" />
                   </div>
                   <div className="min-w-0">
                     <CardTitle className="truncate">{template.name}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {template.sections.length} secoes
+                    <p className="text-muted-foreground text-sm">
+                      {template.sections.length} seções
                     </p>
                   </div>
-                  {template.isDefault && <Badge>Padrao</Badge>}
+                  {template.isDefault && <Badge>Padrão</Badge>}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {!template.isDefault && (
@@ -92,7 +92,7 @@ export function TemplateListPage() {
                       onClick={() => setDefault.mutate({ id: template.id })}
                     >
                       <Star className="h-4 w-4" />
-                      Padrao
+                      Padrão
                     </Button>
                   )}
                   <Button
@@ -129,6 +129,6 @@ export function TemplateListPage() {
           ))}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

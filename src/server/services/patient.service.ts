@@ -198,7 +198,7 @@ export const getPatientOverview = async (
       },
     },
   });
-  if (!patient) throw new TRPCError({ code: "NOT_FOUND", message: "Paciente nao encontrado" });
+  if (!patient) throw new TRPCError({ code: "NOT_FOUND", message: "Paciente não encontrado" });
   return patient;
 };
 
@@ -266,7 +266,7 @@ export const getPatientAnamnesisDetail = async (
       aiDiagnoses: { where: { isValid: true }, orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
-  if (!item) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese nao encontrada" });
+  if (!item) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese não encontrada" });
   return {
     ...item,
     formSnapshot: item.formSnapshot ?? (

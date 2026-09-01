@@ -39,7 +39,7 @@ const parseFormState = (value: unknown) => {
 const parseRow = (row: SessionRow): SyncedSession | null => {
   const parsed = parseFormState(row.current_form_state);
   if (!parsed.success) {
-    console.warn("[useAnamnesisFormSync] form state invalido:", parsed.error);
+    console.warn("[useAnamnesisFormSync] form state inválido:", parsed.error);
     return null;
   }
   return {

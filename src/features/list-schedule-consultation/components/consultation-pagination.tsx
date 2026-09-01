@@ -26,7 +26,7 @@ export function ConsultationPagination({
   return (
     <div className="text-muted-foreground flex items-center justify-between text-sm">
       <span>
-        {from}–{to} de {total} consultation{total !== 1 ? "s" : ""}
+        {from}–{to} de {total} {total === 1 ? "consulta" : "consultas"}
       </span>
       <div className="flex items-center gap-2">
         <Button
