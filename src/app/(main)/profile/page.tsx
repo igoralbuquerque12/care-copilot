@@ -8,10 +8,10 @@ export const metadata: Metadata = {
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-muted/40 py-8">
-      <div className="container mx-auto max-w-5xl px-4 md:px-6">
+    <main className="bg-muted/40 w-full p-4 md:p-6 lg:p-8">
+      <div className="w-full">
         <ProfileForm />
       </div>
-    </div>
+    </main>
   );
 }
