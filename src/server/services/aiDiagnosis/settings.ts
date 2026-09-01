@@ -1,8 +1,19 @@
 import type { AiProvider, PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import type { SaveAnalysisSettingsInput } from "~/schemas/ai-analysis";
+import type {
+  SaveAiPromptTemplatesInput,
+  SaveAnalysisSettingsInput,
+} from "~/schemas/ai-analysis";
 import { decryptApiKey, encryptApiKey } from "./credentials";
 import { validateProviderConfiguration } from "./providers";
+import { CLINICAL_CHAT_MODEL } from "../clinicalChat/constants";
+import {
+  ANALYSIS_PROMPT_VARIABLES,
+  CLINICAL_CHAT_PROMPT_VARIABLES,
+  DEFAULT_ANALYSIS_PROMPT_TEMPLATE,
+  DEFAULT_CLINICAL_CHAT_PROMPT_TEMPLATE,
+  validatePromptTemplate,
+} from "../ai-prompt-templates";
 
 export const MODEL_PRESETS = {
   OPENAI: ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"],
@@ -19,7 +30,55 @@ export const getSettings = async (db: PrismaClient, profileId: string) => {
       select: { provider: true, lastFour: true, verifiedAt: true, updatedAt: true },
     }),
   ]);
-  return { settings, credentials, presets: MODEL_PRESETS };
+  return {
+    settings,
+    credentials,
+    presets: MODEL_PRESETS,
+    chatModel: CLINICAL_CHAT_MODEL,
+    promptConfiguration: {
+      templates: {
+        analysis:
+          settings?.analysisPromptTemplate ?? DEFAULT_ANALYSIS_PROMPT_TEMPLATE,
+        clinicalChat:
+          settings?.clinicalChatPromptTemplate ??
+          DEFAULT_CLINICAL_CHAT_PROMPT_TEMPLATE,
+      },
+      defaults: {
+        analysis: DEFAULT_ANALYSIS_PROMPT_TEMPLATE,
+        clinicalChat: DEFAULT_CLINICAL_CHAT_PROMPT_TEMPLATE,
+      },
+      variables: {
+        analysis: ANALYSIS_PROMPT_VARIABLES,
+        clinicalChat: CLINICAL_CHAT_PROMPT_VARIABLES,
+      },
+    },
+  };
+};
+
+export const savePromptTemplates = async (
+  db: PrismaClient,
+  profileId: string,
+  input: SaveAiPromptTemplatesInput,
+) => {
+  validatePromptTemplate(
+    input.analysisPromptTemplate,
+    ANALYSIS_PROMPT_VARIABLES,
+  );
+  validatePromptTemplate(
+    input.clinicalChatPromptTemplate,
+    CLINICAL_CHAT_PROMPT_VARIABLES,
+  );
+  const updated = await db.aiAnalysisSettings.updateMany({
+    where: { profileId },
+    data: input,
+  });
+  if (updated.count === 0) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "Ative primeiro uma configuracao de IA para salvar os prompts.",
+    });
+  }
+  return { ok: true as const };
 };
 
 export const saveCredential = async (

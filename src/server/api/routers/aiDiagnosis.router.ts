@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import {
   analysisByAnamnesisSchema,
   removeCredentialSchema,
+  saveAiPromptTemplatesSchema,
   saveAnalysisSettingsSchema,
   saveCredentialSchema,
   testCredentialSchema,
@@ -32,6 +33,11 @@ export const aiDiagnosisRouter = createTRPCRouter({
     .input(saveAnalysisSettingsSchema)
     .mutation(({ ctx, input }) =>
       settingsService.saveSettings(ctx.db, ctx.user.id, input),
+    ),
+  savePromptTemplates: protectedProcedure
+    .input(saveAiPromptTemplatesSchema)
+    .mutation(({ ctx, input }) =>
+      settingsService.savePromptTemplates(ctx.db, ctx.user.id, input),
     ),
   getByAnamnesis: protectedProcedure
     .input(analysisByAnamnesisSchema)
