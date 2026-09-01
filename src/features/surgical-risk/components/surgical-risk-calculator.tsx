@@ -106,8 +106,7 @@ const RISK_CONFIG: Record<string, RiskConfig> = {
     riskRange: "~11% de MACE",
     colorClass: "text-red-700 dark:text-red-400",
     badgeVariant: "destructive",
-    alertClass:
-      "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950",
+    alertClass: "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950",
     icon: HeartPulse,
   },
 };
@@ -123,7 +122,9 @@ type SurgicalRiskCalculatorProps = {
   control: Control<CreateSurgicalRiskInput>;
 };
 
-export function SurgicalRiskCalculator({ control }: SurgicalRiskCalculatorProps) {
+export function SurgicalRiskCalculator({
+  control,
+}: SurgicalRiskCalculatorProps) {
   const watched = useWatch({ control });
 
   const score = LEE_PREDICTORS.reduce(
@@ -136,14 +137,14 @@ export function SurgicalRiskCalculator({ control }: SurgicalRiskCalculatorProps)
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3">
+      <div className="grid gap-3 lg:grid-cols-2">
         {LEE_PREDICTORS.map((predictor) => (
           <FormField
             key={predictor.field}
             control={control}
             name={predictor.field}
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-3 hover:bg-muted/40 transition-colors">
+              <FormItem className="hover:bg-muted/40 flex flex-row items-start space-y-0 space-x-3 rounded-md border p-3 transition-colors">
                 <FormControl>
                   <Checkbox
                     checked={field.value}
@@ -154,7 +155,7 @@ export function SurgicalRiskCalculator({ control }: SurgicalRiskCalculatorProps)
                   <FormLabel className="cursor-pointer font-medium">
                     {predictor.label}
                   </FormLabel>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-muted-foreground text-xs">
                     {predictor.description}
                   </p>
                 </div>
@@ -167,7 +168,9 @@ export function SurgicalRiskCalculator({ control }: SurgicalRiskCalculatorProps)
       {/* Score reativo */}
       <Alert className={cn("mt-4 transition-all", config.alertClass)}>
         <RiskIcon className={cn("h-4 w-4", config.colorClass)} />
-        <AlertTitle className={cn("flex items-center gap-2", config.colorClass)}>
+        <AlertTitle
+          className={cn("flex items-center gap-2", config.colorClass)}
+        >
           {config.label}
           <Badge variant={config.badgeVariant} className="ml-auto text-xs">
             {score} / 6 pontos

@@ -1,10 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { HeartPulse, ChevronRight } from "lucide-react";
-import { api } from "~/trpc/react";
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
+import {
+  ClipboardCheck,
+  HeartPulse,
+  Loader2,
+  Stethoscope,
+  UserRound,
+} from "lucide-react";
+import { Badge } from "~/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,137 +23,197 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Separator } from "~/components/ui/separator";
-import { Badge } from "~/components/ui/badge";
 import { PatientSearch } from "~/features/patients/components/patient-search";
 import { SurgicalRiskForm } from "~/features/surgical-risk/components/surgical-risk-form";
 import { SurgicalRiskReport } from "~/features/surgical-risk/components/surgical-risk-report";
+import { api } from "~/trpc/react";
 
-function StepLabel({ number, label, active, done }: { number: number; label: string; active: boolean; done: boolean }) {
+function StepLabel({
+  number,
+  label,
+  active,
+  done,
+}: {
+  number: number;
+  label: string;
+  active: boolean;
+  done: boolean;
+}) {
   return (
-    <div className={`flex items-center gap-2 text-sm ${done ? "text-primary" : active ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-      <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold border ${done ? "bg-primary border-primary text-primary-foreground" : active ? "border-foreground" : "border-muted-foreground/40"}`}>
+    <div
+      className={[
+        "flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 text-xs sm:px-3 sm:text-sm",
+        done
+          ? "bg-primary/10 text-primary"
+          : active
+            ? "bg-background text-foreground font-medium shadow-sm"
+            : "text-muted-foreground",
+      ].join(" ")}
+    >
+      <span
+        className={[
+          "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold",
+          done
+            ? "border-primary bg-primary text-primary-foreground"
+            : active
+              ? "border-foreground"
+              : "border-muted-foreground/40",
+        ].join(" ")}
+      >
         {done ? "✓" : number}
       </span>
-      {label}
+      <span className="truncate">{label}</span>
     </div>
   );
 }
 
 export default function RiscoCirurgicoPage() {
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
-  const [selectedAnamnesisId, setSelectedAnamnesisId] = useState<string | null>(null);
-  const [showReport, setShowReport] = useState(false);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null,
+  );
+  const [selectedAnamnesisId, setSelectedAnamnesisId] = useState<string | null>(
+    null,
+  );
+  const [isEditingRisk, setIsEditingRisk] = useState(false);
 
   const { data: anamneses, isLoading: isLoadingAnamneses } =
     api.surgicalRisk.getPatientAnamneses.useQuery(
       { patientId: selectedPatientId! },
-      { enabled: !!selectedPatientId },
+      { enabled: Boolean(selectedPatientId) },
     );
 
-  const { data: existingRisk } =
+  const { data: existingRisk, isLoading: isLoadingRisk } =
     api.surgicalRisk.getByAnamnesisId.useQuery(
       { anamnesisId: selectedAnamnesisId! },
-      { enabled: !!selectedAnamnesisId },
+      { enabled: Boolean(selectedAnamnesisId) },
     );
 
   const step = !selectedPatientId ? 1 : !selectedAnamnesisId ? 2 : 3;
 
   const handleAnamnesisSelect = (id: string) => {
     setSelectedAnamnesisId(id);
-    setShowReport(false);
+    setIsEditingRisk(false);
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="mx-auto max-w-3xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <HeartPulse className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">Risco Cirúrgico Perioperatório</h1>
-              <p className="text-sm text-muted-foreground">
-                Avaliação baseada no Índice de Risco Cardíaco Revisado (Score de Lee / RCRI)
-              </p>
-            </div>
-          </div>
-
-          {/* Stepper */}
-          <div className="flex items-center gap-3 mt-5 p-3 rounded-lg bg-muted/50">
-            <StepLabel number={1} label="Paciente" active={step === 1} done={step > 1} />
-            <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            <StepLabel number={2} label="Anamnese" active={step === 2} done={step > 2} />
-            <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            <StepLabel number={3} label="Avaliação" active={step === 3} done={false} />
-          </div>
+    <main className="bg-background w-full space-y-6 p-4 md:p-6 lg:p-8">
+      <header className="flex items-start gap-3">
+        <span className="bg-primary/10 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+          <HeartPulse className="text-primary h-5 w-5" />
+        </span>
+        <div>
+          <h1 className="text-foreground text-2xl font-semibold md:text-3xl">
+            Risco Cirúrgico Perioperatório
+          </h1>
+          <p className="text-muted-foreground mt-1 max-w-3xl text-sm">
+            Avaliação baseada no Índice de Risco Cardíaco Revisado (Score de Lee
+            / RCRI).
+          </p>
         </div>
+      </header>
 
-        {/* Passo 1: Busca de paciente */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Passo 1 — Selecionar Paciente
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PatientSearch
-              onSelect={(id) => {
-                setSelectedPatientId(id);
-                setSelectedAnamnesisId(null);
-              }}
-              onClear={() => {
-                setSelectedPatientId(null);
-                setSelectedAnamnesisId(null);
-              }}
-              selectedPatientId={selectedPatientId}
-            />
-          </CardContent>
-        </Card>
+      <div className="bg-muted/60 grid grid-cols-3 gap-1 rounded-xl p-1.5 sm:gap-2">
+        <StepLabel
+          number={1}
+          label="Paciente"
+          active={step === 1}
+          done={step > 1}
+        />
+        <StepLabel
+          number={2}
+          label="Anamnese"
+          active={step === 2}
+          done={step > 2}
+        />
+        <StepLabel
+          number={3}
+          label="Avaliação"
+          active={step === 3}
+          done={false}
+        />
+      </div>
 
-        {/* Passo 2: Seleção de anamnese */}
-        {selectedPatientId && (
-          <Card className="mb-4">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.7fr)]">
+        <aside className="space-y-4 xl:sticky xl:top-4">
+          <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Passo 2 — Selecionar Anamnese Base
+              <CardTitle className="flex items-center gap-2 text-base">
+                <UserRound className="text-primary h-4 w-4" />
+                1. Selecionar paciente
               </CardTitle>
               <CardDescription>
-                Escolha uma das últimas consultas registradas para este paciente
+                Busque pelo nome ou CPF do paciente.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isLoadingAnamneses ? (
-                <div className="text-sm text-muted-foreground animate-pulse">Carregando anamneses...</div>
-              ) : !anamneses?.length ? (
-                <div className="text-sm text-muted-foreground">
-                  Nenhuma anamnese encontrada para este paciente.
+              <PatientSearch
+                onSelect={(id) => {
+                  setSelectedPatientId(id);
+                  setSelectedAnamnesisId(null);
+                  setIsEditingRisk(false);
+                }}
+                onClear={() => {
+                  setSelectedPatientId(null);
+                  setSelectedAnamnesisId(null);
+                  setIsEditingRisk(false);
+                }}
+                selectedPatientId={selectedPatientId}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className={!selectedPatientId ? "opacity-60" : undefined}>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Stethoscope className="text-primary h-4 w-4" />
+                2. Selecionar anamnese
+              </CardTitle>
+              <CardDescription>
+                Use uma consulta registrada como base da avaliação.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!selectedPatientId ? (
+                <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+                  Selecione um paciente para carregar as anamneses.
+                </p>
+              ) : isLoadingAnamneses ? (
+                <div className="text-muted-foreground flex items-center gap-2 py-3 text-sm">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Carregando anamneses...
                 </div>
+              ) : !anamneses?.length ? (
+                <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+                  Nenhuma anamnese encontrada para este paciente.
+                </p>
               ) : (
-                <Select onValueChange={handleAnamnesisSelect} value={selectedAnamnesisId ?? ""}>
+                <Select
+                  onValueChange={handleAnamnesisSelect}
+                  value={selectedAnamnesisId ?? ""}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma anamnese..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {anamneses.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        <div className="flex items-center gap-2">
-                          <span>
-                            {new Intl.DateTimeFormat("pt-BR").format(new Date(a.date))}
+                    {anamneses.map((anamnesis) => (
+                      <SelectItem key={anamnesis.id} value={anamnesis.id}>
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="truncate">
+                            {new Intl.DateTimeFormat("pt-BR").format(
+                              new Date(anamnesis.date),
+                            )}
                             {" — "}
-                            {a.chiefComplaint.slice(0, 50)}
-                            {a.chiefComplaint.length > 50 ? "..." : ""}
+                            {anamnesis.chiefComplaint}
                           </span>
-                          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                          {(a as any).surgicalRisk && (
-                            <Badge variant="secondary" className="text-xs">
-                              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                              RCRI {(a as any).surgicalRisk.riskClass as string}
+                          {anamnesis.surgicalRisk && (
+                            <Badge
+                              variant="secondary"
+                              className="shrink-0 text-xs"
+                            >
+                              RCRI {anamnesis.surgicalRisk.riskClass}
                             </Badge>
                           )}
-                        </div>
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -150,41 +221,59 @@ export default function RiscoCirurgicoPage() {
               )}
             </CardContent>
           </Card>
-        )}
+        </aside>
 
-        {/* Passo 3: Formulário ou Laudo */}
-        {selectedAnamnesisId && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Passo 3 — Avaliação de Risco Cirúrgico
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {existingRisk && !showReport ? (
-                <>
-                  <SurgicalRiskReport
-                    assessment={existingRisk}
-                    onEdit={() => setShowReport(false)}
-                  />
-                  <Separator className="my-4" />
-                  <button
-                    onClick={() => setShowReport(true)}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Editar avaliação
-                  </button>
-                </>
-              ) : (
+        <section className="min-w-0" aria-label="Avaliação de risco cirúrgico">
+          {!selectedAnamnesisId ? (
+            <Card className="flex min-h-72 items-center justify-center border-dashed">
+              <CardContent className="max-w-md py-12 text-center">
+                <span className="bg-primary/10 mx-auto flex h-12 w-12 items-center justify-center rounded-2xl">
+                  <ClipboardCheck className="text-primary h-6 w-6" />
+                </span>
+                <h2
+                  id="risk-assessment-title"
+                  className="text-foreground mt-4 font-semibold"
+                >
+                  Avaliação de risco
+                </h2>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Selecione o paciente e uma anamnese para preencher ou
+                  consultar o laudo de risco cirúrgico.
+                </p>
+              </CardContent>
+            </Card>
+          ) : isLoadingRisk ? (
+            <Card>
+              <CardContent className="text-muted-foreground flex min-h-72 items-center justify-center gap-2 text-sm">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Carregando avaliação...
+              </CardContent>
+            </Card>
+          ) : existingRisk && !isEditingRisk ? (
+            <SurgicalRiskReport
+              assessment={existingRisk}
+              onEdit={() => setIsEditingRisk(true)}
+            />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle id="risk-assessment-title">
+                  3. Avaliação de risco cirúrgico
+                </CardTitle>
+                <CardDescription>
+                  Confirme os dados clínicos e registre o parecer médico.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
                 <SurgicalRiskForm
                   anamnesisId={selectedAnamnesisId}
-                  onSuccess={() => setShowReport(false)}
+                  onSuccess={() => setIsEditingRisk(false)}
                 />
-              )}
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          )}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
