@@ -145,8 +145,8 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
   const createAnamnesisMutation = api.anamnesis.create.useMutation({
     onSuccess: (data) => {
       toast.success("Anamnese finalizada com sucesso!")
-      setCreatedAnamnesisId(data.id)
-      // Navigation is now handled by the wizard after the CTA is dismissed
+      setCreatedAnamnesisId(data.anamnesisId)
+      router.push(`/anamnesis/${data.anamnesisId}/analise`)
     },
     onError: (error) => {
       console.error("Erro ao criar anamnese:", error)
