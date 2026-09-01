@@ -1,0 +1,48 @@
+enum AiProvider {
+  OPENAI
+  GROQ
+  GEMINI
+  ANTHROPIC
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model AiProviderCredential {
+  id String @id @default(cuid())
+
+  profileId String     @map("profile_id") @db.Uuid
+  profile   Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  provider  AiProvider
+
+  encryptedApiKey String   @map("encrypted_api_key") @db.Text
+  iv              String
+  authTag         String   @map("auth_tag")
+  keyVersion      Int      @default(1) @map("key_version")
+  lastFour        String   @map("last_four")
+  verifiedAt      DateTime? @map("verified_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([profileId, provider])
+  @@map("ai_provider_credential")
+}
+
+model AiAnalysisSettings {
+  id String @id @default(cuid())
+
+  profileId String  @unique @map("profile_id") @db.Uuid
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  provider           AiProvider
+  model              String
+  customInstructions String     @default("") @map("custom_instructions") @db.Text
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @default(now()) @updatedAt @map("updated_at")
+
+  @@map("ai_analysis_settings")
+}
