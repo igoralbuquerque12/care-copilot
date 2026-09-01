@@ -11,6 +11,7 @@ import {
   Activity,
   FolderCode,
   ClipboardList,
+  BrainCircuit,
   ShieldCheck,
   HeartPulse
 } from "lucide-react";
@@ -49,25 +50,14 @@ export const SIDEBAR_ITEMS: SidebarItemType[] = [
       { title: "Nova Anamnese", href: "/anamnesis", icon: Stethoscope },
     ]
   },
-  {
-    title: "Care AI",
-    icon: Mic,
-    type: "group",
-    subItems: [
-      { title: "Captura de Voz", href: "/anamnesis/audio", icon: Mic },
-      { title: "Transcrições", href: "/ai/transcricoes", icon: FileText },
-      { title: "Análises Clínicas", href: "/ai/insights", icon: Activity },
-    ]
-  },
-  {
-    title: "Clínico",
-    icon: Stethoscope,
-    type: "group",
-    subItems: [
-      { title: "Exames", href: "/clinico/exames", icon: FileText },
-      { title: "Prescrições", href: "/clinico/prescricoes", icon: Pill },
-    ]
-  },
+  // {
+  //   title: "Care AI",
+  //   icon: Mic,
+  //   type: "group",
+  //   subItems: [
+  //     { title: "Captura de Voz", href: "/anamnesis/audio", icon: Mic },
+  //   ]
+  // },
   {
     title: "Configurações",
     icon: Settings,
@@ -75,6 +65,7 @@ export const SIDEBAR_ITEMS: SidebarItemType[] = [
     subItems: [
       { title: "Minha Conta", href: "/profile", icon: Settings },
       { title: "Formulários", href: "/configuracoes/formularios", icon: ClipboardList },
+      { title: "Inteligência Artificial", href: "/configuracoes/ia", icon: BrainCircuit },
       {
         title: "Super Admin",
         href: "/configuracoes/superadmin",
@@ -83,12 +74,6 @@ export const SIDEBAR_ITEMS: SidebarItemType[] = [
       },
     ]
   },
-  {
-    title: "StyleGuide",
-    icon: FolderCode,
-    href: "/styleguide",
-    type: "link"
-  }
 ];
 
 export const getVisibleSidebarItems = (isSuperAdmin: boolean) =>
