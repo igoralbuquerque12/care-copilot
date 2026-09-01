@@ -16,7 +16,7 @@ export const createQStashAdapter = (
   },
 
   async verifySignature(request: Request, body: string): Promise<boolean> {
-    if (!receiver) return true;
+    if (!receiver) return false;
     const signature = request.headers.get("upstash-signature");
     if (!signature) return false;
     return receiver.verify({ signature, body });
