@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { Search, Mic, Plus, Bell } from "lucide-react";
 
 import { getUser } from "~/server/auth/supabase.server";
 import { UserDropdown } from "~/features/layout/components/userDropdown";
 import { MobileSidebar } from "~/features/layout/components/mobileSidebar";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
 
 export async function Header() {
   const user = await getUser();

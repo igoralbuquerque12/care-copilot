@@ -3,24 +3,23 @@ import { Header } from "~/features/layout/components/header";
 import { Sidebar } from "~/features/layout/components/sidebar";
 
 export default async function MainLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return (
-        <div className="flex h-screen overflow-hidden bg-background">
+  return (
+    <div className="bg-background flex h-dvh overflow-hidden">
+      <div className="hidden md:flex">
+        <Sidebar />
+      </div>
 
-            <div className="hidden md:flex">
-                <Sidebar />
-            </div>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header />
 
-            <div className="flex flex-1 flex-col overflow-hidden">
-                <Header />
-
-                <main className="flex-1 overflow-y-auto bg-muted/20">
-                    {children}
-                </main>
-            </div>
-        </div>
-    );
+        <main className="bg-muted/20 min-w-0 flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
 }
