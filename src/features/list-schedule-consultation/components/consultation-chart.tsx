@@ -36,7 +36,7 @@ export function ConsultationChart({
 }: ConsultationChartProps) {
   const chartData = data.map((entry) => ({
     date: formatDate(entry.date),
-    Consultations: entry.count,
+    Consultas: entry.count,
   }));
 
   return (
@@ -102,7 +102,7 @@ export function ConsultationChart({
               itemStyle={{ color: "var(--foreground)" }}
             />
             <Bar
-              dataKey="Consultations"
+              dataKey="Consultas"
               radius={[4, 4, 0, 0]}
               fill="var(--primary)"
             />
