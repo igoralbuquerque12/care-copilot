@@ -1,8 +1,3 @@
-/**
- * Central configuration for AI credit accounting.
- *
- * Update only this file when product pricing changes.
- */
 export const AI_CREDIT_CONFIG = {
   signupBonusCredits: 10_000,
   whisperCreditsPerAudioSecond: 3,
