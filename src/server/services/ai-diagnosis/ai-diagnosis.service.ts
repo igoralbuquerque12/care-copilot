@@ -2,13 +2,19 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { Prisma as PrismaNamespace } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { env } from "~/env";
-import { anamnesisAnalysisResultSchema, type AnamnesisAnalysisResult } from "~/schemas/ai-analysis";
+import {
+  anamnesisAnalysisResultSchema,
+  type AnamnesisAnalysisResult,
+} from "~/schemas/ai-analysis";
 import { messageQueue } from "~/server/messaging";
 import { BASE_PROMPT_VERSION } from "./constants";
 import { decryptApiKey } from "./credentials";
 import { createFormSnapshot, readFormSnapshot } from "./form-snapshot";
 import { buildDiagnosisPrompt } from "./prompt-builder";
-import { generateStructuredAnalysis, isTransientProviderError } from "./providers";
+import {
+  generateStructuredAnalysis,
+  isTransientProviderError,
+} from "./providers";
 import { getResolvedConfiguration } from "./settings";
 import type { AnalysisAnamnesisInput, PatientHistoryForAI } from "./types";
 
@@ -18,7 +24,7 @@ const RESULT_SCHEMA_VERSION = 2;
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown>
+    ? (value as Record<string, unknown>)
     : {};
 
 const templateInclude = {
@@ -36,14 +42,18 @@ type AnamnesisWithRelations = Prisma.AnamnesisGetPayload<{
   };
 }>;
 
-const toAnalysisInput = (anamnesis: AnamnesisWithRelations): AnalysisAnamnesisInput => {
-  const snapshot = readFormSnapshot(anamnesis.formSnapshot) ?? (
-    anamnesis.template
+const toAnalysisInput = (
+  anamnesis: AnamnesisWithRelations,
+): AnalysisAnamnesisInput => {
+  const snapshot =
+    readFormSnapshot(anamnesis.formSnapshot) ??
+    (anamnesis.template
       ? readFormSnapshot(createFormSnapshot(anamnesis.template, "APPROXIMATED"))
-      : null
-  );
+      : null);
   const labels = new Map(
-    snapshot?.sections.flatMap((section) => section.fields.map((field) => [field.key, field.label] as const)) ?? [],
+    snapshot?.sections.flatMap((section) =>
+      section.fields.map((field) => [field.key, field.label] as const),
+    ) ?? [],
   );
   const custom = Object.fromEntries(
     Object.entries(toRecord(anamnesis.customResponses)).map(([key, value]) => [
@@ -56,7 +66,10 @@ const toAnalysisInput = (anamnesis: AnamnesisWithRelations): AnalysisAnamnesisIn
   return {
     id: anamnesis.id,
     date: anamnesis.date,
-    templateName: snapshot?.templateName ?? anamnesis.template?.name ?? "Formulario nao identificado",
+    templateName:
+      snapshot?.templateName ??
+      anamnesis.template?.name ??
+      "Formulario nao identificado",
     fields: {
       "Queixa principal": anamnesis.chiefComplaint,
       "Historia da doenca atual": anamnesis.currentIllnessHistory,
@@ -70,19 +83,23 @@ const toAnalysisInput = (anamnesis: AnamnesisWithRelations): AnalysisAnamnesisIn
         edema: anamnesis.hasEdema,
         dorToracica: anamnesis.hasChestPain,
       },
-      "Exame fisico": exam ? {
-        peso: exam.weight,
-        altura: exam.height,
-        pressaoSistolica: exam.bpSystolic,
-        pressaoDiastolica: exam.bpDiastolic,
-        frequenciaCardiaca: exam.heartRate,
-        saturacaoOxigenio: exam.oxygenSaturation,
-        auscultaCardiaca: exam.heartAuscultation,
-        auscultaPulmonar: exam.lungAuscultation,
-        pulsosPerifericos: exam.peripheralPulses,
-        grauEdema: exam.edemaGrade,
-      } : null,
-      Medicamentos: anamnesis.medications.map(({ name, dosage, frequency }) => ({ name, dosage, frequency })),
+      "Exame fisico": exam
+        ? {
+            peso: exam.weight,
+            altura: exam.height,
+            pressaoSistolica: exam.bpSystolic,
+            pressaoDiastolica: exam.bpDiastolic,
+            frequenciaCardiaca: exam.heartRate,
+            saturacaoOxigenio: exam.oxygenSaturation,
+            auscultaCardiaca: exam.heartAuscultation,
+            auscultaPulmonar: exam.lungAuscultation,
+            pulsosPerifericos: exam.peripheralPulses,
+            grauEdema: exam.edemaGrade,
+          }
+        : null,
+      Medicamentos: anamnesis.medications.map(
+        ({ name, dosage, frequency }) => ({ name, dosage, frequency }),
+      ),
       "Hipotese diagnostica do medico": anamnesis.diagnosticHypothesis,
       "Conduta do medico": anamnesis.conduct,
       "Proximo retorno": anamnesis.nextRecallDate,
@@ -91,10 +108,15 @@ const toAnalysisInput = (anamnesis: AnamnesisWithRelations): AnalysisAnamnesisIn
   };
 };
 
-const confidenceLevelFor = (score: number): AnamnesisAnalysisResult["confidence"]["level"] =>
+const confidenceLevelFor = (
+  score: number,
+): AnamnesisAnalysisResult["confidence"]["level"] =>
   score < 50 ? "LOW" : score < 80 ? "MEDIUM" : "HIGH";
 
-const parseResult = (raw: string, coverage: AnamnesisAnalysisResult["historyCoverage"]) => {
+const parseResult = (
+  raw: string,
+  coverage: AnamnesisAnalysisResult["historyCoverage"],
+) => {
   const parsed = anamnesisAnalysisResultSchema.parse(JSON.parse(raw));
   parsed.confidence.level = confidenceLevelFor(parsed.confidence.score);
   parsed.historyCoverage = coverage;
@@ -108,7 +130,8 @@ const generateWithTransientRetries = async (
     try {
       return await generateStructuredAnalysis(request);
     } catch (error) {
-      if (attempt === PROVIDER_RETRIES || !isTransientProviderError(error)) throw error;
+      if (attempt === PROVIDER_RETRIES || !isTransientProviderError(error))
+        throw error;
     }
   }
   throw new Error("Falha transitoria do provedor");
@@ -124,10 +147,17 @@ export const createAnalysisJob = async (
     where: { id: anamnesisId, patientId, profileId },
     select: { id: true, contentVersion: true },
   });
-  if (!anamnesis) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese nao encontrada" });
+  if (!anamnesis)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Anamnese nao encontrada",
+    });
 
-  const configuration = await getResolvedConfiguration(db, profileId).catch(() => null);
-  if (!configuration) return { id: undefined, status: "NOT_CONFIGURED" as const };
+  const configuration = await getResolvedConfiguration(db, profileId).catch(
+    () => null,
+  );
+  if (!configuration)
+    return { id: undefined, status: "NOT_CONFIGURED" as const };
 
   const active = await db.aiDiagnosis.findFirst({
     where: { anamnesisId, status: { in: ["PENDING", "PROCESSING"] } },
@@ -158,7 +188,10 @@ export const createAnalysisJob = async (
       },
     });
   } catch (error) {
-    if (error instanceof PrismaNamespace.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (
+      error instanceof PrismaNamespace.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       const concurrent = await db.aiDiagnosis.findFirst({
         where: { anamnesisId, status: { in: ["PENDING", "PROCESSING"] } },
         orderBy: { createdAt: "desc" },
@@ -190,16 +223,27 @@ export const createAnalysisJob = async (
   return { id: analysis.id, status: analysis.status };
 };
 
-export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) => {
+export const processAiDiagnosis = async (
+  db: PrismaClient,
+  analysisId: string,
+) => {
   const claimed = await db.aiDiagnosis.updateMany({
     where: { id: analysisId, status: "PENDING" },
-    data: { status: "PROCESSING", startedAt: new Date(), errorCode: null, errorMessage: null },
+    data: {
+      status: "PROCESSING",
+      startedAt: new Date(),
+      errorCode: null,
+      errorMessage: null,
+    },
   });
   if (claimed.count === 0) return { processed: false };
 
   try {
-    const analysis = await db.aiDiagnosis.findUniqueOrThrow({ where: { id: analysisId } });
-    if (!analysis.provider || !analysis.model) throw new Error("Configuracao da analise ausente");
+    const analysis = await db.aiDiagnosis.findUniqueOrThrow({
+      where: { id: analysisId },
+    });
+    if (!analysis.provider || !analysis.model)
+      throw new Error("Configuracao da analise ausente");
 
     const patient = await db.patient.findFirst({
       where: { id: analysis.patientId },
@@ -209,11 +253,19 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
         gender: true,
         clinicalProfile: {
           select: {
-            hasHypertension: true, hasDiabetes: true, diabetesDuration: true,
-            hasDyslipidemia: true, hasPriorInfarction: true, priorSurgeries: true,
-            allergies: true, familyHistoryCoronaryEarly: true,
-            familyHistorySuddenDeath: true, familyHistoryOthers: true,
-            smokingStatus: true, smokingPacksYear: true, alcoholConsumption: true,
+            hasHypertension: true,
+            hasDiabetes: true,
+            diabetesDuration: true,
+            hasDyslipidemia: true,
+            hasPriorInfarction: true,
+            priorSurgeries: true,
+            allergies: true,
+            familyHistoryCoronaryEarly: true,
+            familyHistorySuddenDeath: true,
+            familyHistoryOthers: true,
+            smokingStatus: true,
+            smokingPacksYear: true,
+            alcoholConsumption: true,
             exerciseLevel: true,
           },
         },
@@ -228,7 +280,9 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
       },
     });
     if (!patient) throw new Error("Paciente nao encontrado");
-    const currentRecord = patient.anamneses.find((item) => item.id === analysis.anamnesisId);
+    const currentRecord = patient.anamneses.find(
+      (item) => item.id === analysis.anamnesisId,
+    );
     if (!currentRecord) throw new Error("Anamnese atual nao encontrada");
 
     const credential = await db.aiProviderCredential.findUnique({
@@ -244,9 +298,13 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
     const current = toAnalysisInput(currentRecord);
     const history: PatientHistoryForAI = {
       patient: {
-        ageAtCurrentAnamnesis: Math.max(0, Math.floor(
-          (current.date.getTime() - patient.birthDate.getTime()) / 31_557_600_000,
-        )),
+        ageAtCurrentAnamnesis: Math.max(
+          0,
+          Math.floor(
+            (current.date.getTime() - patient.birthDate.getTime()) /
+              31_557_600_000,
+          ),
+        ),
         gender: patient.gender,
       },
       clinicalProfile: patient.clinicalProfile,
@@ -255,7 +313,10 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
         .filter((item) => item.id !== current.id && item.date <= current.date)
         .map(toAnalysisInput),
     };
-    const prompt = buildDiagnosisPrompt(history, analysis.customInstructionsSnapshot ?? "");
+    const prompt = buildDiagnosisPrompt(
+      history,
+      analysis.customInstructionsSnapshot ?? "",
+    );
 
     let result: AnamnesisAnalysisResult | null = null;
     let lastValidationError = "";
@@ -265,17 +326,22 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
         apiKey: decryptApiKey(credential),
         model: analysis.model,
         systemPrompt: prompt.systemPrompt,
-        userPrompt: attempt === 0
-          ? prompt.userPrompt
-          : `${prompt.userPrompt}\n\nA resposta anterior foi invalida (${lastValidationError}). Corrija o JSON e retorne somente o objeto completo.`,
+        userPrompt:
+          attempt === 0
+            ? prompt.userPrompt
+            : `${prompt.userPrompt}\n\nA resposta anterior foi invalida (${lastValidationError}). Corrija o JSON e retorne somente o objeto completo.`,
       });
       try {
         result = parseResult(raw, prompt.coverage);
       } catch (error) {
-        lastValidationError = error instanceof Error ? error.message.slice(0, 500) : "JSON invalido";
+        lastValidationError =
+          error instanceof Error
+            ? error.message.slice(0, 500)
+            : "JSON invalido";
       }
     }
-    if (!result) throw new Error("O modelo retornou uma analise em formato invalido");
+    if (!result)
+      throw new Error("O modelo retornou uma analise em formato invalido");
 
     await db.aiDiagnosis.update({
       where: { id: analysisId },
@@ -288,7 +354,9 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
         differentialDiagnoses: result.aiDiagnosis.differentials.join("; "),
         identifiedPatterns: result.longitudinalComparison.overview,
         riskAlerts: result.riskAlerts.map((item) => item.title).join("; "),
-        recommendedActions: result.suggestedNextSteps.map((item) => item.action).join("; "),
+        recommendedActions: result.suggestedNextSteps
+          .map((item) => item.action)
+          .join("; "),
         confidenceLevel: result.confidence.level,
         completedAt: new Date(),
       },
@@ -300,8 +368,11 @@ export const processAiDiagnosis = async (db: PrismaClient, analysisId: string) =
       where: { id: analysisId },
       data: {
         status: "FAILED",
-        errorCode: isTransientProviderError(error) ? "PROVIDER_TRANSIENT_ERROR" : "PROVIDER_ERROR",
-        errorMessage: "Nao foi possivel concluir a analise. Verifique a configuracao e tente novamente.",
+        errorCode: isTransientProviderError(error)
+          ? "PROVIDER_TRANSIENT_ERROR"
+          : "PROVIDER_ERROR",
+        errorMessage:
+          "Nao foi possivel concluir a analise. Verifique a configuracao e tente novamente.",
         completedAt: new Date(),
       },
     });
@@ -317,29 +388,47 @@ export const getAnalysisByAnamnesis = async (
   const anamnesis = await db.anamnesis.findFirst({
     where: { id: anamnesisId, profileId },
     select: {
-      id: true, patientId: true, contentVersion: true,
-      aiDiagnoses: { where: { isValid: true }, orderBy: { createdAt: "desc" }, take: 1 },
+      id: true,
+      patientId: true,
+      contentVersion: true,
+      aiDiagnoses: {
+        where: { isValid: true },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
   });
-  if (!anamnesis) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese nao encontrada" });
+  if (!anamnesis)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Anamnese nao encontrada",
+    });
   const analysis = anamnesis.aiDiagnoses[0];
   if (!analysis) {
-    const configuration = await getResolvedConfiguration(db, profileId).catch(() => null);
+    const configuration = await getResolvedConfiguration(db, profileId).catch(
+      () => null,
+    );
     return {
       anamnesisId,
       patientId: anamnesis.patientId,
-      state: configuration ? "NOT_GENERATED" as const : "NOT_CONFIGURED" as const,
+      state: configuration
+        ? ("NOT_GENERATED" as const)
+        : ("NOT_CONFIGURED" as const),
       analysis: null,
     };
   }
-  const legacy = analysis.status === "COMPLETED" && (
-    analysis.resultSchemaVersion < RESULT_SCHEMA_VERSION || !analysis.result
-  );
+  const legacy =
+    analysis.status === "COMPLETED" &&
+    (analysis.resultSchemaVersion < RESULT_SCHEMA_VERSION || !analysis.result);
   const stale = analysis.anamnesisVersion < anamnesis.contentVersion;
   return {
     anamnesisId,
     patientId: anamnesis.patientId,
-    state: legacy ? "LEGACY" as const : stale ? "STALE" as const : analysis.status,
+    state: legacy
+      ? ("LEGACY" as const)
+      : stale
+        ? ("STALE" as const)
+        : analysis.status,
     analysis,
   };
 };
@@ -353,6 +442,10 @@ export const retryAnalysis = async (
     where: { id: anamnesisId, profileId },
     select: { patientId: true },
   });
-  if (!anamnesis) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese nao encontrada" });
+  if (!anamnesis)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Anamnese nao encontrada",
+    });
   return createAnalysisJob(db, profileId, anamnesis.patientId, anamnesisId);
 };

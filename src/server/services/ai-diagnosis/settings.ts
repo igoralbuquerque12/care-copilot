@@ -6,9 +6,24 @@ import { validateProviderConfiguration } from "./providers";
 
 export const MODEL_PRESETS = {
   OPENAI: ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"],
-  GROQ: ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"],
-  GEMINI: ["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-pro"],
-  ANTHROPIC: ["claude-fable-5", "claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5-20251001"],
+  GROQ: [
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "llama-3.3-70b-versatile",
+  ],
+  GEMINI: [
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-2.5-pro",
+  ],
+  ANTHROPIC: [
+    "claude-fable-5",
+    "claude-opus-5",
+    "claude-sonnet-5",
+    "claude-haiku-4-5-20251001",
+  ],
 } as const;
 
 export const getSettings = async (db: PrismaClient, profileId: string) => {
@@ -16,7 +31,12 @@ export const getSettings = async (db: PrismaClient, profileId: string) => {
     db.aiAnalysisSettings.findUnique({ where: { profileId } }),
     db.aiProviderCredential.findMany({
       where: { profileId },
-      select: { provider: true, lastFour: true, verifiedAt: true, updatedAt: true },
+      select: {
+        provider: true,
+        lastFour: true,
+        verifiedAt: true,
+        updatedAt: true,
+      },
     }),
   ]);
   return { settings, credentials, presets: MODEL_PRESETS };
@@ -33,7 +53,12 @@ export const saveCredential = async (
     where: { profileId_provider: { profileId, provider } },
     create: { profileId, provider, ...encrypted },
     update: { ...encrypted, verifiedAt: null },
-    select: { provider: true, lastFour: true, verifiedAt: true, updatedAt: true },
+    select: {
+      provider: true,
+      lastFour: true,
+      verifiedAt: true,
+      updatedAt: true,
+    },
   });
 };
 
@@ -97,10 +122,17 @@ export const testCredential = async (
     where: { profileId_provider: { profileId, provider } },
   });
   if (!credential) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Credencial nao encontrada." });
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Credencial nao encontrada.",
+    });
   }
   try {
-    await validateProviderConfiguration({ provider, model, apiKey: decryptApiKey(credential) });
+    await validateProviderConfiguration({
+      provider,
+      model,
+      apiKey: decryptApiKey(credential),
+    });
   } catch {
     throw new TRPCError({
       code: "BAD_REQUEST",
@@ -118,7 +150,9 @@ export const getResolvedConfiguration = async (
   db: PrismaClient,
   profileId: string,
 ) => {
-  const settings = await db.aiAnalysisSettings.findUnique({ where: { profileId } });
+  const settings = await db.aiAnalysisSettings.findUnique({
+    where: { profileId },
+  });
   if (!settings) return null;
   const credential = await db.aiProviderCredential.findUnique({
     where: { profileId_provider: { profileId, provider: settings.provider } },

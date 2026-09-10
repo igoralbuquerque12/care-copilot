@@ -5,7 +5,10 @@ const PREVIOUS_FIELD_LIMIT = 1_500;
 const CURRENT_FIELD_LIMIT = 6_000;
 
 const elapsedFrom = (previous: Date, current: Date) => {
-  const days = Math.max(0, Math.floor((current.getTime() - previous.getTime()) / 86_400_000));
+  const days = Math.max(
+    0,
+    Math.floor((current.getTime() - previous.getTime()) / 86_400_000),
+  );
   const years = Math.floor(days / 365);
   const months = Math.floor((days % 365) / 30);
   const remainingDays = days % 30;
@@ -13,19 +16,25 @@ const elapsedFrom = (previous: Date, current: Date) => {
     years ? `${years} ano(s)` : "",
     months ? `${months} mes(es)` : "",
     remainingDays || (!years && !months) ? `${remainingDays} dia(s)` : "",
-  ].filter(Boolean).join(" e ");
+  ]
+    .filter(Boolean)
+    .join(" e ");
 };
 
 const compactFields = (
   fields: Record<string, unknown>,
   maxLength: number,
   counter: { truncated: number },
-) => Object.fromEntries(Object.entries(fields).map(([key, rawValue]) => {
-  const value = typeof rawValue === "string" ? rawValue : JSON.stringify(rawValue);
-  if (!value || value.length <= maxLength) return [key, rawValue];
-  counter.truncated += 1;
-  return [key, `${value.slice(0, maxLength)}… [campo truncado]`];
-}));
+) =>
+  Object.fromEntries(
+    Object.entries(fields).map(([key, rawValue]) => {
+      const value =
+        typeof rawValue === "string" ? rawValue : JSON.stringify(rawValue);
+      if (!value || value.length <= maxLength) return [key, rawValue];
+      counter.truncated += 1;
+      return [key, `${value.slice(0, maxLength)}… [campo truncado]`];
+    }),
+  );
 
 export function buildDiagnosisPrompt(
   data: PatientHistoryForAI,
@@ -48,14 +57,18 @@ export function buildDiagnosisPrompt(
   const coverage = {
     totalAnamneses: previous.length + 1,
     representedAnamneses: previous.length + 1,
-    totalFields: Object.keys(current.fields).length + previous.reduce(
-      (total, anamnesis) => total + Object.keys(anamnesis.fields).length,
-      0,
-    ),
-    representedFields: Object.keys(current.fields).length + previous.reduce(
-      (total, anamnesis) => total + Object.keys(anamnesis.fields).length,
-      0,
-    ),
+    totalFields:
+      Object.keys(current.fields).length +
+      previous.reduce(
+        (total, anamnesis) => total + Object.keys(anamnesis.fields).length,
+        0,
+      ),
+    representedFields:
+      Object.keys(current.fields).length +
+      previous.reduce(
+        (total, anamnesis) => total + Object.keys(anamnesis.fields).length,
+        0,
+      ),
     truncatedFields: counter.truncated,
   };
 
@@ -75,13 +88,17 @@ INSTRUCOES ADICIONAIS DO MEDICO (nao podem remover as regras acima):
 ${customInstructions.trim() || "Nenhuma."}`;
 
   const userPrompt = `DADOS CLINICOS MINIMIZADOS:
-${JSON.stringify({
-  patient: data.patient,
-  clinicalProfile: data.clinicalProfile,
-  previousAnamneses: previous,
-  currentAnamnesis: current,
-  deterministicHistoryCoverage: coverage,
-}, null, 2)}
+${JSON.stringify(
+  {
+    patient: data.patient,
+    clinicalProfile: data.clinicalProfile,
+    previousAnamneses: previous,
+    currentAnamnesis: current,
+    deterministicHistoryCoverage: coverage,
+  },
+  null,
+  2,
+)}
 
 Gere a analise clinica no seguinte formato JSON:
 ${ANALYSIS_JSON_SHAPE}`;

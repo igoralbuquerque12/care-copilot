@@ -13,19 +13,38 @@ type GenerateRequest = {
 export const isTransientProviderError = (error: unknown) => {
   if (error instanceof TypeError) return true;
   if (!error || typeof error !== "object") return false;
-  const candidate = error as { status?: unknown; code?: unknown; message?: unknown };
+  const candidate = error as {
+    status?: unknown;
+    code?: unknown;
+    message?: unknown;
+  };
   const status = typeof candidate.status === "number" ? candidate.status : null;
-  if (status !== null && (status === 408 || status === 409 || status === 425 || status === 429 || status >= 500)) {
+  if (
+    status !== null &&
+    (status === 408 ||
+      status === 409 ||
+      status === 425 ||
+      status === 429 ||
+      status >= 500)
+  ) {
     return true;
   }
-  const code = typeof candidate.code === "string" ? candidate.code.toUpperCase() : "";
-  if (["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN"].includes(code)) return true;
-  const message = typeof candidate.message === "string" ? candidate.message.toLowerCase() : "";
+  const code =
+    typeof candidate.code === "string" ? candidate.code.toUpperCase() : "";
+  if (["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EAI_AGAIN"].includes(code))
+    return true;
+  const message =
+    typeof candidate.message === "string"
+      ? candidate.message.toLowerCase()
+      : "";
   return /(?:timeout|network|fetch failed|\b429\b|\b5\d\d\b)/.test(message);
 };
 
 const cleanJson = (text: string) =>
-  text.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+  text
+    .replace(/^```json\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
 
 const generateOpenAiCompatible = async (
   request: GenerateRequest,
@@ -74,10 +93,12 @@ const generateAnthropic = async (request: GenerateRequest) => {
   if (!response.ok) {
     throw new Error(`Anthropic request failed (${response.status})`);
   }
-  const body = await response.json() as {
+  const body = (await response.json()) as {
     content?: Array<{ type: string; text?: string }>;
   };
-  return cleanJson(body.content?.find((item) => item.type === "text")?.text ?? "");
+  return cleanJson(
+    body.content?.find((item) => item.type === "text")?.text ?? "",
+  );
 };
 
 export const generateStructuredAnalysis = (request: GenerateRequest) => {
@@ -85,7 +106,10 @@ export const generateStructuredAnalysis = (request: GenerateRequest) => {
     case "OPENAI":
       return generateOpenAiCompatible(request);
     case "GROQ":
-      return generateOpenAiCompatible(request, "https://api.groq.com/openai/v1");
+      return generateOpenAiCompatible(
+        request,
+        "https://api.groq.com/openai/v1",
+      );
     case "GEMINI":
       return generateGemini(request);
     case "ANTHROPIC":
@@ -99,7 +123,8 @@ export const validateProviderConfiguration = async (
   const text = await generateStructuredAnalysis({
     ...input,
     systemPrompt: "Responda exclusivamente com JSON valido.",
-    userPrompt: 'Retorne exatamente um objeto JSON com o campo booleano "ok" igual a true.',
+    userPrompt:
+      'Retorne exatamente um objeto JSON com o campo booleano "ok" igual a true.',
   });
   const parsed = JSON.parse(text) as { ok?: unknown };
   if (parsed.ok !== true) throw new Error("Resposta de validacao inesperada");

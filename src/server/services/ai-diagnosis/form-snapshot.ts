@@ -24,27 +24,28 @@ type TemplateWithSections = {
 export const createFormSnapshot = (
   template: TemplateWithSections,
   source: FormSnapshot["source"] = "EXACT",
-): Prisma.InputJsonValue => ({
-  source,
-  templateId: template.id,
-  templateName: template.name,
-  capturedAt: new Date().toISOString(),
-  sections: template.sections.map((section) => ({
-    name: section.name,
-    description: section.description,
-    fields: section.fields.map((field) => ({
-      key: field.key,
-      systemKey: field.systemKey,
-      label: field.label,
-      description: field.description,
-      fieldType: field.fieldType,
-      isSystemField: field.isSystemField,
-      isVisible: field.isVisible,
-      isRequired: field.isRequired,
-      config: field.config,
+): Prisma.InputJsonValue =>
+  ({
+    source,
+    templateId: template.id,
+    templateName: template.name,
+    capturedAt: new Date().toISOString(),
+    sections: template.sections.map((section) => ({
+      name: section.name,
+      description: section.description,
+      fields: section.fields.map((field) => ({
+        key: field.key,
+        systemKey: field.systemKey,
+        label: field.label,
+        description: field.description,
+        fieldType: field.fieldType,
+        isSystemField: field.isSystemField,
+        isVisible: field.isVisible,
+        isRequired: field.isRequired,
+        config: field.config,
+      })),
     })),
-  })),
-}) as Prisma.InputJsonValue;
+  }) as Prisma.InputJsonValue;
 
 export const readFormSnapshot = (value: unknown): FormSnapshot | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
