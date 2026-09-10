@@ -10,7 +10,7 @@ import {
   Phone,
   Coins,
 } from "lucide-react";
-import { useProfileForm } from "~/features/profile/hooks/useProfile";
+import { useProfileForm } from "~/features/profile/hooks/use-profile";
 import { api } from "~/trpc/react";
 import { Button } from "~/components/ui/button";
 import {
@@ -32,7 +32,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Separator } from "~/components/ui/separator";
-import { getInitials } from "~/features/layout/utils/getInitials";
+import { getInitials } from "~/features/layout/utils/get-initials";
 import { maskCep, maskPhone } from "~/utils/masks";
 import { ProfileFormSkeleton } from "~/features/profile/loading/skeleton";
 
