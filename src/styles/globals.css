@@ -78,7 +78,7 @@
   --border: oklch(0.3 0.012 220);
   --input: oklch(0.3 0.012 220);
   --ring: oklch(0.65 0.14 185);
-  
+
   --chart-1: oklch(0.65 0.14 185);
   --chart-2: oklch(0.7 0.16 220);
   --chart-3: oklch(0.75 0.12 160);
@@ -96,8 +96,8 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
