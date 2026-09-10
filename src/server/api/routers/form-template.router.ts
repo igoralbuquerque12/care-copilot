@@ -5,7 +5,7 @@ import {
   updateFormTemplateSchema,
 } from "~/schemas/form-template";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import * as formTemplateService from "~/server/services/formTemplate.service";
+import * as formTemplateService from "~/server/services/form-templates/form-template.service";
 
 export const formTemplateRouter = createTRPCRouter({
   getDefault: protectedProcedure.query(({ ctx }) =>

@@ -1,5 +1,5 @@
 import { db } from "../src/server/db";
-import { seedDefaultTemplate } from "../src/server/services/formTemplate.service";
+import { seedDefaultTemplate } from "../src/server/services/form-templates/form-template.service";
 
 const main = async () => {
   const profiles = await db.profile.findMany({ select: { id: true } });
@@ -12,7 +12,9 @@ const main = async () => {
     });
   }
 
-  console.log(`Seeded default anamnesis templates for ${profiles.length} profiles.`);
+  console.log(
+    `Seeded default anamnesis templates for ${profiles.length} profiles.`,
+  );
 };
 
 main()

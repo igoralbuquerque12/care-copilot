@@ -115,26 +115,97 @@ export const DEFAULT_ANAMNESIS_TEMPLATE: DefaultSection[] = [
     name: "Exame Fisico",
     order: 1,
     fields: [
-      { key: "weight", label: "Peso", order: 0, fieldType: "NUMBER", config: { unit: "kg", step: 0.1 } },
-      { key: "height", label: "Altura", order: 1, fieldType: "NUMBER", config: { unit: "cm", step: 0.1 } },
-      { key: "bpSystolic", label: "PA Sistolica", order: 2, fieldType: "NUMBER", config: { unit: "mmHg" } },
-      { key: "bpDiastolic", label: "PA Diastolica", order: 3, fieldType: "NUMBER", config: { unit: "mmHg" } },
-      { key: "heartRate", label: "Frequencia Cardiaca", order: 4, fieldType: "NUMBER", config: { unit: "bpm" } },
-      { key: "oxygenSaturation", label: "Saturacao O2", order: 5, fieldType: "NUMBER", config: { unit: "%" } },
-      { key: "heartAuscultation", label: "Ausculta Cardiaca", order: 6, fieldType: "TEXT" },
-      { key: "lungAuscultation", label: "Ausculta Pulmonar", order: 7, fieldType: "TEXT" },
-      { key: "peripheralPulses", label: "Pulsos Perifericos", order: 8, fieldType: "SHORT_TEXT" },
-      { key: "edemaGrade", label: "Grau de Edema", order: 9, fieldType: "SHORT_TEXT" },
+      {
+        key: "weight",
+        label: "Peso",
+        order: 0,
+        fieldType: "NUMBER",
+        config: { unit: "kg", step: 0.1 },
+      },
+      {
+        key: "height",
+        label: "Altura",
+        order: 1,
+        fieldType: "NUMBER",
+        config: { unit: "cm", step: 0.1 },
+      },
+      {
+        key: "bpSystolic",
+        label: "PA Sistolica",
+        order: 2,
+        fieldType: "NUMBER",
+        config: { unit: "mmHg" },
+      },
+      {
+        key: "bpDiastolic",
+        label: "PA Diastolica",
+        order: 3,
+        fieldType: "NUMBER",
+        config: { unit: "mmHg" },
+      },
+      {
+        key: "heartRate",
+        label: "Frequencia Cardiaca",
+        order: 4,
+        fieldType: "NUMBER",
+        config: { unit: "bpm" },
+      },
+      {
+        key: "oxygenSaturation",
+        label: "Saturacao O2",
+        order: 5,
+        fieldType: "NUMBER",
+        config: { unit: "%" },
+      },
+      {
+        key: "heartAuscultation",
+        label: "Ausculta Cardiaca",
+        order: 6,
+        fieldType: "TEXT",
+      },
+      {
+        key: "lungAuscultation",
+        label: "Ausculta Pulmonar",
+        order: 7,
+        fieldType: "TEXT",
+      },
+      {
+        key: "peripheralPulses",
+        label: "Pulsos Perifericos",
+        order: 8,
+        fieldType: "SHORT_TEXT",
+      },
+      {
+        key: "edemaGrade",
+        label: "Grau de Edema",
+        order: 9,
+        fieldType: "SHORT_TEXT",
+      },
     ],
   },
   {
     name: "Hipotese e Conduta",
     order: 2,
     fields: [
-      { key: "medications", label: "Medicamentos", order: 0, fieldType: "MEDICATIONS" },
-      { key: "diagnosticHypothesis", label: "Hipotese Diagnostica", order: 1, fieldType: "TEXT" },
+      {
+        key: "medications",
+        label: "Medicamentos",
+        order: 0,
+        fieldType: "MEDICATIONS",
+      },
+      {
+        key: "diagnosticHypothesis",
+        label: "Hipotese Diagnostica",
+        order: 1,
+        fieldType: "TEXT",
+      },
       { key: "conduct", label: "Conduta", order: 2, fieldType: "TEXT" },
-      { key: "nextRecallDate", label: "Data do Proximo Retorno", order: 3, fieldType: "DATE" },
+      {
+        key: "nextRecallDate",
+        label: "Data do Proximo Retorno",
+        order: 3,
+        fieldType: "DATE",
+      },
     ],
   },
 ];
@@ -202,10 +273,7 @@ const createDefaultTemplate = (db: DbClient, profileId: string) => {
   });
 };
 
-export const seedDefaultTemplate = async (
-  db: DbClient,
-  profileId: string,
-) => {
+export const seedDefaultTemplate = async (db: DbClient, profileId: string) => {
   const existing = await db.anamnesisFormTemplate.findFirst({
     where: { profileId, isDefault: true },
     include: templateInclude,
@@ -216,10 +284,8 @@ export const seedDefaultTemplate = async (
   return createDefaultTemplate(db, profileId);
 };
 
-export const getDefaultTemplate = async (
-  db: PrismaClient,
-  profileId: string,
-) => seedDefaultTemplate(db, profileId);
+export const getDefaultTemplate = async (db: PrismaClient, profileId: string) =>
+  seedDefaultTemplate(db, profileId);
 
 export const listTemplates = async (db: PrismaClient, profileId: string) => {
   return db.anamnesisFormTemplate.findMany({
@@ -240,7 +306,10 @@ export const getTemplateById = async (
   });
 
   if (!template) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Template nao encontrado" });
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Template nao encontrado",
+    });
   }
 
   return template;
@@ -248,7 +317,10 @@ export const getTemplateById = async (
 
 const toCustomSectionCreate = (
   section: CreateFormTemplateInput["sections"][number],
-  systemFieldsByKey = new Map<string, { fieldType: FormFieldType; systemKey: string | null }>(),
+  systemFieldsByKey = new Map<
+    string,
+    { fieldType: FormFieldType; systemKey: string | null }
+  >(),
 ): Prisma.AnamnesisFormSectionCreateWithoutTemplateInput => ({
   name: section.name,
   description: section.description ?? undefined,
@@ -259,7 +331,9 @@ const toCustomSectionCreate = (
       const systemField = systemFieldsByKey.get(field.key);
       const isKnownSystemField =
         Boolean(systemField) ||
-        Boolean(field.isSystemField && SYSTEM_ANAMNESIS_FIELD_KEY_SET.has(field.key));
+        Boolean(
+          field.isSystemField && SYSTEM_ANAMNESIS_FIELD_KEY_SET.has(field.key),
+        );
 
       return {
         key: field.key,
@@ -271,7 +345,9 @@ const toCustomSectionCreate = (
         isVisible: field.isVisible,
         config: normalizeJson(field.config),
         isSystemField: isKnownSystemField,
-        systemKey: isKnownSystemField ? (systemField?.systemKey ?? field.key) : null,
+        systemKey: isKnownSystemField
+          ? (systemField?.systemKey ?? field.key)
+          : null,
       };
     }),
   },
@@ -299,7 +375,9 @@ export const createTemplate = async (
         description: input.description ?? undefined,
         isDefault: input.isDefault,
         sections: {
-          create: input.sections.map((section) => toCustomSectionCreate(section)),
+          create: input.sections.map((section) =>
+            toCustomSectionCreate(section),
+          ),
         },
       },
       include: templateInclude,
@@ -319,7 +397,9 @@ export const updateTemplate = async (
     validateUniqueKeys(sections);
 
     const incomingFieldsByKey = new Map(
-      sections.flatMap((section) => section.fields.map((field) => [field.key, field] as const)),
+      sections.flatMap((section) =>
+        section.fields.map((field) => [field.key, field] as const),
+      ),
     );
 
     for (const systemField of existing.sections.flatMap((section) =>
