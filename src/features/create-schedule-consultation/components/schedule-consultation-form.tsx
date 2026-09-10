@@ -41,7 +41,6 @@ export function ScheduleConsultationForm() {
 
   return (
     <main className="bg-muted/20 w-full p-4 md:p-6 lg:p-8">
-      {/* Page header */}
       <div className="mb-8 flex items-center gap-3">
         <div className="bg-primary/10 flex h-10 w-10 items-center justify-center rounded-xl">
           <CalendarPlus className="text-primary h-5 w-5" />
@@ -58,9 +57,7 @@ export function ScheduleConsultationForm() {
       </div>
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-        {/* ── Left column: form ── */}
         <div className="flex-1 space-y-6">
-          {/* Section 1 – Patient */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Paciente</CardTitle>
@@ -88,7 +85,6 @@ export function ScheduleConsultationForm() {
             </CardContent>
           </Card>
 
-          {/* Section 2 – Consultation details */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Detalhes da Consulta</CardTitle>
@@ -174,7 +170,6 @@ export function ScheduleConsultationForm() {
           </Card>
         </div>
 
-        {/* ── Right column: daily appointments ── */}
         <div className="w-full">
           <Card className="xl:sticky xl:top-4">
             <CardHeader>
