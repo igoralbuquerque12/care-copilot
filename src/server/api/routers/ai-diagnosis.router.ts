@@ -6,8 +6,8 @@ import {
   saveCredentialSchema,
   testCredentialSchema,
 } from "~/schemas/ai-analysis";
-import * as analysisService from "~/server/services/aiDiagnosis";
-import * as settingsService from "~/server/services/aiDiagnosis/settings";
+import * as analysisService from "~/server/services/ai-diagnosis/ai-diagnosis.service";
+import * as settingsService from "~/server/services/ai-diagnosis/settings";
 
 export const aiDiagnosisRouter = createTRPCRouter({
   getSettings: protectedProcedure.query(({ ctx }) =>
@@ -16,7 +16,12 @@ export const aiDiagnosisRouter = createTRPCRouter({
   saveCredential: protectedProcedure
     .input(saveCredentialSchema)
     .mutation(({ ctx, input }) =>
-      settingsService.saveCredential(ctx.db, ctx.user.id, input.provider, input.apiKey),
+      settingsService.saveCredential(
+        ctx.db,
+        ctx.user.id,
+        input.provider,
+        input.apiKey,
+      ),
     ),
   removeCredential: protectedProcedure
     .input(removeCredentialSchema)
@@ -26,7 +31,12 @@ export const aiDiagnosisRouter = createTRPCRouter({
   testCredential: protectedProcedure
     .input(testCredentialSchema)
     .mutation(({ ctx, input }) =>
-      settingsService.testCredential(ctx.db, ctx.user.id, input.provider, input.model),
+      settingsService.testCredential(
+        ctx.db,
+        ctx.user.id,
+        input.provider,
+        input.model,
+      ),
     ),
   saveSettings: protectedProcedure
     .input(saveAnalysisSettingsSchema)
@@ -36,7 +46,11 @@ export const aiDiagnosisRouter = createTRPCRouter({
   getByAnamnesis: protectedProcedure
     .input(analysisByAnamnesisSchema)
     .query(({ ctx, input }) =>
-      analysisService.getAnalysisByAnamnesis(ctx.db, ctx.user.id, input.anamnesisId),
+      analysisService.getAnalysisByAnamnesis(
+        ctx.db,
+        ctx.user.id,
+        input.anamnesisId,
+      ),
     ),
   retry: protectedProcedure
     .input(analysisByAnamnesisSchema)
