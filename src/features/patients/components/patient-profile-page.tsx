@@ -5,12 +5,15 @@ import {
   AlertTriangle,
   ArrowLeft,
   FileText,
+  HeartPulse,
+  MessageCircle,
   Pencil,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { ClinicalChatPanel } from "~/features/clinical-chat/components/clinical-chat-panel";
 import { readFormSnapshot } from "~/server/services/ai-diagnosis/form-snapshot";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { AnamnesisDetailPage } from "./anamnesis-detail-page";
@@ -119,15 +122,19 @@ function SnapshotRecord({ anamnesis }: { anamnesis: AnamnesisDetailOutput }) {
 export function PatientProfilePage({
   patientId,
   initialAnamnesisId,
+  initialView,
 }: {
   patientId: string;
   initialAnamnesisId?: string;
+  initialView?: string;
 }) {
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(
     initialAnamnesisId ?? null,
   );
   const [editingDetail, setEditingDetail] = useState(false);
+  const [openRiskOnDetail, setOpenRiskOnDetail] = useState(false);
+  const [chatOpen, setChatOpen] = useState(initialView === "chat");
   const { overview, timeline, trends } = usePatientDetail(patientId, page);
   useEffect(() => {
     if (!selectedId && timeline.data?.items[0])
@@ -151,13 +158,33 @@ export function PatientProfilePage({
         <p>Paciente não encontrado.</p>
       </div>
     );
+  if (chatOpen)
+    return (
+      <ClinicalChatPanel
+        patientId={patientId}
+        patientName={patient.name}
+        contextAnamnesisId={selectedId}
+        anamnesis={
+          detail.data
+            ? {
+                id: detail.data.id,
+                date: detail.data.date,
+                chiefComplaint: detail.data.chiefComplaint,
+              }
+            : null
+        }
+        onBack={() => setChatOpen(false)}
+      />
+    );
   if (editingDetail && detail.data)
     return (
       <AnamnesisDetailPage
         anamnesis={detail.data}
         patientId={patientId}
+        initialRiskOpen={openRiskOnDetail}
         onBack={() => {
           setEditingDetail(false);
+          setOpenRiskOnDetail(false);
           void detail.refetch();
           void timeline.refetch();
         }}
@@ -166,12 +193,18 @@ export function PatientProfilePage({
 
   return (
     <main className="space-y-6 p-4 md:p-8">
-      <Button asChild variant="ghost" size="sm">
-        <Link href="/pacientes">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar aos pacientes
-        </Link>
-      </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/pacientes">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar aos pacientes
+          </Link>
+        </Button>
+        <Button variant="outline" onClick={() => setChatOpen(true)}>
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Chat clínico geral
+        </Button>
+      </div>
       <PatientInfoCard patient={patient} />
 
       {trends.data && <PatientConsultationChart anamneses={trends.data} />}
@@ -195,19 +228,45 @@ export function PatientProfilePage({
             </p>
           ) : detail.data ? (
             <Tabs key={detail.data.id} defaultValue="analysis">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <TabsList>
                   <TabsTrigger value="analysis">Análise da IA</TabsTrigger>
                   <TabsTrigger value="record">Registro</TabsTrigger>
                 </TabsList>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setEditingDetail(true)}
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Abrir e editar
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant={detail.data.surgicalRisk ? "secondary" : "default"}
+                    onClick={() => {
+                      setOpenRiskOnDetail(true);
+                      setEditingDetail(true);
+                    }}
+                  >
+                    <HeartPulse className="mr-2 h-4 w-4" />
+                    {detail.data.surgicalRisk
+                      ? `RCRI ${detail.data.surgicalRisk.riskClass} · ${detail.data.surgicalRisk.leeScore}/6`
+                      : "Avaliar risco cirúrgico"}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setChatOpen(true)}
+                  >
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Chat desta anamnese
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setOpenRiskOnDetail(false);
+                      setEditingDetail(true);
+                    }}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Abrir e editar
+                  </Button>
+                </div>
               </div>
               <TabsContent value="analysis">
                 <PatientAiDiagnosis anamnesisId={detail.data.id} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Bot, Check, ChevronRight, Loader2, Settings } from "lucide-react";
+import { AlertTriangle, Bot, Check, ChevronRight, Loader2, MessageCircle, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -52,10 +52,11 @@ export function AnalysisProgressPage({ anamnesisId }: { anamnesisId: string }) {
 
       {["NOT_GENERATED", "STALE", "LEGACY"].includes(data?.state ?? "") && <div className="rounded-2xl border bg-card p-5"><p className="font-medium">{data?.state === "STALE" ? "A análise está desatualizada" : data?.state === "LEGACY" ? "Esta é uma análise legada" : "Análise ainda não gerada"}</p><Button className="mt-4" onClick={() => retry.mutate({ anamnesisId })} disabled={retry.isPending}>{retry.isPending ? "Iniciando..." : "Gerar análise atualizada"}</Button></div>}
 
-      <div className="flex justify-end">
-        <Button variant={processing ? "outline" : "default"} onClick={() => data && router.push(`/pacientes/${data.patientId}?anamnesis=${anamnesisId}`)} disabled={!data}>
+      <div className="flex flex-wrap justify-end gap-2">
+        <Button variant="outline" onClick={() => data && router.push(`/pacientes/${data.patientId}?anamnesis=${anamnesisId}`)} disabled={!data}>
           {processing ? "Pular e ir para o paciente" : "Ver perfil do paciente"}<ChevronRight className="ml-2 h-4 w-4" />
         </Button>
+        {data && <Button asChild><Link href={`/pacientes/${data.patientId}?anamnesis=${anamnesisId}&view=chat`}><MessageCircle className="mr-2 h-4 w-4" />Conversar sobre este caso</Link></Button>}
       </div>
     </main>
   );

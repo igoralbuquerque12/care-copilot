@@ -96,6 +96,11 @@ export const testCredentialSchema = saveAnalysisSettingsSchema.pick({
   model: true,
 });
 
+export const saveAiPromptTemplatesSchema = z.object({
+  analysisPromptTemplate: z.string().max(50_000),
+  clinicalChatPromptTemplate: z.string().max(50_000),
+});
+
 export const analysisByAnamnesisSchema = z.object({
   anamnesisId: z.string().cuid(),
 });
@@ -104,3 +109,6 @@ export type AiProvider = z.infer<typeof aiProviderSchema>;
 export type AnalysisStatus = z.infer<typeof analysisStatusSchema>;
 export type AnamnesisAnalysisResult = z.infer<typeof anamnesisAnalysisResultSchema>;
 export type SaveAnalysisSettingsInput = z.infer<typeof saveAnalysisSettingsSchema>;
+export type SaveAiPromptTemplatesInput = z.infer<
+  typeof saveAiPromptTemplatesSchema
+>;

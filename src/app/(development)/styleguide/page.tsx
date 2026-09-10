@@ -1,21 +1,33 @@
-"use client"
+"use client";
 
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { Badge } from "~/components/ui/badge"
-import { Switch } from "~/components/ui/switch"
-import { Checkbox } from "~/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
-import { Progress } from "~/components/ui/progress"
-import { Slider } from "~/components/ui/slider"
-import { Separator } from "~/components/ui/separator"
-import { Avatar, AvatarFallback } from "~/components/ui/avatar"
-import { useTheme } from "next-themes"
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Badge } from "~/components/ui/badge";
+import { Switch } from "~/components/ui/switch";
+import { Checkbox } from "~/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Progress } from "~/components/ui/progress";
+import { Slider } from "~/components/ui/slider";
+import { Separator } from "~/components/ui/separator";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { useTheme } from "next-themes";
 import {
   Moon,
   Sun,
@@ -30,34 +42,35 @@ import {
   AlertCircle,
   Info,
   XCircle,
-} from "lucide-react"
-import { useEffect, useState } from "react"
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function StyleguidePage() {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
-    return null
+    return null;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
+    <div className="bg-background min-h-screen">
+      <header className="border-border bg-background/80 sticky top-0 z-50 border-b backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                <Activity className="h-6 w-6 text-primary-foreground" />
+              <div className="bg-primary flex h-10 w-10 items-center justify-center rounded-lg">
+                <Activity className="text-primary-foreground h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">Care Copilot</h1>
-                <p className="text-xs text-muted-foreground">Design System</p>
+                <h1 className="text-foreground text-xl font-bold">
+                  Care Copilot
+                </h1>
+                <p className="text-muted-foreground text-xs">Design System</p>
               </div>
             </div>
 
@@ -67,45 +80,57 @@ export default function StyleguidePage() {
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className="rounded-full"
             >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
-        {/* Introdução */}
         <section className="mb-16">
           <div className="mb-8">
-            <h2 className="mb-2 text-4xl font-bold text-balance">Sistema de Design Care Copilot</h2>
-            <p className="text-lg text-muted-foreground text-pretty max-w-3xl">
-              Componentes e padrões visuais para construir interfaces de suporte clínico confiáveis e profissionais.
+            <h2 className="mb-2 text-4xl font-bold text-balance">
+              Sistema de Design Care Copilot
+            </h2>
+            <p className="text-muted-foreground max-w-3xl text-lg text-pretty">
+              Componentes e padrões visuais para construir interfaces de suporte
+              clínico confiáveis e profissionais.
             </p>
           </div>
         </section>
 
-        {/* Cores */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Paleta de Cores</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Primária</CardTitle>
-                <CardDescription>Verde água - Confiança e precisão clínica</CardDescription>
+                <CardDescription>
+                  Verde água - Confiança e precisão clínica
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-primary" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-primary</p>
+                  <div className="bg-primary h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-primary
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-primary/80" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-primary/80</p>
+                  <div className="bg-primary/80 h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-primary/80
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-primary/60" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-primary/60</p>
+                  <div className="bg-primary/60 h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-primary/60
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -113,20 +138,28 @@ export default function StyleguidePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Secundária</CardTitle>
-                <CardDescription>Cinza suave - Elementos de suporte</CardDescription>
+                <CardDescription>
+                  Cinza suave - Elementos de suporte
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-secondary" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-secondary</p>
+                  <div className="bg-secondary h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-secondary
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-muted" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-muted</p>
+                  <div className="bg-muted h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-muted
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-accent" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-accent</p>
+                  <div className="bg-accent h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-accent
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -138,20 +171,30 @@ export default function StyleguidePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <div className="h-20 w-full rounded-lg bg-destructive" />
-                  <p className="font-mono text-xs text-muted-foreground">bg-destructive</p>
+                  <div className="bg-destructive h-20 w-full rounded-lg" />
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-destructive
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex h-20 w-full items-center justify-center rounded-lg border-2 border-border bg-background">
-                    <p className="text-sm font-medium text-muted-foreground">Background</p>
+                  <div className="border-border bg-background flex h-20 w-full items-center justify-center rounded-lg border-2">
+                    <p className="text-muted-foreground text-sm font-medium">
+                      Background
+                    </p>
                   </div>
-                  <p className="font-mono text-xs text-muted-foreground">bg-background</p>
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-background
+                  </p>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex h-20 w-full items-center justify-center rounded-lg bg-card">
-                    <p className="text-sm font-medium text-card-foreground">Card</p>
+                  <div className="bg-card flex h-20 w-full items-center justify-center rounded-lg">
+                    <p className="text-card-foreground text-sm font-medium">
+                      Card
+                    </p>
                   </div>
-                  <p className="font-mono text-xs text-muted-foreground">bg-card</p>
+                  <p className="text-muted-foreground font-mono text-xs">
+                    bg-card
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -160,43 +203,68 @@ export default function StyleguidePage() {
 
         <Separator className="my-12" />
 
-        {/* Tipografia */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Tipografia</h2>
           <Card>
             <CardContent className="space-y-8 pt-6">
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Display / 4xl</p>
-                <h1 className="text-4xl font-bold text-balance">Suporte clínico inteligente</h1>
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Display / 4xl
+                </p>
+                <h1 className="text-4xl font-bold text-balance">
+                  Suporte clínico inteligente
+                </h1>
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Heading / 3xl</p>
-                <h2 className="text-3xl font-bold text-balance">Automatize seu fluxo de trabalho</h2>
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Heading / 3xl
+                </p>
+                <h2 className="text-3xl font-bold text-balance">
+                  Automatize seu fluxo de trabalho
+                </h2>
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Title / 2xl</p>
-                <h3 className="text-2xl font-semibold">Gestão de pacientes simplificada</h3>
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Title / 2xl
+                </p>
+                <h3 className="text-2xl font-semibold">
+                  Gestão de pacientes simplificada
+                </h3>
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Subtitle / xl</p>
-                <h4 className="text-xl font-semibold">Prontuários eletrônicos integrados</h4>
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Subtitle / xl
+                </p>
+                <h4 className="text-xl font-semibold">
+                  Prontuários eletrônicos integrados
+                </h4>
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Body / base</p>
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Body / base
+                </p>
                 <p className="text-base leading-relaxed text-pretty">
-                  O Care Copilot oferece automações inteligentes para médicos, otimizando processos clínicos e
-                  melhorando o atendimento ao paciente através de tecnologia de ponta.
+                  O Care Copilot oferece automações inteligentes para médicos,
+                  otimizando processos clínicos e melhorando o atendimento ao
+                  paciente através de tecnologia de ponta.
                 </p>
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Small / sm</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Informações complementares e metadados aparecem neste tamanho de fonte.
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Small / sm
+                </p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  Informações complementares e metadados aparecem neste tamanho
+                  de fonte.
                 </p>
               </div>
               <div>
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Code / mono</p>
-                <code className="rounded bg-muted px-2 py-1 font-mono text-sm">const copilot = new CareCopilot()</code>
+                <p className="text-muted-foreground mb-2 text-xs font-medium">
+                  Code / mono
+                </p>
+                <code className="bg-muted rounded px-2 py-1 font-mono text-sm">
+                  const copilot = new CareCopilot()
+                </code>
               </div>
             </CardContent>
           </Card>
@@ -204,14 +272,15 @@ export default function StyleguidePage() {
 
         <Separator className="my-12" />
 
-        {/* Botões */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Botões</h2>
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Variantes</CardTitle>
-                <CardDescription>Diferentes estilos para diferentes contextos</CardDescription>
+                <CardDescription>
+                  Diferentes estilos para diferentes contextos
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-wrap gap-3">
@@ -228,7 +297,9 @@ export default function StyleguidePage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Tamanhos</CardTitle>
-                <CardDescription>Adaptados para diferentes hierarquias</CardDescription>
+                <CardDescription>
+                  Adaptados para diferentes hierarquias
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
@@ -287,7 +358,6 @@ export default function StyleguidePage() {
 
         <Separator className="my-12" />
 
-        {/* Formulários */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Componentes de Formulário</h2>
           <div className="grid gap-6 md:grid-cols-2">
@@ -302,11 +372,19 @@ export default function StyleguidePage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="paciente@exemplo.com" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="paciente@exemplo.com"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="disabled">Campo Desabilitado</Label>
-                  <Input id="disabled" disabled placeholder="Campo desabilitado" />
+                  <Input
+                    id="disabled"
+                    disabled
+                    placeholder="Campo desabilitado"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -424,7 +502,6 @@ export default function StyleguidePage() {
 
         <Separator className="my-12" />
 
-        {/* Badges & Avatars */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Badges & Avatars</h2>
           <div className="grid gap-6 md:grid-cols-2">
@@ -460,10 +537,14 @@ export default function StyleguidePage() {
                     <AvatarFallback>DR</AvatarFallback>
                   </Avatar>
                   <Avatar>
-                    <AvatarFallback className="bg-primary text-primary-foreground">MC</AvatarFallback>
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      MC
+                    </AvatarFallback>
                   </Avatar>
                   <Avatar>
-                    <AvatarFallback className="bg-secondary text-secondary-foreground">JS</AvatarFallback>
+                    <AvatarFallback className="bg-secondary text-secondary-foreground">
+                      JS
+                    </AvatarFallback>
                   </Avatar>
                 </div>
                 <div className="flex items-center gap-4">
@@ -472,7 +553,9 @@ export default function StyleguidePage() {
                   </Avatar>
                   <div>
                     <p className="text-sm font-medium">Dr. Ricardo Santos</p>
-                    <p className="text-xs text-muted-foreground">Cardiologista</p>
+                    <p className="text-muted-foreground text-xs">
+                      Cardiologista
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -482,41 +565,48 @@ export default function StyleguidePage() {
 
         <Separator className="my-12" />
 
-        {/* Alerts */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Alertas & Notificações</h2>
           <div className="space-y-4">
             <Alert>
               <Info className="h-4 w-4" />
               <AlertTitle>Informação</AlertTitle>
-              <AlertDescription>Esta é uma mensagem informativa para o usuário sobre o sistema.</AlertDescription>
+              <AlertDescription>
+                Esta é uma mensagem informativa para o usuário sobre o sistema.
+              </AlertDescription>
             </Alert>
 
             <Alert className="border-green-500/50 text-green-600 dark:text-green-400">
               <CheckCircle2 className="h-4 w-4" />
               <AlertTitle>Sucesso</AlertTitle>
-              <AlertDescription>Operação concluída com sucesso. Os dados foram salvos corretamente.</AlertDescription>
+              <AlertDescription>
+                Operação concluída com sucesso. Os dados foram salvos
+                corretamente.
+              </AlertDescription>
             </Alert>
 
             <Alert className="border-yellow-500/50 text-yellow-600 dark:text-yellow-400">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Atenção</AlertTitle>
               <AlertDescription>
-                Existem campos obrigatórios que precisam ser preenchidos antes de continuar.
+                Existem campos obrigatórios que precisam ser preenchidos antes
+                de continuar.
               </AlertDescription>
             </Alert>
 
             <Alert variant="destructive">
               <XCircle className="h-4 w-4" />
               <AlertTitle>Erro</AlertTitle>
-              <AlertDescription>Não foi possível processar a solicitação. Por favor, tente novamente.</AlertDescription>
+              <AlertDescription>
+                Não foi possível processar a solicitação. Por favor, tente
+                novamente.
+              </AlertDescription>
             </Alert>
           </div>
         </section>
 
         <Separator className="my-12" />
 
-        {/* Cards & Tabs */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Cards & Navegação</h2>
           <div className="space-y-6">
@@ -531,34 +621,46 @@ export default function StyleguidePage() {
                 <div className="grid gap-4 md:grid-cols-3">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium">Pacientes Ativos</CardTitle>
-                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm font-medium">
+                        Pacientes Ativos
+                      </CardTitle>
+                      <Users className="text-muted-foreground h-4 w-4" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">142</div>
-                      <p className="text-xs text-muted-foreground">+12% desde o mês passado</p>
+                      <p className="text-muted-foreground text-xs">
+                        +12% desde o mês passado
+                      </p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium">Consultas Hoje</CardTitle>
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm font-medium">
+                        Consultas Hoje
+                      </CardTitle>
+                      <Calendar className="text-muted-foreground h-4 w-4" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">24</div>
-                      <p className="text-xs text-muted-foreground">8 pendentes</p>
+                      <p className="text-muted-foreground text-xs">
+                        8 pendentes
+                      </p>
                     </CardContent>
                   </Card>
 
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                      <CardTitle className="text-sm font-medium">Taxa de Satisfação</CardTitle>
-                      <Heart className="h-4 w-4 text-muted-foreground" />
+                      <CardTitle className="text-sm font-medium">
+                        Taxa de Satisfação
+                      </CardTitle>
+                      <Heart className="text-muted-foreground h-4 w-4" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">98%</div>
-                      <p className="text-xs text-muted-foreground">+2% desde o mês passado</p>
+                      <p className="text-muted-foreground text-xs">
+                        +2% desde o mês passado
+                      </p>
                     </CardContent>
                   </Card>
                 </div>
@@ -567,10 +669,14 @@ export default function StyleguidePage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Buscar paciente</CardTitle>
-                    <CardDescription>Gerencie seus pacientes ativos</CardDescription>
+                    <CardDescription>
+                      Gerencie seus pacientes ativos
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">Conteúdo da Buscar paciente...</p>
+                    <p className="text-muted-foreground text-sm">
+                      Conteúdo da Buscar paciente...
+                    </p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -578,10 +684,14 @@ export default function StyleguidePage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Agenda</CardTitle>
-                    <CardDescription>Visualize e gerencie seus compromissos</CardDescription>
+                    <CardDescription>
+                      Visualize e gerencie seus compromissos
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">Conteúdo da agenda...</p>
+                    <p className="text-muted-foreground text-sm">
+                      Conteúdo da agenda...
+                    </p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -589,10 +699,14 @@ export default function StyleguidePage() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Relatórios</CardTitle>
-                    <CardDescription>Análises e métricas do seu consultório</CardDescription>
+                    <CardDescription>
+                      Análises e métricas do seu consultório
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground">Conteúdo dos relatórios...</p>
+                    <p className="text-muted-foreground text-sm">
+                      Conteúdo dos relatórios...
+                    </p>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -602,77 +716,87 @@ export default function StyleguidePage() {
 
         <Separator className="my-12" />
 
-        {/* Ícones */}
         <section className="mb-16">
           <h2 className="mb-6 text-2xl font-bold">Iconografia</h2>
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Ícones Lucide</CardTitle>
-              <CardDescription>Biblioteca de ícones consistente e profissional</CardDescription>
+              <CardDescription>
+                Biblioteca de ícones consistente e profissional
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-4 gap-6 md:grid-cols-8">
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Activity className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <Activity className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Activity</span>
+                  <span className="text-muted-foreground text-xs">
+                    Activity
+                  </span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Heart className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <Heart className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Heart</span>
+                  <span className="text-muted-foreground text-xs">Heart</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Users className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <Users className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Users</span>
+                  <span className="text-muted-foreground text-xs">Users</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Calendar className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <Calendar className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Calendar</span>
+                  <span className="text-muted-foreground text-xs">
+                    Calendar
+                  </span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <FileText className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <FileText className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">FileText</span>
+                  <span className="text-muted-foreground text-xs">
+                    FileText
+                  </span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Settings className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <Settings className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Settings</span>
+                  <span className="text-muted-foreground text-xs">
+                    Settings
+                  </span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <Bell className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <Bell className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Bell</span>
+                  <span className="text-muted-foreground text-xs">Bell</span>
                 </div>
                 <div className="flex flex-col items-center gap-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <CheckCircle2 className="h-6 w-6 text-primary" />
+                  <div className="bg-primary/10 flex h-12 w-12 items-center justify-center rounded-lg">
+                    <CheckCircle2 className="text-primary h-6 w-6" />
                   </div>
-                  <span className="text-xs text-muted-foreground">Check</span>
+                  <span className="text-muted-foreground text-xs">Check</span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </section>
 
-        {/* Footer */}
-        <footer className="mt-16 border-t border-border pt-8">
+        <footer className="border-border mt-16 border-t pt-8">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">Care Copilot Design System © 2025</p>
+            <p className="text-muted-foreground text-sm">
+              Care Copilot Design System © 2025
+            </p>
             <Badge variant="outline">v1.0.0</Badge>
           </div>
         </footer>
       </main>
     </div>
-  )
+  );
 }

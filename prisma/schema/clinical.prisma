@@ -33,6 +33,7 @@ model Patient {
   consultations ScheduleConsultation[]
   aiDiagnoses   AiDiagnosis[]
   audioSessions AudioConsultationSession[]
+  clinicalChats ClinicalChat[]
 }
 
 model ClinicalProfile {
@@ -112,6 +113,7 @@ model Anamnesis {
   medications   PrescribedMedication[]
   aiDiagnoses   AiDiagnosis[]
   surgicalRisk  SurgicalRiskAssessment?
+  clinicalChatMessages ClinicalChatMessage[]
 
   diagnosticHypothesis String?   @db.Text
   conduct              String?   @db.Text
@@ -203,6 +205,7 @@ model AiDiagnosis {
   resultSchemaVersion        Int            @default(1)
   basePromptVersion          String?
   customInstructionsSnapshot String?         @db.Text
+  promptTemplateSnapshot     String?         @db.Text
   errorCode                  String?
   errorMessage               String?         @db.Text
   startedAt                  DateTime?

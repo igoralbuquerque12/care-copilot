@@ -20,6 +20,7 @@ export const getByPatient = async (
       include: {
         physicalExam: true,
         medications: true,
+        surgicalRisk: true,
         template: {
           include: {
             sections: {
