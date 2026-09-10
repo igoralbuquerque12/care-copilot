@@ -1,6 +1,9 @@
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import type { CreateSurgicalRiskInput, UpdateSurgicalRiskInput } from "~/schemas/surgical-risk";
+import type {
+  CreateSurgicalRiskInput,
+  UpdateSurgicalRiskInput,
+} from "~/schemas/surgical-risk";
 
 export type LeeFactors = {
   isHighRiskSurgery: boolean;
@@ -22,7 +25,6 @@ export type InferredRiskFactors = LeeFactors & {
   wasInferred: boolean;
   inferredFields: string[];
 };
-
 
 /**
  * Calcula o Índice de Risco Cardíaco Revisado (Lee Score / RCRI).
@@ -91,7 +93,8 @@ export function inferRiskFactorsFromPatient(
     anamnesis.nyhaClass === "III" ||
     anamnesis.nyhaClass === "IV" ||
     anamnesis.hasEdema;
-  if (hasCongestiveHeartFailure) inferredFields.push("hasCongestiveHeartFailure");
+  if (hasCongestiveHeartFailure)
+    inferredFields.push("hasCongestiveHeartFailure");
 
   const isInsulinDependent = medications.some((m) =>
     m.name.toLowerCase().includes("insulina"),
@@ -141,7 +144,15 @@ export async function createSurgicalRisk(
     });
   }
 
-  const { anamnesisId, surgeryName, asaClass, mets, recommendation, isCleared, ...factors } = data;
+  const {
+    anamnesisId,
+    surgeryName,
+    asaClass,
+    mets,
+    recommendation,
+    isCleared,
+    ...factors
+  } = data;
   const { score, riskClass } = calculateLeeScore(factors);
 
   return db.surgicalRiskAssessment.create({
@@ -176,15 +187,30 @@ export async function updateSurgicalRisk(
     });
   }
 
-  const { surgeryName, asaClass, mets, recommendation, isCleared, ...rawFactors } = data;
+  const {
+    surgeryName,
+    asaClass,
+    mets,
+    recommendation,
+    isCleared,
+    ...rawFactors
+  } = data;
 
   const mergedFactors: LeeFactors = {
-    isHighRiskSurgery: rawFactors.isHighRiskSurgery ?? existing.isHighRiskSurgery,
-    hasIschemicHeartDisease: rawFactors.hasIschemicHeartDisease ?? existing.hasIschemicHeartDisease,
-    hasCongestiveHeartFailure: rawFactors.hasCongestiveHeartFailure ?? existing.hasCongestiveHeartFailure,
-    hasCerebrovascularDisease: rawFactors.hasCerebrovascularDisease ?? existing.hasCerebrovascularDisease,
-    isInsulinDependent: rawFactors.isInsulinDependent ?? existing.isInsulinDependent,
-    hasElevatedCreatinine: rawFactors.hasElevatedCreatinine ?? existing.hasElevatedCreatinine,
+    isHighRiskSurgery:
+      rawFactors.isHighRiskSurgery ?? existing.isHighRiskSurgery,
+    hasIschemicHeartDisease:
+      rawFactors.hasIschemicHeartDisease ?? existing.hasIschemicHeartDisease,
+    hasCongestiveHeartFailure:
+      rawFactors.hasCongestiveHeartFailure ??
+      existing.hasCongestiveHeartFailure,
+    hasCerebrovascularDisease:
+      rawFactors.hasCerebrovascularDisease ??
+      existing.hasCerebrovascularDisease,
+    isInsulinDependent:
+      rawFactors.isInsulinDependent ?? existing.isInsulinDependent,
+    hasElevatedCreatinine:
+      rawFactors.hasElevatedCreatinine ?? existing.hasElevatedCreatinine,
   };
 
   const { score, riskClass } = calculateLeeScore(mergedFactors);

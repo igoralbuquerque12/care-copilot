@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { createSurgicalRiskSchema, updateSurgicalRiskSchema } from "~/schemas/surgical-risk";
-import * as surgicalRiskService from "~/server/services/surgicalRisk.service";
+import {
+  createSurgicalRiskSchema,
+  updateSurgicalRiskSchema,
+} from "~/schemas/surgical-risk";
+import * as surgicalRiskService from "~/server/services/surgical-risk/surgical-risk.service";
 
 export const surgicalRiskRouter = createTRPCRouter({
   create: protectedProcedure
@@ -14,24 +17,41 @@ export const surgicalRiskRouter = createTRPCRouter({
     .input(updateSurgicalRiskSchema)
     .mutation(({ ctx, input }) => {
       const { id, ...data } = input;
-      return surgicalRiskService.updateSurgicalRisk(ctx.db, ctx.user.id, id, data);
+      return surgicalRiskService.updateSurgicalRisk(
+        ctx.db,
+        ctx.user.id,
+        id,
+        data,
+      );
     }),
 
   getByAnamnesisId: protectedProcedure
     .input(z.object({ anamnesisId: z.string().cuid() }))
     .query(({ ctx, input }) =>
-      surgicalRiskService.getByAnamnesisId(ctx.db, ctx.user.id, input.anamnesisId),
+      surgicalRiskService.getByAnamnesisId(
+        ctx.db,
+        ctx.user.id,
+        input.anamnesisId,
+      ),
     ),
 
   inferFromAnamnesis: protectedProcedure
     .input(z.object({ anamnesisId: z.string().cuid() }))
     .query(({ ctx, input }) =>
-      surgicalRiskService.inferFromAnamnesisId(ctx.db, ctx.user.id, input.anamnesisId),
+      surgicalRiskService.inferFromAnamnesisId(
+        ctx.db,
+        ctx.user.id,
+        input.anamnesisId,
+      ),
     ),
 
   getPatientAnamneses: protectedProcedure
     .input(z.object({ patientId: z.string().cuid() }))
     .query(({ ctx, input }) =>
-      surgicalRiskService.getPatientAnamnesesForRisk(ctx.db, ctx.user.id, input.patientId),
+      surgicalRiskService.getPatientAnamnesesForRisk(
+        ctx.db,
+        ctx.user.id,
+        input.patientId,
+      ),
     ),
 });
