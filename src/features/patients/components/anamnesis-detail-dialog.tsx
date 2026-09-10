@@ -3,8 +3,17 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import {
-  X, Pencil, Save, Undo2, Calendar, Pill, AlertCircle,
-  Stethoscope, Activity, Plus, Trash2,
+  X,
+  Pencil,
+  Save,
+  Undo2,
+  Calendar,
+  Pill,
+  AlertCircle,
+  Stethoscope,
+  Activity,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Button } from "~/components/ui/button";
@@ -12,8 +21,6 @@ import { Input } from "~/components/ui/input";
 import { api } from "~/trpc/react";
 import { DynamicFieldRenderer } from "~/features/anamnesis/components/dynamic-field-renderer";
 import type { FormFieldType } from "~/schemas/form-template";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 type Medication = { name: string; dosage: string; frequency: string };
 type CustomResponses = Record<string, unknown>;
@@ -106,8 +113,6 @@ type Props = {
   patientId: string;
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const toRecord = (value: unknown): CustomResponses =>
   value && typeof value === "object" && !Array.isArray(value)
     ? (value as CustomResponses)
@@ -147,28 +152,40 @@ const toForm = (a: AnamnesisDetail): FormState => ({
 
 const num = (v: string) => (v === "" ? undefined : Number(v));
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+    <h3 className="text-muted-foreground mb-3 text-xs font-semibold tracking-wider uppercase">
       {children}
     </h3>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <p className="text-[11px] font-medium text-muted-foreground mb-1">{label}</p>
+      <p className="text-muted-foreground mb-1 text-[11px] font-medium">
+        {label}
+      </p>
       {children}
     </div>
   );
 }
 
-function ReadText({ value, empty = "—" }: { value?: string | null; empty?: string }) {
+function ReadText({
+  value,
+  empty = "—",
+}: {
+  value?: string | null;
+  empty?: string;
+}) {
   return (
-    <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+    <p className="text-foreground text-sm leading-relaxed whitespace-pre-line">
       {value ?? empty}
     </p>
   );
@@ -188,7 +205,7 @@ function EditTextarea({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       rows={rows}
-      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+      className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-ring w-full resize-none rounded-md border px-3 py-2 text-sm focus:ring-1 focus:outline-none"
     />
   );
 }
@@ -200,9 +217,12 @@ const nyhaColors: Record<string, string> = {
   IV: "bg-red-500/10 text-red-700 dark:text-red-400",
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
-export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: Props) {
+export function AnamnesisDetailDialog({
+  anamnesis,
+  open,
+  onClose,
+  patientId,
+}: Props) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toForm(anamnesis));
 
@@ -229,7 +249,10 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
   const addMed = () =>
     setForm((prev) => ({
       ...prev,
-      medications: [...prev.medications, { name: "", dosage: "", frequency: "" }],
+      medications: [
+        ...prev.medications,
+        { name: "", dosage: "", frequency: "" },
+      ],
     }));
 
   const removeMed = (i: number) =>
@@ -272,7 +295,9 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
       hasChestPain: form.hasChestPain,
       diagnosticHypothesis: form.diagnosticHypothesis || null,
       conduct: form.conduct || null,
-      nextRecallDate: form.nextRecallDate ? new Date(form.nextRecallDate) : null,
+      nextRecallDate: form.nextRecallDate
+        ? new Date(form.nextRecallDate)
+        : null,
       physicalExam: {
         weight: num(form.physicalExam.weight),
         height: num(form.physicalExam.height),
@@ -303,104 +328,153 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
     ) ?? [];
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent
         showCloseButton={false}
-        className="fixed inset-0 top-0 left-0 max-w-none w-full h-full rounded-none border-0 translate-x-0 translate-y-0 flex flex-col p-0 gap-0"
+        className="fixed inset-0 top-0 left-0 flex h-full w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none border-0 p-0"
       >
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between gap-4 px-6 py-4 border-b border-border bg-card shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <Stethoscope className="h-4 w-4 text-primary" />
+        <div className="border-border bg-card flex shrink-0 items-center justify-between gap-4 border-b px-6 py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="bg-primary/10 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
+              <Stethoscope className="text-primary h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <DialogTitle className="text-base font-semibold text-foreground truncate">
+              <div className="flex flex-wrap items-center gap-2">
+                <DialogTitle className="text-foreground truncate text-base font-semibold">
                   {anamnesis.chiefComplaint}
                 </DialogTitle>
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${nyhaColors[form.nyhaClass] ?? ""}`}>
+                <span
+                  className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${nyhaColors[form.nyhaClass] ?? ""}`}
+                >
                   NYHA {form.nyhaClass}
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="text-muted-foreground flex items-center gap-1 text-xs">
                 <Calendar className="h-3 w-3" />
-                {date.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                {date.toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             {editing ? (
               <>
-                <Button variant="outline" size="sm" onClick={cancel} disabled={updateMutation.isPending}>
-                  <Undo2 className="h-3.5 w-3.5 mr-1.5" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={cancel}
+                  disabled={updateMutation.isPending}
+                >
+                  <Undo2 className="mr-1.5 h-3.5 w-3.5" />
                   Cancelar
                 </Button>
-                <Button size="sm" onClick={save} disabled={updateMutation.isPending}>
-                  <Save className="h-3.5 w-3.5 mr-1.5" />
+                <Button
+                  size="sm"
+                  onClick={save}
+                  disabled={updateMutation.isPending}
+                >
+                  <Save className="mr-1.5 h-3.5 w-3.5" />
                   {updateMutation.isPending ? "Salvando..." : "Salvar"}
                 </Button>
               </>
             ) : (
-              <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditing(true)}
+              >
+                <Pencil className="mr-1.5 h-3.5 w-3.5" />
                 Editar
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={onClose}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        {/* ── Body ── */}
-        <div className="flex-1 overflow-y-auto bg-muted/20">
-          <div className="max-w-5xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* ── Left column (2/3) ── */}
-            <div className="lg:col-span-2 space-y-5">
-
-              {/* Queixa + HDA */}
-              <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div className="bg-muted/20 flex-1 overflow-y-auto">
+          <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 py-6 lg:grid-cols-3">
+            <div className="space-y-5 lg:col-span-2">
+              <div className="border-border bg-card space-y-4 rounded-xl border p-5">
                 <SectionTitle>Consulta</SectionTitle>
                 <Field label="Queixa Principal">
-                  {editing
-                    ? <EditTextarea value={form.chiefComplaint} onChange={(v) => set("chiefComplaint", v)} rows={2} />
-                    : <ReadText value={form.chiefComplaint} />}
+                  {editing ? (
+                    <EditTextarea
+                      value={form.chiefComplaint}
+                      onChange={(v) => set("chiefComplaint", v)}
+                      rows={2}
+                    />
+                  ) : (
+                    <ReadText value={form.chiefComplaint} />
+                  )}
                 </Field>
                 <Field label="História da Doença Atual">
-                  {editing
-                    ? <EditTextarea value={form.currentIllnessHistory} onChange={(v) => set("currentIllnessHistory", v)} rows={4} />
-                    : <ReadText value={form.currentIllnessHistory} />}
+                  {editing ? (
+                    <EditTextarea
+                      value={form.currentIllnessHistory}
+                      onChange={(v) => set("currentIllnessHistory", v)}
+                      rows={4}
+                    />
+                  ) : (
+                    <ReadText value={form.currentIllnessHistory} />
+                  )}
                 </Field>
                 {(editing || form.treatmentResponse) && (
                   <Field label="Resposta ao Tratamento">
-                    {editing
-                      ? <EditTextarea value={form.treatmentResponse} onChange={(v) => set("treatmentResponse", v)} />
-                      : <ReadText value={form.treatmentResponse} />}
+                    {editing ? (
+                      <EditTextarea
+                        value={form.treatmentResponse}
+                        onChange={(v) => set("treatmentResponse", v)}
+                      />
+                    ) : (
+                      <ReadText value={form.treatmentResponse} />
+                    )}
                   </Field>
                 )}
                 {(editing || form.symptomEvolution) && (
                   <Field label="Evolução dos Sintomas">
-                    {editing
-                      ? <EditTextarea value={form.symptomEvolution} onChange={(v) => set("symptomEvolution", v)} />
-                      : <ReadText value={form.symptomEvolution} />}
+                    {editing ? (
+                      <EditTextarea
+                        value={form.symptomEvolution}
+                        onChange={(v) => set("symptomEvolution", v)}
+                      />
+                    ) : (
+                      <ReadText value={form.symptomEvolution} />
+                    )}
                   </Field>
                 )}
                 {(editing || form.newEvents) && (
                   <Field label="Novos Eventos">
-                    {editing
-                      ? <EditTextarea value={form.newEvents} onChange={(v) => set("newEvents", v)} />
-                      : <ReadText value={form.newEvents} />}
+                    {editing ? (
+                      <EditTextarea
+                        value={form.newEvents}
+                        onChange={(v) => set("newEvents", v)}
+                      />
+                    ) : (
+                      <ReadText value={form.newEvents} />
+                    )}
                   </Field>
                 )}
               </div>
 
-              {/* Sintomas + NYHA */}
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="border-border bg-card rounded-xl border p-5">
                 <SectionTitle>Sintomas</SectionTitle>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {(
                     [
                       ["hasPalpitations", "Palpitações"],
@@ -411,7 +485,7 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                   ).map(([key, label]) => (
                     <label
                       key={key}
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
                         form[key]
                           ? "border-primary/40 bg-primary/5 text-foreground"
                           : "border-border bg-muted/20 text-muted-foreground"
@@ -448,11 +522,13 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${nyhaColors[form.nyhaClass] ?? ""}`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${nyhaColors[form.nyhaClass] ?? ""}`}
+                      >
                         Classe {form.nyhaClass}
                       </span>
                       {symptoms.length > 0 && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                           · {symptoms.join(", ")}
                         </span>
                       )}
@@ -461,23 +537,32 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                 </Field>
               </div>
 
-              {/* Hipótese + Conduta */}
-              <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+              <div className="border-border bg-card space-y-4 rounded-xl border p-5">
                 <SectionTitle>
                   <span className="flex items-center gap-1.5">
-                    <AlertCircle className="h-3.5 w-3.5 text-primary" />
+                    <AlertCircle className="text-primary h-3.5 w-3.5" />
                     Hipótese e Conduta
                   </span>
                 </SectionTitle>
                 <Field label="Hipótese Diagnóstica">
-                  {editing
-                    ? <EditTextarea value={form.diagnosticHypothesis} onChange={(v) => set("diagnosticHypothesis", v)} />
-                    : <ReadText value={form.diagnosticHypothesis} />}
+                  {editing ? (
+                    <EditTextarea
+                      value={form.diagnosticHypothesis}
+                      onChange={(v) => set("diagnosticHypothesis", v)}
+                    />
+                  ) : (
+                    <ReadText value={form.diagnosticHypothesis} />
+                  )}
                 </Field>
                 <Field label="Conduta">
-                  {editing
-                    ? <EditTextarea value={form.conduct} onChange={(v) => set("conduct", v)} />
-                    : <ReadText value={form.conduct} />}
+                  {editing ? (
+                    <EditTextarea
+                      value={form.conduct}
+                      onChange={(v) => set("conduct", v)}
+                    />
+                  ) : (
+                    <ReadText value={form.conduct} />
+                  )}
                 </Field>
                 <Field label="Próximo Retorno">
                   {editing ? (
@@ -491,7 +576,9 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                     <ReadText
                       value={
                         form.nextRecallDate
-                          ? new Date(form.nextRecallDate + "T00:00:00").toLocaleDateString("pt-BR")
+                          ? new Date(
+                              form.nextRecallDate + "T00:00:00",
+                            ).toLocaleDateString("pt-BR")
                           : null
                       }
                     />
@@ -500,7 +587,7 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
               </div>
 
               {customFields.length > 0 && (
-                <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+                <div className="border-border bg-card space-y-4 rounded-xl border p-5">
                   <SectionTitle>Campos Personalizados</SectionTitle>
                   {customFields.map((field) => (
                     <DynamicFieldRenderer
@@ -515,11 +602,8 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
               )}
             </div>
 
-            {/* ── Right column (1/3) ── */}
             <div className="space-y-5">
-
-              {/* Exame Físico */}
-              <div className="rounded-xl border border-border bg-card p-5">
+              <div className="border-border bg-card rounded-xl border p-5">
                 <SectionTitle>
                   <span className="flex items-center gap-1.5">
                     <Activity className="h-3.5 w-3.5" />
@@ -537,18 +621,20 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                       ["height", "Altura", "cm"],
                     ] as const
                   ).map(([key, label, unit]) => (
-                    <div key={key} className="rounded-lg bg-muted/40 p-2.5">
-                      <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
+                    <div key={key} className="bg-muted/40 rounded-lg p-2.5">
+                      <p className="text-muted-foreground mb-1 text-[10px]">
+                        {label}
+                      </p>
                       {editing ? (
                         <Input
                           type="number"
                           value={form.physicalExam[key]}
                           onChange={(e) => setExam(key, e.target.value)}
                           placeholder="—"
-                          className="h-7 text-sm px-2"
+                          className="h-7 px-2 text-sm"
                         />
                       ) : (
-                        <p className="text-sm font-semibold text-foreground">
+                        <p className="text-foreground text-sm font-semibold">
                           {form.physicalExam[key]
                             ? `${form.physicalExam[key]} ${unit}`
                             : "—"}
@@ -566,28 +652,28 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                       ["peripheralPulses", "Pulsos Periféricos"],
                       ["edemaGrade", "Grau do Edema"],
                     ] as const
-                  ).map(([key, label]) => (
-                    (editing || form.physicalExam[key]) && (
-                      <Field key={key} label={label}>
-                        {editing ? (
-                          <Input
-                            value={form.physicalExam[key]}
-                            onChange={(e) => setExam(key, e.target.value)}
-                            placeholder="—"
-                            className="h-8 text-sm"
-                          />
-                        ) : (
-                          <ReadText value={form.physicalExam[key]} />
-                        )}
-                      </Field>
-                    )
-                  ))}
+                  ).map(
+                    ([key, label]) =>
+                      (editing || form.physicalExam[key]) && (
+                        <Field key={key} label={label}>
+                          {editing ? (
+                            <Input
+                              value={form.physicalExam[key]}
+                              onChange={(e) => setExam(key, e.target.value)}
+                              placeholder="—"
+                              className="h-8 text-sm"
+                            />
+                          ) : (
+                            <ReadText value={form.physicalExam[key]} />
+                          )}
+                        </Field>
+                      ),
+                  )}
                 </div>
               </div>
 
-              {/* Medicamentos */}
-              <div className="rounded-xl border border-border bg-card p-5">
-                <div className="flex items-center justify-between mb-3">
+              <div className="border-border bg-card rounded-xl border p-5">
+                <div className="mb-3 flex items-center justify-between">
                   <SectionTitle>
                     <span className="flex items-center gap-1.5">
                       <Pill className="h-3.5 w-3.5" />
@@ -598,7 +684,7 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                     <button
                       type="button"
                       onClick={addMed}
-                      className="flex items-center gap-1 text-xs text-primary hover:underline"
+                      className="text-primary flex items-center gap-1 text-xs hover:underline"
                     >
                       <Plus className="h-3.5 w-3.5" />
                       Adicionar
@@ -607,24 +693,29 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                 </div>
 
                 {form.medications.length === 0 && !editing && (
-                  <p className="text-sm text-muted-foreground">Nenhum medicamento registrado.</p>
+                  <p className="text-muted-foreground text-sm">
+                    Nenhum medicamento registrado.
+                  </p>
                 )}
 
                 <div className="space-y-2">
                   {form.medications.map((med, i) =>
                     editing ? (
-                      <div key={i} className="rounded-lg border border-border bg-muted/20 p-2.5 space-y-1.5">
+                      <div
+                        key={i}
+                        className="border-border bg-muted/20 space-y-1.5 rounded-lg border p-2.5"
+                      >
                         <div className="flex items-center gap-1.5">
                           <Input
                             value={med.name}
                             onChange={(e) => setMed(i, "name", e.target.value)}
                             placeholder="Medicamento"
-                            className="h-7 text-sm flex-1"
+                            className="h-7 flex-1 text-sm"
                           />
                           <button
                             type="button"
                             onClick={() => removeMed(i)}
-                            className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
+                            className="text-muted-foreground hover:text-destructive shrink-0 transition-colors"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -632,28 +723,43 @@ export function AnamnesisDetailDialog({ anamnesis, open, onClose, patientId }: P
                         <div className="grid grid-cols-2 gap-1.5">
                           <Input
                             value={med.dosage}
-                            onChange={(e) => setMed(i, "dosage", e.target.value)}
+                            onChange={(e) =>
+                              setMed(i, "dosage", e.target.value)
+                            }
                             placeholder="Dose"
                             className="h-7 text-sm"
                           />
                           <Input
                             value={med.frequency}
-                            onChange={(e) => setMed(i, "frequency", e.target.value)}
+                            onChange={(e) =>
+                              setMed(i, "frequency", e.target.value)
+                            }
                             placeholder="Frequência"
                             className="h-7 text-sm"
                           />
                         </div>
                       </div>
                     ) : (
-                      <div key={i} className="flex items-start gap-2 text-sm py-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 py-1 text-sm"
+                      >
+                        <span className="bg-primary mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" />
                         <div>
-                          <span className="font-medium text-foreground">{med.name}</span>
+                          <span className="text-foreground font-medium">
+                            {med.name}
+                          </span>
                           {med.dosage && (
-                            <span className="text-muted-foreground"> · {med.dosage}</span>
+                            <span className="text-muted-foreground">
+                              {" "}
+                              · {med.dosage}
+                            </span>
                           )}
                           {med.frequency && (
-                            <span className="text-muted-foreground/70"> ({med.frequency})</span>
+                            <span className="text-muted-foreground/70">
+                              {" "}
+                              ({med.frequency})
+                            </span>
                           )}
                         </div>
                       </div>

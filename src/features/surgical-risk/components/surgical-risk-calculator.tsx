@@ -165,7 +165,6 @@ export function SurgicalRiskCalculator({
         ))}
       </div>
 
-      {/* Score reativo */}
       <Alert className={cn("mt-4 transition-all", config.alertClass)}>
         <RiskIcon className={cn("h-4 w-4", config.colorClass)} />
         <AlertTitle
