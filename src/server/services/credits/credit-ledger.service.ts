@@ -1,6 +1,6 @@
 import { type PrismaClient, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { AI_CREDIT_CONFIG } from "~/server/ai/credits/config";
+import { AI_CREDIT_CONFIG } from "~/server/ai/credits/credit.config";
 import type { CreditConsumptionBreakdown } from "~/server/ai/credits/utils";
 
 export type DebitBatchInput = {
@@ -10,10 +10,7 @@ export type DebitBatchInput = {
   breakdown: CreditConsumptionBreakdown;
 };
 
-export const grantSignupBonus = async (
-  db: PrismaClient,
-  profileId: string,
-) => {
+export const grantSignupBonus = async (db: PrismaClient, profileId: string) => {
   try {
     return await db.$transaction(async (tx) => {
       const existing = await tx.creditLedgerEntry.findFirst({
@@ -33,7 +30,9 @@ export const grantSignupBonus = async (
 
       await tx.profile.update({
         where: { id: profileId },
-        data: { creditsBalance: { increment: AI_CREDIT_CONFIG.signupBonusCredits } },
+        data: {
+          creditsBalance: { increment: AI_CREDIT_CONFIG.signupBonusCredits },
+        },
       });
 
       return created;
