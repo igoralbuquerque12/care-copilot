@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import * as creditLedger from "~/server/services/credits/creditLedger.service";
+import * as creditLedger from "~/server/services/credits/credit-ledger.service";
 
 export const creditsRouter = createTRPCRouter({
   getBalance: protectedProcedure.query(({ ctx }) =>
@@ -15,6 +15,11 @@ export const creditsRouter = createTRPCRouter({
       }),
     )
     .query(({ ctx, input }) =>
-      creditLedger.getRecentLedger(ctx.db, ctx.user.id, input.page, input.pageSize),
+      creditLedger.getRecentLedger(
+        ctx.db,
+        ctx.user.id,
+        input.page,
+        input.pageSize,
+      ),
     ),
 });

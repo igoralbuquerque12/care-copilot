@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { env } from "~/env";
-import type { AIClient, AIGenerateRequest, AIGenerateResponse } from "../client";
+import type {
+  AIClient,
+  AIGenerateRequest,
+  AIGenerateResponse,
+} from "../client";
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 

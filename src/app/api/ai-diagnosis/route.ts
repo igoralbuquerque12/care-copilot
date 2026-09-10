@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "~/server/db";
 import { messageQueue } from "~/server/messaging";
-import { processAiDiagnosis } from "~/server/services/aiDiagnosis";
+import { processAiDiagnosis } from "~/server/services/ai-diagnosis/ai-diagnosis.service";
 
 export async function POST(request: Request) {
   const body = await request.text();
-  if (!await messageQueue.verifySignature(request, body)) {
+  if (!(await messageQueue.verifySignature(request, body))) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

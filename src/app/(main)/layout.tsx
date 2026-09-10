@@ -1,4 +1,3 @@
-// src/app/(main)/layout.tsx
 import { Header } from "~/features/layout/components/header";
 import { Sidebar } from "~/features/layout/components/sidebar";
 

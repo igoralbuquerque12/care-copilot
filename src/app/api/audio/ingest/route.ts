@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "~/server/db";
 import { getUser } from "~/server/auth/supabase.server";
-import { ingestBatch } from "~/server/services/audio/services/batchIngestion.service";
+import { ingestBatch } from "~/server/services/audio/audio-batch-ingestion.service";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -28,7 +28,10 @@ export async function POST(request: Request) {
     try {
       parsed = JSON.parse(payloadStr);
     } catch {
-      return NextResponse.json({ error: "Invalid payload JSON" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload JSON" },
+        { status: 400 },
+      );
     }
 
     const result = await ingestBatch(db, {

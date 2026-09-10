@@ -8,9 +8,9 @@ import {
   completeClinicalChatTurn,
   failClinicalChatTurn,
   prepareClinicalChatTurn,
-} from "~/server/services/clinicalChat";
-import { buildClinicalChatResponseParams } from "~/server/services/clinicalChat/context";
-import { validateClinicalAttachments } from "~/server/services/clinicalChat/storage";
+} from "~/server/services/clinical-chat/clinical-chat.service";
+import { buildClinicalChatResponseParams } from "~/server/services/clinical-chat/context";
+import { validateClinicalAttachments } from "~/server/services/clinical-chat/storage";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;

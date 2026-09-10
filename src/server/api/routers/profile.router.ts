@@ -3,7 +3,7 @@ import {
   createDoctorBySuperAdminSchema,
   updateProfileSchema,
 } from "~/schemas/profile";
-import * as profileService from "~/server/services/profile.service";
+import * as profileService from "~/server/services/profile/profile.service";
 
 export const profileRouter = createTRPCRouter({
   get: protectedProcedure.query(async ({ ctx }) => {
@@ -23,7 +23,11 @@ export const profileRouter = createTRPCRouter({
   createDoctorBySuperAdmin: protectedProcedure
     .input(createDoctorBySuperAdminSchema)
     .mutation(async ({ ctx, input }) => {
-      return profileService.createDoctorBySuperAdmin(ctx.db, ctx.user.id, input);
+      return profileService.createDoctorBySuperAdmin(
+        ctx.db,
+        ctx.user.id,
+        input,
+      );
     }),
 
   delete: protectedProcedure.mutation(async ({ ctx }) => {

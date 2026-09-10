@@ -7,10 +7,6 @@ const INFERRED_LABEL: Record<string, string> = {
   isInsulinDependent: "Diabetes Insulino-dependente",
 };
 
-/**
- * Hook que orquestra o carregamento de dados, pré-preenchimento por inferência
- * e as mutations de criação/atualização do risco cirúrgico.
- */
 export function useSurgicalRiskForm(anamnesisId: string) {
   const utils = api.useUtils();
 
@@ -40,7 +36,9 @@ export function useSurgicalRiskForm(anamnesisId: string) {
         hasCerebrovascularDisease: existingRisk.hasCerebrovascularDisease,
         isInsulinDependent: existingRisk.isInsulinDependent,
         hasElevatedCreatinine: existingRisk.hasElevatedCreatinine,
-        asaClass: existingRisk.asaClass as CreateSurgicalRiskInput["asaClass"] ?? undefined,
+        asaClass:
+          (existingRisk.asaClass as CreateSurgicalRiskInput["asaClass"]) ??
+          undefined,
         mets: existingRisk.mets ?? undefined,
         recommendation: existingRisk.recommendation ?? undefined,
         isCleared: existingRisk.isCleared,

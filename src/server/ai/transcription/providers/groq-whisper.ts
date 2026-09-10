@@ -23,7 +23,9 @@ export class GroqWhisperTranscriber implements AudioTranscriber {
     private readonly model: string,
   ) {}
 
-  async transcribe(request: TranscriptionRequest): Promise<TranscriptionResponse> {
+  async transcribe(
+    request: TranscriptionRequest,
+  ): Promise<TranscriptionResponse> {
     const sdk = getSDK(this.apiKey);
 
     const arrayBuffer = request.audio.buffer.slice(

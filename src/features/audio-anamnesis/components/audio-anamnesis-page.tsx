@@ -18,7 +18,7 @@ import { AudioManualDraftForm } from "./audio-manual-draft-form";
 import { AudioReviewStep } from "./audio-review-step";
 import { RecorderControl } from "./recorder-control";
 import { CreditsBadge } from "./credits-badge";
-import { useAudioConsultation } from "../hooks/useAudioConsultation";
+import { useAudioConsultation } from "../hooks/use-audio-consultation";
 
 type Props = {
   consultationId?: string;

@@ -9,9 +9,14 @@ const OPENAI_TRANSCRIPTION_URL =
 const DEFAULT_MODEL = "whisper-1";
 
 export class WhisperTranscriber implements AudioTranscriber {
-  constructor(private readonly apiKey: string, private readonly model: string = DEFAULT_MODEL) {}
+  constructor(
+    private readonly apiKey: string,
+    private readonly model: string = DEFAULT_MODEL,
+  ) {}
 
-  async transcribe(request: TranscriptionRequest): Promise<TranscriptionResponse> {
+  async transcribe(
+    request: TranscriptionRequest,
+  ): Promise<TranscriptionResponse> {
     const form = new FormData();
     const arrayBuffer = request.audio.buffer.slice(
       request.audio.byteOffset,

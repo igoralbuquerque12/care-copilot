@@ -1,93 +1,94 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo } from "react"
-import { toast } from "sonner"
-import { api } from "~/trpc/react"
-import { type CreatePatientInput } from "~/schemas/patient"
-import { type CreateAnamnesisInput } from "~/schemas/anamnesis"
-import { useRouter } from "next/navigation"
-import { steps as DEFAULT_STEPS } from "~/features/anamnesis/constants/steps"
-import { PHYSICAL_EXAM_FIELD_KEYS } from "~/features/anamnesis/constants/system-fields"
+import { useState, useEffect, useMemo } from "react";
+import { toast } from "sonner";
+import { api } from "~/trpc/react";
+import { type CreatePatientInput } from "~/schemas/patient";
+import { type CreateAnamnesisInput } from "~/schemas/anamnesis";
+import { useRouter } from "next/navigation";
+import { steps as DEFAULT_STEPS } from "~/features/anamnesis/constants/steps";
+import { PHYSICAL_EXAM_FIELD_KEYS } from "~/features/anamnesis/constants/system-fields";
 
 export type FormData = {
-  name: string
-  birthDate: Date
-  gender: "MASCULINO" | "FEMININO" | "OUTRO"
+  name: string;
+  birthDate: Date;
+  gender: "MASCULINO" | "FEMININO" | "OUTRO";
   clinicalProfile?: {
-    hasHypertension?: boolean
-    hasDiabetes?: boolean
-    diabetesDuration?: number
-    allergies?: string
-  }
-  cpf?: string
-  chiefComplaint: string
-  currentIllnessHistory: string
-  treatmentResponse?: string
-  symptomEvolution?: string
-  newEvents?: string
-  nyhaClass: "I" | "II" | "III" | "IV"
-  hasPalpitations: boolean
-  hasSyncope: boolean
-  hasEdema: boolean
-  hasChestPain: boolean
+    hasHypertension?: boolean;
+    hasDiabetes?: boolean;
+    diabetesDuration?: number;
+    allergies?: string;
+  };
+  cpf?: string;
+  chiefComplaint: string;
+  currentIllnessHistory: string;
+  treatmentResponse?: string;
+  symptomEvolution?: string;
+  newEvents?: string;
+  nyhaClass: "I" | "II" | "III" | "IV";
+  hasPalpitations: boolean;
+  hasSyncope: boolean;
+  hasEdema: boolean;
+  hasChestPain: boolean;
   physicalExam?: {
-    weight?: number
-    height?: number
-    bpSystolic?: number
-    bpDiastolic?: number
-    heartRate?: number
-    oxygenSaturation?: number
-    heartAuscultation?: string
-    lungAuscultation?: string
-    peripheralPulses?: string
-    edemaGrade?: string
-  }
+    weight?: number;
+    height?: number;
+    bpSystolic?: number;
+    bpDiastolic?: number;
+    heartRate?: number;
+    oxygenSaturation?: number;
+    heartAuscultation?: string;
+    lungAuscultation?: string;
+    peripheralPulses?: string;
+    edemaGrade?: string;
+  };
 
   medications?: Array<{
-    name: string
-    dosage: string
-    frequency: string
-  }>
+    name: string;
+    dosage: string;
+    frequency: string;
+  }>;
 
-  diagnosticHypothesis?: string
-  conduct?: string
-  nextRecallDate?: Date
-}
+  diagnosticHypothesis?: string;
+  conduct?: string;
+  nextRecallDate?: Date;
+};
 
 type UseAnamnesisFormOptions = {
-  /** cuid from URL param ?consultationId=... */
-  consultationId?: string
-}
+  consultationId?: string;
+};
 
 const getSystemValue = (formData: Partial<FormData>, key: string) => {
   if (PHYSICAL_EXAM_FIELD_KEYS.has(key)) {
     return formData.physicalExam?.[
       key as keyof NonNullable<FormData["physicalExam"]>
-    ]
+    ];
   }
 
-  return formData[key as keyof FormData]
-}
+  return formData[key as keyof FormData];
+};
 
 const isEmptyRequiredValue = (value: unknown) => {
-  if (value == null) return true
-  if (typeof value === "string") return value.trim().length === 0
-  if (Array.isArray(value)) return value.length === 0
-  return false
-}
+  if (value == null) return true;
+  if (typeof value === "string") return value.trim().length === 0;
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
+};
 
 const cleanOptionalString = (value?: string) => {
-  const trimmed = value?.trim()
-  if (!trimmed) return undefined
-  return trimmed
-}
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  return trimmed;
+};
 
 export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
   const router = useRouter();
 
-  const [currentStep, setCurrentStep] = useState(1)
-  const [patientId, setPatientId] = useState<string | null>(null)
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
+  const [currentStep, setCurrentStep] = useState(1);
+  const [patientId, setPatientId] = useState<string | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null,
+  );
 
   const [formData, setFormData] = useState<Partial<FormData>>({
     hasPalpitations: false,
@@ -95,28 +96,33 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
     hasEdema: false,
     hasChestPain: false,
     nyhaClass: "I",
-  })
+  });
 
-  const [medications, setMedications] = useState<Array<{ name: string; dosage: string; frequency: string }>>([])
-  const [customValues, setCustomValues] = useState<Record<string, unknown>>({})
-  const [createdAnamnesisId, setCreatedAnamnesisId] = useState<string | null>(null)
+  const [medications, setMedications] = useState<
+    Array<{ name: string; dosage: string; frequency: string }>
+  >([]);
+  const [customValues, setCustomValues] = useState<Record<string, unknown>>({});
+  const [createdAnamnesisId, setCreatedAnamnesisId] = useState<string | null>(
+    null,
+  );
 
   const { data: defaultTemplate, isLoading: isLoadingTemplate } =
-    api.formTemplate.getDefault.useQuery()
+    api.formTemplate.getDefault.useQuery();
 
-  const { data: consultation, isLoading: isLoadingConsultation } = api.scheduleConsultation.getById.useQuery(
-    { id: opts.consultationId! },
-    { enabled: !!opts.consultationId }
-  )
+  const { data: consultation, isLoading: isLoadingConsultation } =
+    api.scheduleConsultation.getById.useQuery(
+      { id: opts.consultationId! },
+      { enabled: !!opts.consultationId },
+    );
 
   useEffect(() => {
     if (consultation?.patient) {
-      const patient = consultation.patient
+      const patient = consultation.patient;
       const genderMap: Record<string, "MASCULINO" | "FEMININO" | "OUTRO"> = {
         Masculino: "MASCULINO",
         Feminino: "FEMININO",
         Outro: "OUTRO",
-      }
+      };
 
       setFormData((prev) => ({
         ...prev,
@@ -124,38 +130,38 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
         birthDate: new Date(patient.birthDate),
         gender: genderMap[patient.gender] ?? "OUTRO",
         cpf: patient.cpf ?? undefined,
-      }))
-      setPatientId(patient.id)
-      setSelectedPatientId(patient.id)
+      }));
+      setPatientId(patient.id);
+      setSelectedPatientId(patient.id);
     }
-  }, [consultation])
+  }, [consultation]);
 
   const createPatientMutation = api.patient.create.useMutation({
     onSuccess: (data) => {
-      setPatientId(data.id)
-      setCurrentStep(2)
-      toast.success("Paciente cadastrado com sucesso")
+      setPatientId(data.id);
+      setCurrentStep(2);
+      toast.success("Paciente cadastrado com sucesso");
     },
     onError: (error) => {
-      console.error("Erro ao criar paciente:", error)
-      toast.error(error.message ?? "Erro ao salvar paciente.")
-    }
-  })
+      console.error("Erro ao criar paciente:", error);
+      toast.error(error.message ?? "Erro ao salvar paciente.");
+    },
+  });
 
   const createAnamnesisMutation = api.anamnesis.create.useMutation({
     onSuccess: (data) => {
-      toast.success("Anamnese finalizada com sucesso!")
-      setCreatedAnamnesisId(data.anamnesisId)
-      router.push(`/anamnesis/${data.anamnesisId}/analise`)
+      toast.success("Anamnese finalizada com sucesso!");
+      setCreatedAnamnesisId(data.anamnesisId);
+      router.push(`/anamnesis/${data.anamnesisId}/analise`);
     },
     onError: (error) => {
-      console.error("Erro ao criar anamnese:", error)
-      toast.error(error.message ?? "Erro ao salvar anamnese.")
-    }
-  })
+      console.error("Erro ao criar anamnese:", error);
+      toast.error(error.message ?? "Erro ao salvar anamnese.");
+    },
+  });
 
   const steps = useMemo(() => {
-    if (!defaultTemplate) return DEFAULT_STEPS
+    if (!defaultTemplate) return DEFAULT_STEPS;
 
     return [
       { number: 1, title: "Dados do Paciente" },
@@ -168,43 +174,42 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
         number: defaultTemplate.sections.length + 2,
         title: "Revisão Final",
       },
-    ]
-  }, [defaultTemplate])
+    ];
+  }, [defaultTemplate]);
 
   const isLoading =
     createPatientMutation.isPending ||
     createAnamnesisMutation.isPending ||
     isLoadingConsultation ||
-    isLoadingTemplate
+    isLoadingTemplate;
 
   const handleSelectExistingPatient = (id: string) => {
-    setSelectedPatientId(id)
-  }
+    setSelectedPatientId(id);
+  };
 
   const handleClearExistingPatient = () => {
-    setSelectedPatientId(null)
-    setPatientId(null)
-  }
+    setSelectedPatientId(null);
+    setPatientId(null);
+  };
 
   const handleNext = async () => {
     if (currentStep === 1) {
       if (!formData.name || !formData.birthDate || !formData.gender) {
-        toast.error("Preencha os campos obrigatórios do paciente.")
-        return
+        toast.error("Preencha os campos obrigatórios do paciente.");
+        return;
       }
 
-      // If an existing patient was picked, skip creation and go directly to step 2
       if (selectedPatientId) {
-        setPatientId(selectedPatientId)
-        setCurrentStep(2)
-        return
+        setPatientId(selectedPatientId);
+        setCurrentStep(2);
+        return;
       }
 
       const genderMap: Record<string, "Masculino" | "Feminino" | "Outro"> = {
-        "MASCULINO": "Masculino",
-        "FEMININO": "Feminino",
-        "OUTRO": "Outro"
-      }
+        MASCULINO: "Masculino",
+        FEMININO: "Feminino",
+        OUTRO: "Outro",
+      };
 
       const patientData: CreatePatientInput = {
         name: formData.name,
@@ -212,52 +217,51 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
         gender: genderMap[formData.gender] ?? "Outro",
         cpf: cleanOptionalString(formData.cpf),
         clinicalProfile: formData.clinicalProfile,
-      }
+      };
 
-      createPatientMutation.mutate(patientData)
-      return
+      createPatientMutation.mutate(patientData);
+      return;
     }
 
     if (defaultTemplate && currentStep > 1 && currentStep < steps.length) {
-      const section = defaultTemplate.sections[currentStep - 2]
+      const section = defaultTemplate.sections[currentStep - 2];
       const missingField = section?.fields
         .filter((field) => field.isVisible && field.isRequired)
         .find((field) => {
-          const key = field.systemKey ?? field.key
+          const key = field.systemKey ?? field.key;
           const value = field.isSystemField
             ? getSystemValue(formData, key)
-            : customValues[field.key]
+            : customValues[field.key];
 
-          return isEmptyRequiredValue(value)
-        })
+          return isEmptyRequiredValue(value);
+        });
 
       if (missingField) {
-        toast.error(`Preencha o campo obrigatório: ${missingField.label}.`)
-        return
+        toast.error(`Preencha o campo obrigatório: ${missingField.label}.`);
+        return;
       }
     }
 
-    setCurrentStep(currentStep + 1)
-  }
+    setCurrentStep(currentStep + 1);
+  };
 
   const handlePrevious = () => {
-    setCurrentStep(currentStep - 1)
-  }
+    setCurrentStep(currentStep - 1);
+  };
 
   const handleFinalSubmit = async () => {
     if (!patientId) {
-      toast.error("ID do paciente não encontrado.")
-      return
+      toast.error("ID do paciente não encontrado.");
+      return;
     }
 
     if (!formData.chiefComplaint || !formData.currentIllnessHistory) {
-      toast.error("Preencha os dados obrigatórios da anamnese.")
-      return
+      toast.error("Preencha os dados obrigatórios da anamnese.");
+      return;
     }
 
     const anamnesisData: CreateAnamnesisInput = {
       patientId,
-      // Only pass consultationId if provided via URL param
       consultationId: opts.consultationId,
       chiefComplaint: formData.chiefComplaint,
       currentIllnessHistory: formData.currentIllnessHistory,
@@ -279,27 +283,27 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
       nextRecallDate: formData.nextRecallDate,
       templateId: defaultTemplate?.id,
       customResponses: customValues,
-    }
+    };
 
-    createAnamnesisMutation.mutate(anamnesisData)
-  }
+    createAnamnesisMutation.mutate(anamnesisData);
+  };
 
   const addMedication = () => {
-    setMedications([...medications, { name: "", dosage: "", frequency: "" }])
-  }
+    setMedications([...medications, { name: "", dosage: "", frequency: "" }]);
+  };
 
   const updateMedication = (index: number, field: string, value: string) => {
-    const updated = [...medications]
-    const currentItem = updated[index]
+    const updated = [...medications];
+    const currentItem = updated[index];
     if (currentItem) {
       updated[index] = { ...currentItem, [field]: value };
-      setMedications(updated)
+      setMedications(updated);
     }
-  }
+  };
 
   const removeMedication = (index: number) => {
-    setMedications(medications.filter((_, i) => i !== index))
-  }
+    setMedications(medications.filter((_, i) => i !== index));
+  };
 
   return {
     currentStep,
@@ -323,5 +327,5 @@ export function useAnamnesisForm(opts: UseAnamnesisFormOptions = {}) {
     removeMedication,
     createdAnamnesisId,
     navigateHome: () => router.push("/"),
-  }
+  };
 }

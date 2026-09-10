@@ -23,15 +23,15 @@ vi.mock("~/schemas/clinical-chat", () => ({
 }));
 vi.mock("~/server/auth/supabase.server", () => ({ getUser: mocks.getUser }));
 vi.mock("~/server/db", () => ({ db: { marker: "db" } }));
-vi.mock("~/server/services/clinicalChat", () => ({
+vi.mock("~/server/services/clinical-chat/clinical-chat.service", () => ({
   prepareClinicalChatTurn: mocks.prepareTurn,
   completeClinicalChatTurn: mocks.completeTurn,
   failClinicalChatTurn: mocks.failTurn,
 }));
-vi.mock("~/server/services/clinicalChat/context", () => ({
+vi.mock("~/server/services/clinical-chat/context", () => ({
   buildClinicalChatResponseParams: mocks.buildParams,
 }));
-vi.mock("~/server/services/clinicalChat/storage", () => ({
+vi.mock("~/server/services/clinical-chat/storage", () => ({
   validateClinicalAttachments: mocks.validateAttachments,
 }));
 

@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ClinicalChatPanel } from "~/features/clinical-chat/components/clinical-chat-panel";
-import { readFormSnapshot } from "~/server/services/aiDiagnosis/form-snapshot";
+import { readFormSnapshot } from "~/server/services/ai-diagnosis/form-snapshot";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { AnamnesisDetailPage } from "./anamnesis-detail-page";
 import { PatientAiDiagnosis } from "./patient-ai-diagnosis";

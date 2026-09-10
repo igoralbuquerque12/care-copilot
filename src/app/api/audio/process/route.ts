@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "~/server/db";
 import { messageQueue } from "~/server/messaging";
 import { qstashAudioJobSchema } from "~/schemas/audio-session";
-import { processAudioJob } from "~/server/services/audio/services/worker.service";
+import { processAudioJob } from "~/server/services/audio/audio-worker.service";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;

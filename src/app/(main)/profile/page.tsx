@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ProfileForm } from "~/features/profile/components/profileForm";
+import { ProfileForm } from "~/features/profile/components/profile-form";
 
 export const metadata: Metadata = {
   title: "Minha Conta | Care Copilot",

@@ -47,7 +47,6 @@ export function ProfileFormSkeleton() {
         </CardContent>
       </Card>
 
-      {/* CARD 2: Endereço */}
       <Card className="border-border/50 shadow-md">
         <div className="space-y-2 p-6 pb-2">
           <div className="flex items-center gap-2">

@@ -103,7 +103,7 @@ Essa abordagem mantém compatibilidade com relatórios e filtros existentes, mas
 
 O template padrão é criado pelo service:
 
-`src/server/services/formTemplate.service.ts`
+`src/server/services/form-templates/form-template.service.ts`
 
 A função principal é:
 
@@ -183,7 +183,7 @@ Também foram atualizados:
 
 Arquivo:
 
-`src/server/services/formTemplate.service.ts`
+`src/server/services/form-templates/form-template.service.ts`
 
 Funções principais:
 
@@ -210,7 +210,7 @@ Regras importantes:
 
 Foi criado:
 
-`src/server/api/routers/formTemplate.router.ts`
+`src/server/api/routers/form-template.router.ts`
 
 Registrado em:
 
@@ -231,7 +231,7 @@ Endpoints:
 
 Arquivo alterado:
 
-`src/server/services/profile.service.ts`
+`src/server/services/profile/profile.service.ts`
 
 Ao criar ou buscar um perfil, o sistema garante:
 
@@ -244,7 +244,7 @@ Isso evita usuários sem formulário default.
 
 Arquivo alterado:
 
-`src/server/services/anamnesis.service.ts`
+`src/server/services/anamnesis/anamnesis.service.ts`
 
 Novo comportamento:
 
@@ -306,8 +306,8 @@ Enquanto o template carrega, as telas antigas continuam servindo como fallback.
 Arquivos principais:
 
 - `src/schemas/audio-anamnesis-form.ts`
-- `src/server/services/audio/services/session.service.ts`
-- `src/server/services/audio/services/worker.service.ts`
+- `src/server/services/audio/audio-session.service.ts`
+- `src/server/services/audio/audio-worker.service.ts`
 - `src/features/audio-anamnesis/components/audio-anamnesis-page.tsx`
 - `src/features/audio-anamnesis/components/audio-anamnesis-form.tsx`
 
@@ -322,10 +322,7 @@ Em `startSession`:
 
 ```ts
 {
-  patient,
-  anamnesis,
-  customFields,
-  templateId
+  (patient, anamnesis, customFields, templateId);
 }
 ```
 
@@ -343,10 +340,7 @@ Em `worker.service.ts`:
 
 ```ts
 {
-  patient,
-  anamnesis,
-  customFields,
-  templateId
+  (patient, anamnesis, customFields, templateId);
 }
 ```
 
@@ -412,7 +406,7 @@ Observação: a primeira versão usa botões de subir/descer para reordenação.
 
 Arquivo alterado:
 
-`src/features/layout/constants/sidebarItems.ts`
+`src/features/layout/constants/sidebar-items.ts`
 
 `Configurações` virou grupo e ganhou:
 
@@ -423,7 +417,7 @@ Arquivo alterado:
 
 Arquivos alterados:
 
-- `src/server/services/patient.service.ts`
+- `src/server/services/patients/patient.service.ts`
 - `src/features/patients/components/anamnesis-detail-dialog.tsx`
 - `src/features/patients/components/anamnesis-detail-page.tsx`
 
@@ -484,8 +478,8 @@ O que está protegido no backend:
 - `prisma/migrations/20260524123000_anamnesis_form_templates/migration.sql`
 - `scripts/seed-default-templates.ts`
 - `src/schemas/form-template.ts`
-- `src/server/services/formTemplate.service.ts`
-- `src/server/api/routers/formTemplate.router.ts`
+- `src/server/services/form-templates/form-template.service.ts`
+- `src/server/api/routers/form-template.router.ts`
 - `src/features/anamnesis/components/dynamic-field-renderer.tsx`
 - `src/features/anamnesis/components/dynamic-section-renderer.tsx`
 - `src/features/anamnesis/constants/system-fields.ts`
@@ -505,11 +499,11 @@ Principais:
 - `src/schemas/anamnesis.ts`
 - `src/schemas/audio-anamnesis-form.ts`
 - `src/server/api/root.ts`
-- `src/server/services/anamnesis.service.ts`
-- `src/server/services/profile.service.ts`
-- `src/server/services/patient.service.ts`
-- `src/server/services/audio/services/session.service.ts`
-- `src/server/services/audio/services/worker.service.ts`
+- `src/server/services/anamnesis/anamnesis.service.ts`
+- `src/server/services/profile/profile.service.ts`
+- `src/server/services/patients/patient.service.ts`
+- `src/server/services/audio/audio-session.service.ts`
+- `src/server/services/audio/audio-worker.service.ts`
 - `src/features/anamnesis/hooks/use-anamnesis-form.tsx`
 - `src/features/anamnesis/components/anamnesis-wizard.tsx`
 - `src/features/anamnesis/components/review-step.tsx`
@@ -517,7 +511,7 @@ Principais:
 - `src/features/audio-anamnesis/components/audio-anamnesis-form.tsx`
 - `src/features/patients/components/anamnesis-detail-dialog.tsx`
 - `src/features/patients/components/anamnesis-detail-page.tsx`
-- `src/features/layout/constants/sidebarItems.ts`
+- `src/features/layout/constants/sidebar-items.ts`
 
 Também houve pequenos ajustes de typecheck em:
 
@@ -547,7 +541,7 @@ O lint ainda falhou por problemas já existentes fora do escopo principal da fea
 - `src/components/ui/progress.tsx`
 - `src/components/ui/textarea.tsx`
 - hooks/utilitários do módulo de áudio
-- `src/server/services/aiDiagnosis/index.ts`
+- `src/server/services/ai-diagnosis/ai-diagnosis.service.ts`
 
 ## Pontos Pendentes / Próximos Passos
 
