@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import type { ReadyBatch } from "./useAudioBatchBuffer";
+import type { ReadyBatch } from "./use-audio-batch-buffer";
 
 type UploadInput = {
   sessionId: string;
@@ -102,7 +102,10 @@ export const useAudioBatchUploader = () => {
         }
 
         if (lastError) {
-          console.error("[useAudioBatchUploader] desistindo do lote", lastError);
+          console.error(
+            "[useAudioBatchUploader] desistindo do lote",
+            lastError,
+          );
           toast.error(getUploadErrorMessage(lastError), {
             id: "audio-batch-upload-error",
           });

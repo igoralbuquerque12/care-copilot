@@ -73,7 +73,6 @@ export const useAnamnesisFormSync = (
     if (!sessionId) return;
 
     const supabase = getSupabaseBrowserClient();
-    console.log("[useAnamnesisFormSync] subscribing to realtime updates for session: audio-session:", sessionId);
     const channel = supabase
       .channel(`audio-session:${sessionId}`)
       .on(
@@ -85,13 +84,7 @@ export const useAnamnesisFormSync = (
           filter: `id=eq.${sessionId}`,
         },
         (payload) => {
-          console.log("[useAnamnesisFormSync] realtime payload recebido:", {
-            eventType: payload.eventType,
-            new: payload.new,
-            old: payload.old,
-          });
           const next = parseRow(payload.new as SessionRow);
-          console.log("[useAnamnesisFormSync] realtime payload parseado:", next);
           if (!next) return;
           setSession((prev) => {
             if (!prev || next.lastBatchIndex >= prev.lastBatchIndex) {
@@ -101,13 +94,7 @@ export const useAnamnesisFormSync = (
           });
         },
       )
-      .subscribe((status, error) => {
-        console.log("[useAnamnesisFormSync] realtime subscription:", {
-          channel: `audio-session:${sessionId}`,
-          status,
-          error,
-        });
-      });
+      .subscribe();
 
     return () => {
       void supabase.removeChannel(channel);

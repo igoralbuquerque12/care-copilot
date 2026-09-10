@@ -13,7 +13,11 @@ type VadOptions = {
 export const useVadStateMachine = (options: VadOptions) => {
   const [state, setState] = useState<VadFsmState>("IDLE");
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const vadInstanceRef = useRef<{ start: () => void; pause: () => void; destroy: () => void | Promise<void> } | null>(null);
+  const vadInstanceRef = useRef<{
+    start: () => void;
+    pause: () => void;
+    destroy: () => void | Promise<void>;
+  } | null>(null);
   const startedAtRef = useRef<number>(Date.now());
   const optsRef = useRef(options);
 

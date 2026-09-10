@@ -2,10 +2,10 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { api } from "~/trpc/react";
-import { useVadStateMachine } from "./useVadStateMachine";
-import { useAudioBatchBuffer } from "./useAudioBatchBuffer";
-import { useAudioBatchUploader } from "./useAudioBatchUploader";
-import { useAnamnesisFormSync } from "./useAnamnesisFormSync";
+import { useVadStateMachine } from "./use-vad-state-machine";
+import { useAudioBatchBuffer } from "./use-audio-batch-buffer";
+import { useAudioBatchUploader } from "./use-audio-batch-uploader";
+import { useAnamnesisFormSync } from "./use-anamnesis-form-sync";
 import { resolveVisualState } from "../utils/visual-state";
 import {
   consolidatedFormStateSchema,
@@ -59,7 +59,7 @@ export const useAudioConsultation = ({ sessionId }: Args) => {
 
     uploader.enqueue({
       sessionId: session.id,
-      patientId: session.id ? sessionQuery.data?.patientId ?? "" : "",
+      patientId: session.id ? (sessionQuery.data?.patientId ?? "") : "",
       consultationId: sessionQuery.data?.consultationId ?? null,
       batchIndex: idx,
       batch: ready,
