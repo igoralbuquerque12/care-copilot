@@ -1,6 +1,10 @@
 import OpenAI from "openai";
 import { env } from "~/env";
-import type { AIClient, AIGenerateRequest, AIGenerateResponse } from "../client";
+import type {
+  AIClient,
+  AIGenerateRequest,
+  AIGenerateResponse,
+} from "../client";
 
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 
@@ -38,16 +42,8 @@ class GroqLLMClient implements AIClient {
   }
 }
 
-/**
- * Client rapido para extracao audio → JSON.
- * Usa GROQ_LLM_AUDIO_MODEL (default: llama-4-scout, ~20B, 128k).
- */
 export const createAudioLLMClient = (): AIClient =>
   new GroqLLMClient(env.GROQ_LLM_AUDIO_MODEL);
 
-/**
- * Client de alta capacidade para diagnostico e avaliacao clinica.
- * Usa GROQ_LLM_SMART_MODEL (default: llama-4-maverick, ~120B, 128k).
- */
 export const createSmartLLMClient = (): AIClient =>
   new GroqLLMClient(env.GROQ_LLM_SMART_MODEL);
