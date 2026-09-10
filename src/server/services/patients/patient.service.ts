@@ -1,9 +1,7 @@
-// src/server/services/patient.service.ts
-
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { type CreatePatientInput } from "~/schemas/patient";
-import { createFormSnapshot } from "~/server/services/aiDiagnosis/form-snapshot";
+import { createFormSnapshot } from "~/server/services/ai-diagnosis/form-snapshot";
 
 export const getFullProfile = async (
   db: PrismaClient,
@@ -43,7 +41,10 @@ export const getFullProfile = async (
     });
   } catch (error) {
     console.error("[Patient - getFullProfile]: ", error);
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao buscar perfil do paciente" });
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro ao buscar perfil do paciente",
+    });
   }
 };
 
@@ -81,10 +82,19 @@ export const getAnamnesisPaginated = async (
         },
       }),
     ]);
-    return { items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) };
+    return {
+      items,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
   } catch (error) {
     console.error("[Patient - getAnamnesisPaginated]: ", error);
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao listar anamneses" });
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro ao listar anamneses",
+    });
   }
 };
 
@@ -94,7 +104,6 @@ export const createPatient = async (
   data: CreatePatientInput,
 ) => {
   try {
-    console.log("profileid:", profileId)
     const { clinicalProfile, ...patientData } = data;
 
     return await db.patient.create({
@@ -194,23 +203,39 @@ export const getPatientOverview = async (
       anamneses: {
         orderBy: { date: "desc" },
         take: 1,
-        select: { id: true, date: true, chiefComplaint: true, diagnosticHypothesis: true },
+        select: {
+          id: true,
+          date: true,
+          chiefComplaint: true,
+          diagnosticHypothesis: true,
+        },
       },
     },
   });
-  if (!patient) throw new TRPCError({ code: "NOT_FOUND", message: "Paciente não encontrado" });
+  if (!patient)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Paciente não encontrado",
+    });
   return patient;
 };
 
 const analysisState = (anamnesis: {
   contentVersion: number;
-  aiDiagnoses: Array<{ status: string; result: unknown; resultSchemaVersion: number; anamnesisVersion: number }>;
+  aiDiagnoses: Array<{
+    status: string;
+    result: unknown;
+    resultSchemaVersion: number;
+    anamnesisVersion: number;
+  }>;
 }) => {
   const analysis = anamnesis.aiDiagnoses[0];
   if (!analysis) return "NOT_GENERATED" as const;
   if (analysis.status !== "COMPLETED") return analysis.status;
-  if (!analysis.result || analysis.resultSchemaVersion < 2) return "LEGACY" as const;
-  if (analysis.anamnesisVersion < anamnesis.contentVersion) return "STALE" as const;
+  if (!analysis.result || analysis.resultSchemaVersion < 2)
+    return "LEGACY" as const;
+  if (analysis.anamnesisVersion < anamnesis.contentVersion)
+    return "STALE" as const;
   return analysis.status;
 };
 
@@ -230,19 +255,36 @@ export const getPatientTimeline = async (
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: {
-        id: true, date: true, chiefComplaint: true, nyhaClass: true,
-        hasPalpitations: true, hasSyncope: true, hasEdema: true, hasChestPain: true,
-        contentVersion: true, formSnapshot: true,
+        id: true,
+        date: true,
+        chiefComplaint: true,
+        nyhaClass: true,
+        hasPalpitations: true,
+        hasSyncope: true,
+        hasEdema: true,
+        hasChestPain: true,
+        contentVersion: true,
+        formSnapshot: true,
         template: { select: { name: true } },
         aiDiagnoses: {
-          where: { isValid: true }, orderBy: { createdAt: "desc" }, take: 1,
-          select: { status: true, result: true, resultSchemaVersion: true, anamnesisVersion: true },
+          where: { isValid: true },
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: {
+            status: true,
+            result: true,
+            resultSchemaVersion: true,
+            anamnesisVersion: true,
+          },
         },
       },
     }),
   ]);
   return {
-    items: items.map((item) => ({ ...item, analysisState: analysisState(item) })),
+    items: items.map((item) => ({
+      ...item,
+      analysisState: analysisState(item),
+    })),
     total,
     page,
     pageSize,
@@ -262,16 +304,33 @@ export const getPatientAnamnesisDetail = async (
       physicalExam: true,
       medications: true,
       surgicalRisk: true,
-      template: { include: { sections: { orderBy: { order: "asc" }, include: { fields: { orderBy: { order: "asc" } } } } } },
-      aiDiagnoses: { where: { isValid: true }, orderBy: { createdAt: "desc" }, take: 1 },
+      template: {
+        include: {
+          sections: {
+            orderBy: { order: "asc" },
+            include: { fields: { orderBy: { order: "asc" } } },
+          },
+        },
+      },
+      aiDiagnoses: {
+        where: { isValid: true },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      },
     },
   });
-  if (!item) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese não encontrada" });
+  if (!item)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Anamnese não encontrada",
+    });
   return {
     ...item,
-    formSnapshot: item.formSnapshot ?? (
-      item.template ? createFormSnapshot(item.template, "APPROXIMATED") : null
-    ),
+    formSnapshot:
+      item.formSnapshot ??
+      (item.template
+        ? createFormSnapshot(item.template, "APPROXIMATED")
+        : null),
     analysisState: analysisState(item),
   };
 };
@@ -285,8 +344,20 @@ export const getPatientTrends = async (
     where: { patientId, profileId },
     orderBy: { date: "asc" },
     select: {
-      id: true, date: true, nyhaClass: true, customResponses: true, formSnapshot: true,
-      physicalExam: { select: { weight: true, bpSystolic: true, bpDiastolic: true, heartRate: true, oxygenSaturation: true } },
+      id: true,
+      date: true,
+      nyhaClass: true,
+      customResponses: true,
+      formSnapshot: true,
+      physicalExam: {
+        select: {
+          weight: true,
+          bpSystolic: true,
+          bpDiastolic: true,
+          heartRate: true,
+          oxygenSaturation: true,
+        },
+      },
       template: {
         select: {
           id: true,
@@ -319,8 +390,8 @@ export const getPatientTrends = async (
 
   return items.map(({ template, ...item }) => ({
     ...item,
-    formSnapshot: item.formSnapshot ?? (
-      template ? createFormSnapshot(template, "APPROXIMATED") : null
-    ),
+    formSnapshot:
+      item.formSnapshot ??
+      (template ? createFormSnapshot(template, "APPROXIMATED") : null),
   }));
 };
