@@ -1,13 +1,12 @@
-// src/server/services/anamnesis.service.ts
 import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import {
   getDefaultTemplate,
   getTemplateById,
   sanitizeCustomResponses,
-} from "~/server/services/formTemplate.service";
-import { createFormSnapshot } from "~/server/services/aiDiagnosis/form-snapshot";
-import { createAnalysisJob } from "~/server/services/aiDiagnosis";
+} from "~/server/services/form-templates/form-template.service";
+import { createFormSnapshot } from "~/server/services/ai-diagnosis/form-snapshot";
+import { createAnalysisJob } from "~/server/services/ai-diagnosis/ai-diagnosis.service";
 
 export const getByPatient = async (
   db: PrismaClient,
@@ -33,17 +32,29 @@ export const getByPatient = async (
     });
   } catch (error) {
     console.error("[Anamnesis - getByPatient]: ", error);
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao buscar anamneses" });
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Erro ao buscar anamneses",
+    });
   }
 };
-import { type CreateAnamnesisInput, type UpdateAnamnesisInput } from "~/schemas/anamnesis";
+import {
+  type CreateAnamnesisInput,
+  type UpdateAnamnesisInput,
+} from "~/schemas/anamnesis";
 
 export const createAnamnesis = async (
   db: PrismaClient,
   profileId: string,
   data: CreateAnamnesisInput,
 ) => {
-  const { physicalExam, medications, templateId, customResponses, ...anamnesisData } = data;
+  const {
+    physicalExam,
+    medications,
+    templateId,
+    customResponses,
+    ...anamnesisData
+  } = data;
   const template = templateId
     ? await getTemplateById(db, profileId, templateId)
     : await getDefaultTemplate(db, profileId);
@@ -63,10 +74,12 @@ export const createAnamnesis = async (
     include: { physicalExam: true, medications: true, template: true },
   });
 
-  let analysis: Awaited<ReturnType<typeof createAnalysisJob>> | {
-    id: undefined;
-    status: "FAILED";
-  };
+  let analysis:
+    | Awaited<ReturnType<typeof createAnalysisJob>>
+    | {
+        id: undefined;
+        status: "FAILED";
+      };
   try {
     analysis = await createAnalysisJob(
       db,
@@ -84,10 +97,21 @@ export const createAnamnesis = async (
 export const updateAnamnesis = async (
   db: PrismaClient,
   profileId: string,
-  { id, physicalExam, medications, customResponses, templateId, ...fields }: UpdateAnamnesisInput,
+  {
+    id,
+    physicalExam,
+    medications,
+    customResponses,
+    templateId,
+    ...fields
+  }: UpdateAnamnesisInput,
 ) => {
   const existing = await db.anamnesis.findFirst({ where: { id, profileId } });
-  if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Anamnese não encontrada" });
+  if (!existing)
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Anamnese não encontrada",
+    });
 
   const template = templateId
     ? await getTemplateById(db, profileId, templateId)
