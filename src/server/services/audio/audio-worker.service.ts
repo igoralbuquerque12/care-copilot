@@ -12,12 +12,16 @@ import type { QstashAudioJob } from "~/schemas/audio-session";
 import {
   assertMinimumBalanceForBatch,
   debitBatch,
-} from "~/server/services/credits/creditLedger.service";
-import { deleteAudioBatch, downloadAudioFromSignedUrl } from "./batchStorage.service";
-import type { MergeContext, MergeResult } from "../entities/audio.entity";
-import { getDefaultTemplate, getTemplateById } from "~/server/services/formTemplate.service";
-
-// ── LLM merge ─────────────────────────────────────────────────────────────────
+} from "~/server/services/credits/credit-ledger.service";
+import {
+  deleteAudioBatch,
+  downloadAudioFromSignedUrl,
+} from "./audio-batch-storage.service";
+import type { MergeContext, MergeResult } from "./audio.types";
+import {
+  getDefaultTemplate,
+  getTemplateById,
+} from "~/server/services/form-templates/form-template.service";
 
 const SYSTEM_PROMPT = `Voce e um parser clinico especializado em atualizar formularios de anamnese.
 Sua funcao e analisar uma nova transcricao de audio medico e atualizar um JSON existente.
@@ -77,16 +81,6 @@ Retorne um objeto JSON com exatamente as chaves:
 2. "fieldOperations" - mapa de "secao.campo" => { "action": "replace"|"append"|"merge"|"noop", "reason": string }.`;
 };
 
-/**
- * Calls the LLM to merge a new audio transcript into the current form state.
- * Validates the model output against `llmExtractionResponseSchema`.
- *
- * @param params.ctx - Session and batch context for the LLM prompt
- * @param params.currentFormState - Current accumulated form state
- * @param params.transcript - New transcript text to merge
- * @returns MergeResult with the validated response, full prompt, and raw output text
- * @throws If the LLM returns invalid JSON or output that does not match the schema
- */
 const mergeBatch = async (params: {
   ctx: MergeContext;
   currentFormState: ConsolidatedFormState;
@@ -101,8 +95,10 @@ const mergeBatch = async (params: {
   );
   const fullPrompt = `${SYSTEM_PROMPT}\n\n${userPrompt}`;
 
-  const raw = await aiClientAudio.generate({ prompt: fullPrompt, responseFormat: "json" });
-  console.log(`[LLM Merge] Prompt enviado para sessao ${params.ctx.sessionId}, batch ${params.ctx.batchIndex}. Prompt length: ${fullPrompt.length} chars. Resposta bruta: ${raw.text.slice(0, 200)}...`);
+  const raw = await aiClientAudio.generate({
+    prompt: fullPrompt,
+    responseFormat: "json",
+  });
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw.text);
@@ -124,49 +120,43 @@ const mergeBatch = async (params: {
     );
   }
 
-  return { response: validated.data, promptText: fullPrompt, rawOutputText: raw.text };
+  return {
+    response: validated.data,
+    promptText: fullPrompt,
+    rawOutputText: raw.text,
+  };
 };
 
-// ── Worker ────────────────────────────────────────────────────────────────────
-
-/**
- * Processes a single audio batch job end-to-end:
- * 1. Downloads the audio from Supabase Storage via signed URL
- * 2. Transcribes the audio with the configured provider (Groq Whisper)
- * 3. Merges the transcript into the session form state via LLM
- * 4. Calculates credit consumption and persists everything in a single transaction
- * 5. Deletes the audio file from storage
- *
- * On any error the batch and session are marked ERROR. Already-PROCESSED batches
- * are skipped without re-processing.
- *
- * @param db - Prisma client
- * @param job - QStash job payload (session, batch, storage references)
- * @returns `{ skipped: true }` if the batch was already PROCESSED, otherwise
- *          `{ skipped: false, breakdown }` with the credit consumption breakdown
- */
-export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => {
-  console.log(`[Worker] Processando lote ${job.batchIndex} da sessao ${job.sessionId}`);
+export const processAudioJob = async (
+  db: PrismaClient,
+  job: QstashAudioJob,
+) => {
   const session = await db.audioConsultationSession.findFirst({
     where: { id: job.sessionId, profileId: job.profileId },
   });
 
   if (!session) {
-    throw new Error(`Sessao ${job.sessionId} nao encontrada para profile ${job.profileId}`);
+    throw new Error(
+      `Sessao ${job.sessionId} nao encontrada para profile ${job.profileId}`,
+    );
   }
 
   const batch = await db.audioBatchRecord.findUnique({
     where: {
-      sessionId_batchIndex: { sessionId: job.sessionId, batchIndex: job.batchIndex },
+      sessionId_batchIndex: {
+        sessionId: job.sessionId,
+        batchIndex: job.batchIndex,
+      },
     },
   });
 
   if (!batch) {
-    throw new Error(`Lote ${job.batchIndex} nao registrado para a sessao ${job.sessionId}`);
+    throw new Error(
+      `Lote ${job.batchIndex} nao registrado para a sessao ${job.sessionId}`,
+    );
   }
 
   if (batch.status === "PROCESSED") {
-    console.log(`[Worker] Lote aa ${job.batchIndex} da sessao ${job.sessionId} ja foi processado.`);
     return { skipped: true as const };
   }
 
@@ -186,10 +176,10 @@ export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => 
   });
 
   try {
-    const { buffer, mimeType } = await downloadAudioFromSignedUrl(job.signedAudioUrl);
-    console.log(`[Worker] Audio baixado para lote ${job.batchIndex} da sessao ${job.sessionId}, iniciando transcricao...`);
+    const { buffer, mimeType } = await downloadAudioFromSignedUrl(
+      job.signedAudioUrl,
+    );
     const transcriber = getAudioTranscriber();
-    console.log(`[Worker] Transcrevendo lote ${job.batchIndex} da sessao ${job.sessionId}...`);
     const transcription = await transcriber.transcribe({
       audio: buffer,
       mimeType,
@@ -201,7 +191,9 @@ export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => 
       1,
     );
 
-    const currentFormState = consolidatedFormStateSchema.parse(session.currentFormState);
+    const currentFormState = consolidatedFormStateSchema.parse(
+      session.currentFormState,
+    );
     const template = currentFormState.templateId
       ? await getTemplateById(db, job.profileId, currentFormState.templateId)
       : await getDefaultTemplate(db, job.profileId);
@@ -241,8 +233,8 @@ export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => 
           lastBatchIndex: Math.max(session.lastBatchIndex, job.batchIndex),
           currentFormState: nextFormState as unknown as Prisma.InputJsonValue,
           lastProcessedTranscript: transcription.text,
-          lastFieldOperations:
-            merge.response.fieldOperations as unknown as Prisma.InputJsonValue,
+          lastFieldOperations: merge.response
+            .fieldOperations as unknown as Prisma.InputJsonValue,
         },
       });
 
@@ -253,13 +245,17 @@ export const processAudioJob = async (db: PrismaClient, job: QstashAudioJob) => 
     });
 
     await deleteAudioBatch(job.storagePath);
-    console.log(`[Worker] Lote bb ${job.batchIndex} da sessao ${job.sessionId} processado com sucesso. Creditos debitados: ${breakdown.totalCredits.toFixed(2)}`);
     return { skipped: false as const, breakdown };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro desconhecido";
+    const message =
+      error instanceof Error ? error.message : "Erro desconhecido";
     await db.audioBatchRecord.update({
       where: { id: batch.id },
-      data: { status: "ERROR", errorMessage: message, retries: { increment: 1 } },
+      data: {
+        status: "ERROR",
+        errorMessage: message,
+        retries: { increment: 1 },
+      },
     });
     await db.audioConsultationSession.update({
       where: { id: job.sessionId },

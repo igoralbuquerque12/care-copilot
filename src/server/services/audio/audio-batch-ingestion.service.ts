@@ -2,12 +2,15 @@ import { type PrismaClient } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { audioBatchMetadataSchema } from "~/schemas/audio-session";
 import type { QstashAudioJob } from "~/schemas/audio-session";
-import { assertMinimumBalanceForBatch } from "~/server/services/credits/creditLedger.service";
+import { assertMinimumBalanceForBatch } from "~/server/services/credits/credit-ledger.service";
 import { messageQueue } from "~/server/messaging";
 import { env } from "~/env";
-import { AUDIO_QUEUE_RETRIES } from "../audio.config";
-import type { IngestInput } from "../entities/audio.entity";
-import { createSignedAudioUrl, uploadAudioBatch } from "./batchStorage.service";
+import { AUDIO_QUEUE_RETRIES } from "./audio.config";
+import type { IngestInput } from "./audio.types";
+import {
+  createSignedAudioUrl,
+  uploadAudioBatch,
+} from "./audio-batch-storage.service";
 
 const enqueueAudioProcessing = (job: QstashAudioJob) =>
   messageQueue.publish({
@@ -17,21 +20,6 @@ const enqueueAudioProcessing = (job: QstashAudioJob) =>
     deduplicationId: `${job.sessionId}:${job.batchIndex}`,
   });
 
-// ── Ingestion ──────────────────────────────────────────────────────────────────
-
-/**
- * Entry point for a new audio batch. Validates session ownership and credit
- * balance, uploads the WAV file to storage, upserts the `AudioBatchRecord`,
- * updates the session status to PROCESSING, and enqueues the processing job.
- *
- * Duplicate batches (same sessionId + batchIndex) that are not in ERROR status
- * are ignored and returned with `deduped: true`.
- *
- * @param db - Prisma client
- * @param input - Ingestion payload: profileId, WAV blob, raw form metadata
- * @returns Object with `{ sessionId, batchIndex, deduped }`
- * @throws FORBIDDEN if the session does not exist or the patient doesn't match
- */
 export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
   const meta = audioBatchMetadataSchema.parse(input.rawPayload);
 
@@ -40,7 +28,10 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
   });
 
   if (!session) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Sessao nao encontrada" });
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Sessao nao encontrada",
+    });
   }
 
   if (session.patientId !== meta.patientId) {
@@ -54,12 +45,19 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
 
   const existing = await db.audioBatchRecord.findUnique({
     where: {
-      sessionId_batchIndex: { sessionId: meta.sessionId, batchIndex: meta.batchIndex },
+      sessionId_batchIndex: {
+        sessionId: meta.sessionId,
+        batchIndex: meta.batchIndex,
+      },
     },
   });
 
   if (existing && existing.status !== "ERROR") {
-    return { sessionId: meta.sessionId, batchIndex: meta.batchIndex, deduped: true };
+    return {
+      sessionId: meta.sessionId,
+      batchIndex: meta.batchIndex,
+      deduped: true,
+    };
   }
 
   const storagePath = await uploadAudioBatch(
@@ -71,7 +69,10 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
 
   await db.audioBatchRecord.upsert({
     where: {
-      sessionId_batchIndex: { sessionId: meta.sessionId, batchIndex: meta.batchIndex },
+      sessionId_batchIndex: {
+        sessionId: meta.sessionId,
+        batchIndex: meta.batchIndex,
+      },
     },
     update: {
       storagePath,
@@ -95,7 +96,6 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
   });
 
   const signedAudioUrl = await createSignedAudioUrl(storagePath);
-  console.log("Teste 1 - salvou no supabase o audio")
   await enqueueAudioProcessing({
     ...meta,
     profileId: input.profileId,
@@ -103,5 +103,9 @@ export const ingestBatch = async (db: PrismaClient, input: IngestInput) => {
     signedAudioUrl,
   });
 
-  return { sessionId: meta.sessionId, batchIndex: meta.batchIndex, deduped: false };
+  return {
+    sessionId: meta.sessionId,
+    batchIndex: meta.batchIndex,
+    deduped: false,
+  };
 };

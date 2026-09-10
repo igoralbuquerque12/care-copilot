@@ -6,11 +6,9 @@ import {
   type ConsolidatedFormState,
 } from "~/schemas/audio-anamnesis-form";
 import type { CreateAnamnesisInput } from "~/schemas/anamnesis";
-import { assertMinimumBalanceForSession } from "~/server/services/credits/creditLedger.service";
-import { createAnamnesis } from "~/server/services/anamnesis.service";
-import { getDefaultTemplate } from "~/server/services/formTemplate.service";
-
-// ── Mapper ─────────────────────────────────────────────────────────────────────
+import { assertMinimumBalanceForSession } from "~/server/services/credits/credit-ledger.service";
+import { createAnamnesis } from "~/server/services/anamnesis/anamnesis.service";
+import { getDefaultTemplate } from "~/server/services/form-templates/form-template.service";
 
 type MapContext = { patientId: string; consultationId?: string };
 
@@ -25,11 +23,6 @@ const getMetadataNumber = (metadata: Prisma.JsonValue, key: string) => {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 };
 
-/**
- * Converts a consolidated audio-consultation form state into the input shape
- * expected by `createAnamnesis`. Physical exam is omitted entirely when all
- * fields are null to avoid creating an empty record.
- */
 const mapConsolidatedFormToAnamnesisInput = (
   form: ConsolidatedFormState,
   ctx: MapContext,
@@ -86,22 +79,6 @@ const mapConsolidatedFormToAnamnesisInput = (
   };
 };
 
-// ── Session service ────────────────────────────────────────────────────────────
-
-/**
- * Creates a new audio consultation session for a patient.
- *
- * Validates that the patient belongs to the profile, optionally validates the
- * linked consultation, checks the minimum credit balance, and seeds the form
- * state with the patient's clinical profile so the LLM has prior context.
- *
- * @param db - Prisma client
- * @param profileId - Authenticated user's profile ID
- * @param input - Patient ID and optional consultation ID
- * @returns The created `AudioConsultationSession` record
- * @throws NOT_FOUND if the patient does not exist
- * @throws FORBIDDEN if the consultation does not belong to the patient
- */
 export const startSession = async (
   db: PrismaClient,
   profileId: string,
@@ -195,15 +172,6 @@ export const startSession = async (
   return session;
 };
 
-/**
- * Fetches a single audio consultation session, verifying ownership.
- *
- * @param db - Prisma client
- * @param profileId - Authenticated user's profile ID
- * @param sessionId - Session ID
- * @returns The `AudioConsultationSession` record
- * @throws NOT_FOUND if the session does not exist or belongs to a different profile
- */
 export const getSession = async (
   db: PrismaClient,
   profileId: string,
@@ -296,14 +264,6 @@ export const getReviewSummary = async (
   };
 };
 
-/**
- * Marks a session as ERROR and stores the error message.
- * Used by the worker when a fatal error prevents recovery.
- *
- * @param db - Prisma client
- * @param sessionId - Session ID
- * @param errorMessage - Human-readable error description
- */
 export const markSessionError = async (
   db: PrismaClient,
   sessionId: string,
@@ -315,17 +275,6 @@ export const markSessionError = async (
   });
 };
 
-/**
- * Finalizes a session: parses the accumulated form state, creates an Anamnesis
- * record from it, and marks the session as FINALIZED.
- *
- * @param db - Prisma client
- * @param profileId - Authenticated user's profile ID
- * @param sessionId - Session ID
- * @returns Object with `{ sessionId, anamnesisId }`
- * @throws NOT_FOUND if the session does not exist
- * @throws BAD_REQUEST if the session is already finalized
- */
 export const finalizeSession = async (
   db: PrismaClient,
   profileId: string,
