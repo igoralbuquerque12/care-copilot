@@ -22,7 +22,6 @@ import type { Gender } from "~/features/anamnesis/types/anamnesis.types";
 type PatientDataStepProps = {
   formData: Partial<FormData>;
   setFormData: (data: Partial<FormData>) => void;
-  /** When a patient is selected from search, the parent hook receives the id to skip patient creation */
   onSelectExistingPatient: (id: string) => void;
   onClearExistingPatient: () => void;
   selectedPatientId: string | null;
@@ -61,7 +60,6 @@ export function PatientDataStep({
   const results = rawResults as PatientResult[];
 
   const handleSelect = (patient: PatientResult) => {
-    // Map Prisma gender (e.g. "Masculino") back to internal enum
     const genderMap: Record<string, "MASCULINO" | "FEMININO" | "OUTRO"> = {
       Masculino: "MASCULINO",
       Feminino: "FEMININO",
@@ -97,35 +95,38 @@ export function PatientDataStep({
 
   return (
     <div className="space-y-4">
-      {/* ── Patient search ── */}
       <div>
         <Label className="mb-2 block text-sm font-medium">
           Buscar Paciente Existente
         </Label>
 
         {isLocked ? (
-          /* Selected patient chip */
-          <div className="flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 p-3">
-            <UserCheck className="h-5 w-5 shrink-0 text-primary" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{formData.name} - {formData.cpf}</p>
-              <p className="text-xs text-muted-foreground">Paciente existente selecionado</p>
+          <div className="border-primary/40 bg-primary/5 flex items-center gap-3 rounded-lg border p-3">
+            <UserCheck className="text-primary h-5 w-5 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold">
+                {formData.name} - {formData.cpf}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Paciente existente selecionado
+              </p>
             </div>
-            <Badge variant="secondary" className="shrink-0 text-xs">existente</Badge>
+            <Badge variant="secondary" className="shrink-0 text-xs">
+              existente
+            </Badge>
             <button
               type="button"
               onClick={handleClear}
-              className="ml-1 text-muted-foreground hover:text-destructive transition-colors"
+              className="text-muted-foreground hover:text-destructive ml-1 transition-colors"
               aria-label="Remover paciente selecionado"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
         ) : (
-          /* Search input + dropdown */
           <div className="relative">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 value={query}
                 onChange={(e) => {
@@ -140,13 +141,13 @@ export function PatientDataStep({
             </div>
 
             {isOpen && debouncedQuery.length >= 2 && (
-              <div className="absolute z-50 mt-1 w-full rounded-lg border bg-popover shadow-lg overflow-hidden">
+              <div className="bg-popover absolute z-50 mt-1 w-full overflow-hidden rounded-lg border shadow-lg">
                 {isSearching ? (
-                  <div className="p-3 text-sm text-muted-foreground text-center">
+                  <div className="text-muted-foreground p-3 text-center text-sm">
                     Buscando...
                   </div>
                 ) : results.length === 0 ? (
-                  <div className="p-3 text-sm text-muted-foreground text-center">
+                  <div className="text-muted-foreground p-3 text-center text-sm">
                     Nenhum paciente encontrado — preencha os dados abaixo
                   </div>
                 ) : (
@@ -155,12 +156,12 @@ export function PatientDataStep({
                       <li key={patient.id}>
                         <button
                           type="button"
-                          className="w-full text-left px-4 py-3 hover:bg-accent transition-colors border-b last:border-b-0"
+                          className="hover:bg-accent w-full border-b px-4 py-3 text-left transition-colors last:border-b-0"
                           onMouseDown={() => handleSelect(patient)}
                         >
                           <p className="text-sm font-medium">{patient.name}</p>
                           {patient.cpf && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               CPF: {patient.cpf}
                             </p>
                           )}
@@ -176,13 +177,12 @@ export function PatientDataStep({
       </div>
 
       <div className="border-t pt-4">
-        <p className="mb-4 text-xs text-muted-foreground">
+        <p className="text-muted-foreground mb-4 text-xs">
           {isLocked
             ? "Dados preenchidos automaticamente — remova o paciente acima para editar."
             : "Preencha os dados do novo paciente:"}
         </p>
 
-        {/* ── Name ── */}
         <div className="mb-4">
           <Label htmlFor="name" className="mb-2 block">
             Nome Completo *
@@ -193,12 +193,15 @@ export function PatientDataStep({
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Digite o nome do paciente"
             disabled={isLocked}
-            className={isLocked ? "bg-muted text-muted-foreground cursor-not-allowed" : ""}
+            className={
+              isLocked
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : ""
+            }
           />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {/* ── CPF ── */}
           <div>
             <Label htmlFor="cpf" className="mb-2 block">
               CPF
@@ -206,7 +209,9 @@ export function PatientDataStep({
             <Input
               id="cpf"
               value={formData.cpf ?? ""}
-              onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, cpf: e.target.value })
+              }
               placeholder="000.000.000-00"
               disabled={isLocked}
               className={
@@ -217,7 +222,6 @@ export function PatientDataStep({
             />
           </div>
 
-          {/* ── Birth date ── */}
           <div>
             <Label htmlFor="birthDate" className="mb-2 block">
               Data de Nascimento *
@@ -245,7 +249,6 @@ export function PatientDataStep({
             />
           </div>
 
-          {/* ── Gender ── */}
           <div>
             <Label htmlFor="gender" className="mb-2 block">
               Gênero *
@@ -277,7 +280,6 @@ export function PatientDataStep({
         </div>
       </div>
 
-      {/* ── Clinical profile (always editable) ── */}
       <div className="mt-6 border-t pt-4">
         <h3 className="mb-4 font-medium">Perfil Clínico Inicial (Opcional)</h3>
 
