@@ -6,8 +6,8 @@ import {
   type CreateProfileInput,
   type UpdateProfileInput,
 } from "~/schemas/profile";
-import { grantSignupBonus } from "~/server/services/credits/creditLedger.service";
-import { seedDefaultTemplate } from "~/server/services/formTemplate.service";
+import { grantSignupBonus } from "~/server/services/credits/credit-ledger.service";
+import { seedDefaultTemplate } from "~/server/services/form-templates/form-template.service";
 import { SupabaseService } from "~/server/supabase/supabase-admin";
 
 export const createProfile = async (
