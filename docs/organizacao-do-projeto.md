@@ -86,11 +86,31 @@ Camada de backend da aplicação.
 Subáreas atuais:
 
 - `api/` para infraestrutura tRPC e routers
-- `services/` para regra de negócio
+- `services/` para regras de negócio agrupadas por domínio
 - `auth/` para integração com autenticação
 - `ai/` para cliente e provider de IA
-- `qstash/` para fila assíncrona
+- `messaging/` para fila assíncrona e seus adapters
 - `supabase/` para utilitários administrativos
+
+Os serviços não devem ficar soltos na raiz de `services/`. Cada domínio possui
+uma pasta própria, por exemplo:
+
+```text
+services/
+├── ai-diagnosis/
+├── anamnesis/
+├── audio/
+├── credits/
+├── form-templates/
+├── patients/
+├── profile/
+├── scheduling/
+└── surgical-risk/
+```
+
+Subpastas que apenas repetem o nome da camada, como `audio/services`, devem ser
+evitadas. Tipos e configurações específicos do domínio ficam junto dos serviços
+que os consomem.
 
 ### `src/trpc`
 
@@ -153,7 +173,8 @@ Dentro de cada feature:
 ## Regras de nomeação
 
 - nomes de feature podem seguir o domínio atual do projeto, inclusive compostos com hífen
-- componentes React em PascalCase
+- arquivos e diretórios usam kebab-case
+- componentes React exportados usam PascalCase
 - hooks com prefixo `use`
 - services com sufixo `.service.ts`
 - routers com sufixo `.router.ts`
@@ -176,7 +197,9 @@ Critério prático:
 - adicionar validação em `schemas` antes de ampliar lógica no frontend
 - manter páginas e layouts como composição, não como centro da regra
 - manter isolamento por `profileId` em qualquer domínio clínico
-- documentar novas convenções importantes nesta pasta `docs-ia`
+- documentar novas convenções importantes na pasta `docs`
+- manter comentários apenas quando registram contexto que o código não expressa,
+  como decisões clínicas, limitações externas ou comportamentos contraintuitivos
 
 ## Débitos técnicos já visíveis
 
