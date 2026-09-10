@@ -233,4 +233,4 @@ Contribuições são bem-vindas. Para propor uma mudança:
 
 ## Licença
 
-Este repositório ainda não inclui um arquivo de licença. Antes de reutilizar, distribuir ou contribuir com código, confirme os termos com os mantenedores do projeto.
+Distribuído sob a [licença MIT](./LICENSE). Você pode usar, modificar e redistribuir o projeto, desde que preserve o aviso de copyright e de licença.
